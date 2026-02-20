@@ -1,0 +1,7 @@
+[deps]
+GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
+RamAirKite = "7ebed07a-3d9a-4117-97d2-0a397f5b89df"
+Timers = "21957f78-2cec-46d4-8632-4a3c4f6e0a9f"
+
+[sources]
+RamAirKite = {path = ".."}

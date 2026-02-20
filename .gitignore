@@ -1,0 +1,27 @@
+# Julia
+Manifest.toml
+
+# IDE / editor
+.idea
+.vscode
+
+# Tool configs
+.mcp.json
+.claude/
+
+# Dotfiles (not part of project)
+.bash_profile
+.bashrc
+.gitconfig
+.gitmodules
+.profile
+.ripgreprc
+.zprofile
+.zshrc
+
+# Git repo remnants
+HEAD
+config
+hooks
+objects
+refs
