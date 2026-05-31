@@ -25,3 +25,4 @@ config
 hooks
 objects
 refs
+data/ram_air_kite/*.bin
