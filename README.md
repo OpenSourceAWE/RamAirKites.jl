@@ -1,16 +1,25 @@
 # RamAirKite.jl
 
-A Julia package for simulation of generic ram-air kites built on [SymbolicAWEModels.jl](https://github.com/aenarete/SymbolicAWEModels.jl).
+A Julia package for simulation of generic ram-air kites built on [SymbolicAWEModels.jl](https://github.com/OpenSourceAWE/SymbolicAWEModels.jl).
 
 ## Overview
 
-RamAirKite.jl provides model setup utilities, simulation functions, and configuration structs for simulating ram-air kites. Unlike [V3Kite.jl](https://github.com/aenarete/V3Kite.jl) which is tailored for the TU Delft V3 kite with KCU-specific steering/depower percentages, RamAirKite is designed for generic ram-air kite simulations with direct torque control.
+RamAirKite.jl provides model setup utilities, simulation functions, and configuration structs for simulating ram-air kites. Unlike [V3Kite.jl](https://github.com/OpenSourceAWE/V3Kite.jl) which is tailored for the TU Delft V3 kite with KCU-specific steering/depower percentages, RamAirKite is designed for generic ram-air kite simulations with direct torque control.
 
 ## Installation
 
+It is suggested to install this package from git:
+```bash
+git clone https://github.com/OpenSourceAWE/RamAirKite.jl.git
+cd RamAirKite.jl
+julia --project
+```
+and then, in the Julia REPL
 ```julia
 using Pkg
-Pkg.develop(path="/path/to/RamAirKite.jl")
+Pkg.instantiate()
+Pkg.activate("examples")
+Pkg.instantiate()
 ```
 
 ## Quick Start
