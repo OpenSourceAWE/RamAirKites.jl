@@ -29,15 +29,23 @@ export find_steady_state!, sim_oscillate!
 export REFINE, QUATERNION, WING
 
 # Include submodules
+include("predefined_structures.jl")
 include("model_setup.jl")
 include("simulation.jl")
+include("simulation_utils.jl")
 
 # Model setup exports
 export adjust_tether_length!, adjust_elevation!
 export segment_stretch_stats
 
+# Predefined structure factory exports
+export create_ram_sys_struct, create_simple_ram_sys_struct
+export create_4_attach_ram_sys_struct, create_tether_sys_struct
+export create_sys_struct
+
 # Simulation exports
 export RamAirSimConfig, create_ram_air_model, run_ram_air_simulation
 export ram_air_data_path
+export sim_turn!, copy_to_simple!
 
 end # module

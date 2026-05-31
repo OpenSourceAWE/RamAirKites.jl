@@ -9,10 +9,10 @@ using ModelingToolkit: @variables, t_nounits
 
 # Import SymbolicAWEModels types and functions we need
 using SymbolicAWEModels: Point, Segment, Transform, SystemStructure
-using SymbolicAWEModels: DYNAMIC, STATIC, BRIDLE
-using SymbolicAWEModels: create_simple_ram_sys_struct, update_from_sysstate!
-using SymbolicAWEModels: Settings, SysState, linearize!, simple_linearize!
-using SymbolicAWEModels: sim_turn!, sim_reposition!, copy_to_simple!
+using SymbolicAWEModels: DYNAMIC, STATIC
+using SymbolicAWEModels: update_from_sysstate!
+using SymbolicAWEModels: Settings, SysState, linearize!
+using SymbolicAWEModels: sim_reposition!
 using SymbolicAWEModels: calc_spring_props, calc_winch_force, get_model_name
 
 # Set up data path using RamAirKite's bundled data
@@ -23,14 +23,16 @@ set_data_path(data_path)
 
 # Create models
 set = Settings("system.yaml")
-sam = SymbolicAWEModel(set, "ram")
+sam = SymbolicAWEModel(set, create_ram_sys_struct(set))
 
 tether_set = Settings("system.yaml")
-tether_sam = SymbolicAWEModel(tether_set, "tether")
+tether_set.physical_model = "tether"
+tether_sam = SymbolicAWEModel(tether_set, create_tether_sys_struct(tether_set))
 init!(tether_sam)
 
 simple_set = Settings("system.yaml")
-simple_sam = SymbolicAWEModel(simple_set, "simple_ram")
+simple_set.physical_model = "simple_ram"
+simple_sam = SymbolicAWEModel(simple_set, create_simple_ram_sys_struct(simple_set))
 init!(simple_sam)
 
 original_set = Settings("system.yaml")
@@ -211,21 +213,23 @@ end
             set.abs_tol = 1e-6
             set.rel_tol = 1e-6
             set.segments = 1
-            one_seg_sam = SymbolicAWEModel(set, "ram")
+            one_seg_sam = SymbolicAWEModel(set, create_ram_sys_struct(set))
             init!(one_seg_sam)
-            one_seg_tether_sam = SymbolicAWEModel(set, "tether")
+            one_seg_tether_set = deepcopy(set)
+            one_seg_tether_set.physical_model = "tether"
+            one_seg_tether_sam = SymbolicAWEModel(one_seg_tether_set, create_tether_sys_struct(one_seg_tether_set))
             init!(one_seg_tether_sam)
 
-            axial_stiffness, axial_damping =
+            axial_stiffness, axial_damping, _, _ =
                 calc_spring_props(one_seg_sam, one_seg_tether_sam)
             next_step!(one_seg_sam; dt=1.0)
-            axial_stiffness, axial_damping =
+            axial_stiffness, axial_damping, _, _ =
                 calc_spring_props(one_seg_sam, one_seg_tether_sam)
             segments = one_seg_sam.sys_struct.segments
             tethers = one_seg_sam.sys_struct.tethers
             segments = [segments[tether.segment_idxs[1]] for tether in tethers]
-            real_axial_stiffness = [segment.axial_stiffness for segment in segments]
-            real_axial_damping = [segment.axial_damping for segment in segments]
+            real_axial_stiffness = [segment.unit_stiffness for segment in segments]
+            real_axial_damping = [segment.unit_damping for segment in segments]
             @test isapprox(real_axial_stiffness, axial_stiffness; rtol=0.02)
             @test isapprox(real_axial_damping, axial_damping; rtol=0.2)
 
@@ -243,8 +247,8 @@ end
         @testset "Test calc winch force" begin
             reset!(set)
             init!(sam)
-            tether_vel = [winch.tether_vel for winch in sam.sys_struct.winches]
-            tether_acc = [winch.tether_acc for winch in sam.sys_struct.winches]
+            tether_vel = [winch.vel for winch in sam.sys_struct.winches]
+            tether_acc = [winch.acc for winch in sam.sys_struct.winches]
             set_values = [winch.set_value for winch in sam.sys_struct.winches]
             winch_force = calc_winch_force(sam.sys_struct, tether_vel, tether_acc, set_values)
             ss = SysState(sam)
@@ -266,7 +270,7 @@ end
                 pos = [0.0, 0.0, i * set.l_tether / set.segments]
                 push!(points, Point(point_idx, pos, dynamics_type; wing_idx=0))
                 segment_idx = i
-                push!(segments, Segment(segment_idx, set, (point_idx-1, point_idx), BRIDLE))
+                push!(segments, Segment(segment_idx, set, point_idx-1, point_idx))
                 push!(segment_idxs, segment_idx)
             end
 
@@ -304,15 +308,6 @@ end
                 [-0.0008037289321365251, 0.0004562826732837309, -0.020711457720341487,
                             -0.0017333135190197818], rtol=0.1)
 
-            find_steady_state!(sam)
-            (; A, B, C, D) = simple_linearize!(sam; tstab=1.0)
-            sys = ss(A,B,C,D)
-            res = lsim(sys, repeat([-1.0 0.0 -1.0], 2)', [0.0, 0.5])
-            println(res.y[:,2])
-            @test isapprox(res.y[:,2],
-                [0.014234402954620558, -0.0005674058560722778, -0.0186760660540293,
-                    5.933033873737758], rtol=0.1)
-
             next_step!(simple_sam; dt=1.0)
             (; A, B, C, D) = linearize!(simple_sam)
             @test !isapprox(norm(A), norm_A; atol=1e-3)
@@ -329,13 +324,13 @@ end
                 Point(2, ones(3), DYNAMIC; wing_idx=0, transform_idx=1)
             ]
             segments = [
-                Segment(1, set, (1,2), BRIDLE)
+                Segment(1, set, 1, 2)
             ]
             transforms = [Transform(1, zeros(3)...;
                 base_pos=zeros(3), base_point_idx=1, rot_point_idx=1)]
             sys_struct = SystemStructure("one_point", set; points, segments, transforms)
             local_sam = SymbolicAWEModel(set, sys_struct)
-            model_path = joinpath(get_data_path(), get_model_name(set))
+            model_path = joinpath(get_data_path(), get_model_name(set, sys_struct))
 
             function test_init_with_reset(create_prob, create_lin_prob, create_control_func)
                 println("Create prob: $create_prob \t"*
@@ -362,7 +357,7 @@ end
             push!(points, Point(3, [0, 0, 2], DYNAMIC; wing_idx=0, transform_idx=1))
             sys_struct2 = SystemStructure("one_point", set; points, segments, transforms)
             local_sam.sys_struct = sys_struct2
-            model_path2 = joinpath(get_data_path(), get_model_name(set))
+            model_path2 = joinpath(get_data_path(), get_model_name(set, sys_struct2))
             @test model_path == model_path2
             init!(local_sam; create_prob=false, create_lin_prob=false, create_control_func=false, prn=false)
             @test isnothing(local_sam.prob)
@@ -502,7 +497,9 @@ end
 
         @testset "Round-trip consistency" begin
             reset!(set)
-            local_sam = SymbolicAWEModel(set, "simple_ram")
+            simple_set_local = deepcopy(set)
+            simple_set_local.physical_model = "simple_ram"
+            local_sam = SymbolicAWEModel(simple_set_local, create_simple_ram_sys_struct(simple_set_local))
             init!(local_sam)
 
             ss1 = SysState(local_sam)
@@ -527,7 +524,9 @@ end
 
         @testset "Integration with simulation" begin
             reset!(set)
-            local_sam = SymbolicAWEModel(set, "simple_ram")
+            simple_set_local = deepcopy(set)
+            simple_set_local.physical_model = "simple_ram"
+            local_sam = SymbolicAWEModel(simple_set_local, create_simple_ram_sys_struct(simple_set_local))
             init!(local_sam)
             find_steady_state!(local_sam)
 

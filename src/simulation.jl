@@ -99,7 +99,8 @@ function create_ram_air_model(config::RamAirSimConfig; data_path=nothing)
     set.profile_law = config.profile_law
 
     # Create model
-    sam = SymbolicAWEModel(set)
+    sys_struct = create_sys_struct(set)
+    sam = SymbolicAWEModel(set, sys_struct)
 
     # Adjust tether length
     adjust_tether_length!(sam, config.tether_length)
