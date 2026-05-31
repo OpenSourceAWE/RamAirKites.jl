@@ -178,3 +178,54 @@ function copy_to_simple!(sam::SymbolicAWEModel, tether_sam::SymbolicAWEModel,
     init!(simple_sam; remake=false, reinit_sys=false)
     return simple_sam
 end
+
+"""
+    sim_oscillate!(sam; dt, total_time, vsm_interval, steering_freq, steering_magnitude, bias, prn, lin_model, torque_damp)
+
+Run a simulation with sinusoidal steering oscillation.
+
+Applies alternating left/right steering torque following a sine wave at
+`steering_freq` Hz, with an optional steady `bias` torque.
+
+# Arguments
+- `sam::SymbolicAWEModel`: Initialized AWE model.
+
+# Keywords
+- `dt`: Time step [s]. Default `1/sam.set.sample_freq`.
+- `total_time`: Simulation duration [s]. Default 10.0.
+- `vsm_interval`: Steps between VSM updates. Default 3.
+- `steering_freq`: Steering oscillation frequency [Hz]. Default 0.5.
+- `steering_magnitude`: Peak steering torque magnitude [N·m]. Default 1.0.
+- `bias`: Constant torque bias added to the steering [N·m]. Default 0.0.
+- `prn`: Print performance summary. Default false.
+- `lin_model`: Optional `StateSpace` for linear comparison.
+- `torque_damp`: Torque damping coefficient. Default 0.9.
+
+# Returns
+- `(SysLog, Nothing)` or `(SysLog, SysLog)` when `lin_model` is provided.
+"""
+function sim_oscillate!(
+    sam::SymbolicAWEModel;
+    dt=1/sam.set.sample_freq,
+    total_time=10.0,
+    vsm_interval=3,
+    steering_freq=0.5,
+    steering_magnitude=1.0,
+    bias=0.0,
+    prn=false,
+    lin_model=nothing,
+    torque_damp=0.9
+)
+    steps = Int(round(total_time / dt))
+    num_winches = length(sam.sys_struct.winches)
+    @assert num_winches == 3 "sim_oscillate! requires exactly 3 winches, got $num_winches"
+    set_values = zeros(Float64, steps, num_winches)
+
+    for step in 1:steps
+        t = step * dt
+        steering = steering_magnitude * sin(2π * steering_freq * t) + bias
+        set_values[step, :] = [0.0, steering, -steering]
+    end
+
+    return sim!(sam, set_values; dt, total_time, vsm_interval, prn, lin_model, torque_damp)
+end
