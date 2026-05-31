@@ -151,7 +151,10 @@ function run_ram_air_simulation(config::RamAirSimConfig;
     # Find steady state if requested
     if find_steady
         @info "Finding steady state..."
-        find_steady_state!(sam; dt=1/300, vsm_interval=config.vsm_interval)
+        old_g_earth = sam.set.g_earth
+        sam.set.g_earth = 0.0
+        find_steady_state!(sam; dt=1/300)
+        sam.set.g_earth = old_g_earth
     end
 
     # Set winch brake

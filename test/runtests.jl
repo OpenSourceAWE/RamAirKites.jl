@@ -44,6 +44,15 @@ function reset!(set::Settings)
     return set
 end
 
+# Wrapper: find steady state with gravity disabled (required for VSM convergence)
+function find_ss!(sam::SymbolicAWEModel; dt=1/300)
+    old_g = sam.set.g_earth
+    sam.set.g_earth = 0.0
+    find_steady_state!(sam; dt)
+    sam.set.g_earth = old_g
+    return nothing
+end
+
 @testset "RamAirKite.jl" begin
 
     @testset "Data Path" begin

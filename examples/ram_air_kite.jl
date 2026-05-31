@@ -46,9 +46,12 @@ init!(sam; remake=config.remake_cache)
 fig = plot(sam.sys_struct)
 display(fig)
 
-# Find steady state
+# Find steady state (disable gravity so VSM converges from aerodynamic equilibrium)
 @info "Finding steady state..."
-find_steady_state!(sam; dt=1/300, vsm_interval=config.vsm_interval)
+old_g_earth = sam.set.g_earth
+sam.set.g_earth = 0.0
+find_steady_state!(sam; dt=1/300)
+sam.set.g_earth = old_g_earth
 
 # Run oscillating simulation
 @info "Running simulation..."
