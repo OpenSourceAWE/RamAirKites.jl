@@ -7,10 +7,12 @@ Ram Air Kite Simulation Example
 Demonstrates how to use RamAirKite.jl to run a simulation with sinusoidal
 steering oscillation. The simulation uses the "ram" physical model by default,
 which includes a bridle system and 2 wing groups.
-
-Usage:
-    julia --project=examples examples/ram_air_kite.jl
 """
+
+using Pkg
+if Base.active_project() != joinpath(@__DIR__, "Project.toml")
+    Pkg.activate(joinpath(@__DIR__))
+end
 
 using Timers
 tic()
