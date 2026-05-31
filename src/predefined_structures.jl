@@ -45,13 +45,13 @@ function create_tether(tether_idx, set, points, segments, tethers, attach_point,
         point_idx = length(points) + 1
         segment_idx = length(segments) + 1
         if i == 1
-            last_idx = attach_point.idx
+            last_idx = attach_point.name
         else
             last_idx = point_idx - 1
         end
         if i == set.segments
             points = [points; Point(point_idx, pos, STATIC)]
-            winch_point_idx = points[end].idx
+            winch_point_idx = point_idx
         else
             points = [points; Point(point_idx, pos, dynamics_type)]
         end
@@ -60,7 +60,7 @@ function create_tether(tether_idx, set, points, segments, tethers, attach_point,
         push!(segment_idxs, segment_idx)
     end
     tethers = [tethers; Tether(tether_idx, segment_idxs, set.l_tether)]
-    return points, segments, tethers, tethers[end].idx, winch_point_idx
+    return points, segments, tethers, tether_idx, winch_point_idx
 end
 
 """
@@ -200,7 +200,7 @@ function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)])
     vsm_solver = Solver(vsm_aero; solver_type=NONLIN, atol=2e-8, rtol=2e-8)
     wings = [VSMWing(1, vsm_aero, vsm_wing, vsm_solver, [1, 2, 3, 4], I(3), zeros(3))]
     transforms = [Transform(1, deg2rad(set.elevation), deg2rad(set.azimuth), deg2rad(set.heading);
-                             base_pos=zeros(3), base_point=points[end].idx, wing=1)]
+                             base_pos=zeros(3), base_point=points[end].name, wing=1)]
 
     return SystemStructure("ram", set; points, groups, segments, pulleys, tethers, winches, wings, transforms)
 end
@@ -330,7 +330,7 @@ function create_4_attach_ram_sys_struct(set::Settings)
     vsm_solver = Solver(vsm_aero; solver_type=NONLIN, atol=2e-8, rtol=2e-8)
     wings = [VSMWing(1, vsm_aero, vsm_wing, vsm_solver, [1, 2, 3, 4], I(3), zeros(3))]
     transforms = [Transform(1, deg2rad(set.elevation), deg2rad(set.azimuth), deg2rad(set.heading);
-                             base_pos=zeros(3), base_point=points[end].idx, wing=1)]
+                             base_pos=zeros(3), base_point=points[end].name, wing=1)]
 
     return SystemStructure("4_attach_ram", set; points, groups, segments, pulleys, tethers, winches, wings, transforms)
 end
@@ -446,7 +446,7 @@ function create_tether_sys_struct(set::Settings;
         Winch(3, set, [right_steering_idx]; brake=true, winch_point=right_steering_wp)
     ]
     transforms = [Transform(1, deg2rad(set.elevation), deg2rad(set.azimuth), deg2rad(set.heading);
-                             base_pos=zeros(3), base_point=points[end].idx, rot_point=1)]
+                             base_pos=zeros(3), base_point=points[end].name, rot_point=1)]
 
     return SystemStructure("tether", set; points, segments, tethers, winches, transforms)
 end

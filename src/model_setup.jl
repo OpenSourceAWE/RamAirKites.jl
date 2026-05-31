@@ -63,11 +63,17 @@ function adjust_tether_length!(sam::SymbolicAWEModel, tether_length_raw;
         SymbolicAWEModels.reinit!([transform], sys)
     end
 
+    if !isempty(sys.tethers)
+        for tether in sys.tethers
+            tether.len = tether_length
+            tether.init_unstretched_len = tether_length
+        end
+    end
     if !isempty(sys.winches)
-        winch = sys.winches[1]
-        winch.tether_len = tether_length
-        winch.tether_vel = 0.0
-        winch.brake = true
+        for winch in sys.winches
+            winch.vel = 0.0
+            winch.brake = true
+        end
     end
     return nothing
 end
