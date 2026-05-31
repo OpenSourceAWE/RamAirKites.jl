@@ -467,8 +467,8 @@ end
 
             n_winches = min(length(sys.winches), 4)
             for i in 1:n_winches
-                @test sys.winches[i].tether_len ≈ ss.l_tether[i]
-                @test sys.winches[i].tether_vel ≈ ss.v_reelout[i]
+                @test sys.tethers[i].len ≈ ss.l_tether[i]
+                @test sys.winches[i].vel ≈ ss.v_reelout[i]
                 @test sys.winches[i].set_value ≈ ss.set_torque[i]
                 @test all(isnan.(sys.winches[i].force))
                 @test isnan(sys.winches[i].friction)
