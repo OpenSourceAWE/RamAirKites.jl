@@ -48,7 +48,7 @@ display(fig)
 
 # Find steady state
 @info "Finding steady state..."
-find_steady_state!(sam)
+find_steady_state!(sam; dt=config.dt)
 
 # Run oscillating simulation
 @info "Running simulation..."
