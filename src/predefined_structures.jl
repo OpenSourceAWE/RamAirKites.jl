@@ -50,10 +50,10 @@ function create_tether(tether_idx, set, points, segments, tethers, attach_point,
             last_idx = point_idx - 1
         end
         if i == set.segments
-            points = [points; Point(point_idx, pos, STATIC)]
+            points = [points; Point(point_idx, pos, STATIC; transform=1)]
             winch_point_idx = point_idx
         else
-            points = [points; Point(point_idx, pos, dynamics_type)]
+            points = [points; Point(point_idx, pos, dynamics_type; transform=1)]
         end
         segments = [segments; Segment(segment_idx, set, last_idx, point_idx;
                                       unit_stiffness, unit_damping, diameter_mm)]
@@ -132,15 +132,15 @@ function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)])
         body_frame_damping = 1.0
         points_new = [
             points_new
-            Point(7+i_pnt, bridle_top[1], dynamics_type; body_frame_damping, world_frame_damping=0.0)
+            Point(7+i_pnt, bridle_top[1], dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
             Point(8+i_pnt, bridle_top[2], WING)
-            Point(9+i_pnt, bridle_top[3], dynamics_type; body_frame_damping, world_frame_damping=0.0)
-            Point(10+i_pnt, bridle_top[4], dynamics_type; body_frame_damping, world_frame_damping=0.0)
-            Point(11+i_pnt, bridle_top[2] - 1z, dynamics_type; body_frame_damping, world_frame_damping=0.0)
-            Point(12+i_pnt, bridle_top[1] - 2z, dynamics_type; body_frame_damping, world_frame_damping=0.0)
-            Point(13+i_pnt, bridle_top[3] - 2z, dynamics_type; body_frame_damping, world_frame_damping=0.0)
-            Point(14+i_pnt, bridle_top[1] - 4z, dynamics_type; body_frame_damping, world_frame_damping=0.0)
-            Point(15+i_pnt, bridle_top[3] - 4z, dynamics_type; body_frame_damping, world_frame_damping=0.0)
+            Point(9+i_pnt, bridle_top[3], dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(10+i_pnt, bridle_top[4], dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(11+i_pnt, bridle_top[2] - 1z, dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(12+i_pnt, bridle_top[1] - 2z, dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(13+i_pnt, bridle_top[3] - 2z, dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(14+i_pnt, bridle_top[1] - 4z, dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(15+i_pnt, bridle_top[3] - 4z, dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
         ]
         bk = bridle_kwargs(set)
         segments_new = [
@@ -199,6 +199,7 @@ function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)])
     vsm_aero = BodyAerodynamics([vsm_wing])
     vsm_solver = Solver(vsm_aero; solver_type=NONLIN, atol=2e-8, rtol=2e-8)
     wings = [VSMWing(1, vsm_aero, vsm_wing, vsm_solver, [1, 2, 3, 4], I(3), zeros(3))]
+    # Create transform with the last STATIC winch point as base
     transforms = [Transform(1, deg2rad(set.elevation), deg2rad(set.azimuth), deg2rad(set.heading);
                              base_pos=zeros(3), base_point=points[end].name, wing=1)]
 
@@ -260,15 +261,15 @@ function create_4_attach_ram_sys_struct(set::Settings)
         body_frame_damping = 1.0
         points_new = [
             points_new
-            Point(9+i_pnt, bridle_top[1], dynamics_type; body_frame_damping, world_frame_damping=0.0)
-            Point(10+i_pnt, bridle_top[2], dynamics_type; body_frame_damping, world_frame_damping=0.0)
-            Point(11+i_pnt, bridle_top[3], dynamics_type; body_frame_damping, world_frame_damping=0.0)
-            Point(12+i_pnt, bridle_top[4], dynamics_type; body_frame_damping, world_frame_damping=0.0)
-            Point(13+i_pnt, bridle_top[2] - 1z, dynamics_type; body_frame_damping, world_frame_damping=0.0)
-            Point(14+i_pnt, bridle_top[1] - 2z, dynamics_type; body_frame_damping, world_frame_damping=0.0)
-            Point(15+i_pnt, bridle_top[3] - 2z, dynamics_type; body_frame_damping, world_frame_damping=0.0)
-            Point(16+i_pnt, bridle_top[1] - 4z, dynamics_type; body_frame_damping, world_frame_damping=0.0)
-            Point(17+i_pnt, bridle_top[3] - 4z, dynamics_type; body_frame_damping, world_frame_damping=0.0)
+            Point(9+i_pnt, bridle_top[1], dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(10+i_pnt, bridle_top[2], dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(11+i_pnt, bridle_top[3], dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(12+i_pnt, bridle_top[4], dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(13+i_pnt, bridle_top[2] - 1z, dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(14+i_pnt, bridle_top[1] - 2z, dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(15+i_pnt, bridle_top[3] - 2z, dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(16+i_pnt, bridle_top[1] - 4z, dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(17+i_pnt, bridle_top[3] - 4z, dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
         ]
         bk = bridle_kwargs(set)
         segments_new = [
@@ -362,10 +363,10 @@ function create_simple_ram_sys_struct(set::Settings;
         Point(2, bridle_top_right[2], WING)
         Point(3, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[4]), WING)
         Point(4, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[4]), WING)
-        Point(5, [0, 0, -set.l_tether], STATIC)
-        Point(6, [0, 0, -set.l_tether], STATIC)
-        Point(7, [0, 0, -set.l_tether], STATIC)
-        Point(8, [0, 0, -set.l_tether], STATIC)
+        Point(5, [0, 0, -set.l_tether], STATIC; transform=1)
+        Point(6, [0, 0, -set.l_tether], STATIC; transform=1)
+        Point(7, [0, 0, -set.l_tether], STATIC; transform=1)
+        Point(8, [0, 0, -set.l_tether], STATIC; transform=1)
     ]
     groups = [
         Group(1, [3], DYNAMIC, 0.25)
@@ -415,10 +416,10 @@ function create_tether_sys_struct(set::Settings;
                                   unit_stiffness=fill(NaN, 4),
                                   unit_damping=fill(NaN, 4))
     points = [
-        Point(1, zeros(3), DYNAMIC; fix_sphere=true)
-        Point(2, zeros(3), DYNAMIC; fix_sphere=true)
-        Point(3, zeros(3), DYNAMIC; fix_sphere=true)
-        Point(4, zeros(3), DYNAMIC; fix_sphere=true)
+        Point(1, zeros(3), DYNAMIC; fix_sphere=true, transform=1)
+        Point(2, zeros(3), DYNAMIC; fix_sphere=true, transform=1)
+        Point(3, zeros(3), DYNAMIC; fix_sphere=true, transform=1)
+        Point(4, zeros(3), DYNAMIC; fix_sphere=true, transform=1)
     ]
     segments = Segment[]
     tethers = Tether[]
