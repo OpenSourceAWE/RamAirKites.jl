@@ -11,15 +11,17 @@ RamAirKite.jl provides model setup utilities, simulation functions, and configur
 It is suggested to install this package from git:
 ```bash
 git clone https://github.com/OpenSourceAWE/RamAirKite.jl.git
-cd RamAirKite.jl
-julia --project
+cd RamAirKite.jl/bin
+./install
 ```
-and then, in the Julia REPL
+After the installation, launch Julia with
+```
+cd ..
+./bin/run_julia
+```
+and then, in the Julia REPL run the example with
 ```julia
-using Pkg
-Pkg.instantiate()
-Pkg.activate("examples")
-Pkg.instantiate()
+include("examples/ram_air_kite.jl")
 ```
 
 ## Quick Start
