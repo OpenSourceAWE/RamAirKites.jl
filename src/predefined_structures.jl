@@ -35,6 +35,19 @@ to a new anchor point on the ground.
 function create_tether(tether_idx, set, points, segments, tethers, attach_point,
                        dynamics_type; z=[0,0,1], unit_stiffness=NaN,
                        unit_damping=NaN, d_pos=zeros(3), diameter_mm=NaN)
+    # Compute damping from settings ratio when not explicitly provided.
+    # Segment() would otherwise warn because settings uses axial_damping/axial_stiffness,
+    # not the unit_damping/unit_stiffness properties that Segment() checks.
+    if isnan(unit_damping)
+        ratio = set.axial_damping / set.axial_stiffness
+        if isnan(unit_stiffness)
+            dm = isnan(diameter_mm) ? set.d_tether : diameter_mm
+            default_k = set.e_tether * (0.001 * dm / 2)^2 * π
+            unit_damping = default_k * ratio
+        else
+            unit_damping = unit_stiffness * ratio
+        end
+    end
     winch_pos = find_axis_point(attach_point.pos_cad, set.l_tether, z) .+ d_pos
     dir = winch_pos - attach_point.pos_cad
     segment_idxs = Int64[]
@@ -74,7 +87,9 @@ relative to the standard tether stiffness, modelling their flexibility.
 function bridle_kwargs(set)
     diameter_m = 0.001 * set.bridle_tether_diameter
     unit_stiffness = set.e_tether * (diameter_m / 2)^2 * π * 0.01
-    return (diameter_mm=set.bridle_tether_diameter, unit_stiffness=unit_stiffness)
+    damping_ratio = set.axial_damping / set.axial_stiffness
+    unit_damping = unit_stiffness * damping_ratio
+    return (diameter_mm=set.bridle_tether_diameter, unit_stiffness=unit_stiffness, unit_damping=unit_damping)
 end
 
 # ==================== MODEL FACTORY FUNCTIONS ==================== #
@@ -348,7 +363,7 @@ Simplified bridle without pulley system. Each tether is a single segment.
 """
 function create_simple_ram_sys_struct(set::Settings;
                                       unit_stiffness=fill(NaN, 4),
-                                      unit_damping=fill(NaN, 4))
+                                      unit_damping=fill(0.0, 4))
     set.segments = 1
     vsm_set_path = joinpath(get_data_path(), "vsm_settings.yaml")
     vsm_set = VortexStepMethod.VSMSettings(vsm_set_path; data_prefix=false)
@@ -414,7 +429,7 @@ No wing or bridle system.
 """
 function create_tether_sys_struct(set::Settings;
                                   unit_stiffness=fill(NaN, 4),
-                                  unit_damping=fill(NaN, 4))
+                                  unit_damping=fill(0.0, 4))
     points = [
         Point(1, zeros(3), DYNAMIC; fix_sphere=true, transform=1)
         Point(2, zeros(3), DYNAMIC; fix_sphere=true, transform=1)
