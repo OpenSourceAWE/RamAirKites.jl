@@ -19,6 +19,7 @@ tic()
 @info "Loading packages..."
 using GLMakie
 using RamAirKite
+using SymbolicAWEModels
 
 toc()
 
@@ -29,7 +30,7 @@ config = RamAirSimConfig(
     dt = 0.05,                   # Time step [s]
     v_wind = 15.51,              # Wind speed [m/s]
     tether_length = 50.0,        # Tether length [m]
-    vsm_interval = 3,            # VSM update interval
+    vsm_interval = 0,            # VSM update interval
     steering_freq = 0.5,         # Steering oscillation frequency [Hz]
     steering_magnitude = 1.0,    # Steering torque magnitude [Nm]
 )
@@ -46,28 +47,35 @@ init!(sam; remake=config.remake_cache)
 fig = plot(sam.sys_struct)
 display(fig)
 
-# # Find steady state (disable gravity so VSM converges from aerodynamic equilibrium)
-# @info "Finding steady state..."
-# old_g_earth = sam.set.g_earth
-# sam.set.g_earth = 0.0
-# find_steady_state!(sam; dt=1/300)
-# sam.set.g_earth = old_g_earth
+# Find steady state (disable gravity so VSM converges from aerodynamic equilibrium)
+@info "Finding steady state..."
+old_g_earth = sam.set.g_earth
+sam.set.g_earth = 0.0
+for point in sam.sys_struct.points
+    point.world_frame_damping .= 100.0
+end
+find_steady_state!(sam; dt=0.05, vsm_interval=0)
+sam.set.g_earth = old_g_earth
+for point in sam.sys_struct.points
+    point.world_frame_damping .= 0.0
+end
 
-# # Run oscillating simulation
-# @info "Running simulation..."
-# syslog, _ = sim_oscillate!(sam;
-#     dt = config.dt,
-#     total_time = config.sim_time,
-#     vsm_interval = config.vsm_interval,
-#     steering_freq = config.steering_freq,
-#     steering_magnitude = config.steering_magnitude,
-#     bias = config.steering_bias,
-#     prn = true)
+# Run oscillating simulation
+@info "Running simulation..."
+syslog, _ = sim_oscillate!(sam;
+    dt = config.dt,
+    total_time = config.sim_time,
+    vsm_interval = config.vsm_interval,
+    steering_freq = config.steering_freq,
+    steering_magnitude = config.steering_magnitude,
+    bias = config.steering_bias,
+    prn = true)
 
-# # Plot results and show replay
-# fig = plot(sam.sys_struct, syslog)
-# scr = display(fig)
-# wait(scr)
+# Plot results and show replay
+fig = plot(sam.sys_struct, syslog)
+scr = display(fig)
+wait(scr)
 
-# # Interactive replay
-# replay(syslog, sam.sys_struct)
+# Interactive replay
+replay(syslog, sam.sys_struct)
+
