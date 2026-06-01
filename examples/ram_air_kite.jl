@@ -29,7 +29,7 @@ config = RamAirSimConfig(
     dt = 0.05,                   # Time step [s]
     v_wind = 15.51,              # Wind speed [m/s]
     tether_length = 50.0,        # Tether length [m]
-    vsm_interval = 3,            # VSM update interval
+    vsm_interval = 30,            # VSM update interval
     steering_freq = 0.5,         # Steering oscillation frequency [Hz]
     steering_magnitude = 1.0,    # Steering torque magnitude [Nm]
 )
@@ -43,15 +43,30 @@ sam = create_ram_air_model(config)
 init!(sam; remake=config.remake_cache)
 
 # Plot initial configuration
-fig = plot(sam.sys_struct)
-display(fig)
+# fig = plot(sam.sys_struct)
+# display(fig)
 
-# # Find steady state (disable gravity so VSM converges from aerodynamic equilibrium)
-# @info "Finding steady state..."
-# old_g_earth = sam.set.g_earth
-# sam.set.g_earth = 0.0
-# find_steady_state!(sam; dt=1/300)
-# sam.set.g_earth = old_g_earth
+function print_forces()
+    for segment in sam.sys_struct.segments
+        println("Segment $(segment.idx): Force = $(segment.force)")
+    end
+end
+function brake(on::Bool)
+    for winch in sam.sys_struct.winches
+        winch.brake = on
+    end
+end
+
+#= segment_idxs = sam.sys_struct.tethers[1].segment_idxs
+forces = sam.sys_struct.segments[segment_idxs[1]].force =#
+
+# Find steady state (disable gravity so VSM converges from aerodynamic equilibrium)
+@info "Finding steady state..."
+sam.set.abs_tol = 0.0005
+sam.set.rel_tol = 0.0005
+sam.set.dtmax = 0.025
+brake(true)
+find_steady_state!(sam; dt=1/300)
 
 # # Run oscillating simulation
 # @info "Running simulation..."
