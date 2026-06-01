@@ -1,10 +1,7 @@
-# Copyright (c) 2025 Bart van de Lint
-# SPDX-License-Identifier: MPL-2.0
-
 name = "RamAirKite"
 uuid = "7ebed07a-3d9a-4117-97d2-0a397f5b89df"
-authors = ["Bart van de Lint"]
 version = "0.1.0"
+authors = ["Bart van de Lint"]
 
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
@@ -21,8 +18,9 @@ GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
 [extensions]
 RamAirKiteMakieExt = "GLMakie"
 
-[sources]
-SymbolicAWEModels = {path = "../SymbolicAWEModels.jl"}
+[compat]
+SymbolicAWEModels = "0.10.0"
+julia = "1.10"
 
 [extras]
 ControlSystemsBase = "aaaaaaaa-a6ca-5380-bf3e-84a91bcd477e"
@@ -33,6 +31,3 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Test", "ControlSystemsBase", "ModelingToolkit", "Printf", "Serialization"]
-
-[compat]
-julia = "1.10"
