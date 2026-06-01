@@ -46,28 +46,28 @@ init!(sam; remake=config.remake_cache)
 fig = plot(sam.sys_struct)
 display(fig)
 
-# Find steady state (disable gravity so VSM converges from aerodynamic equilibrium)
-@info "Finding steady state..."
-old_g_earth = sam.set.g_earth
-sam.set.g_earth = 0.0
-find_steady_state!(sam; dt=1/300)
-sam.set.g_earth = old_g_earth
+# # Find steady state (disable gravity so VSM converges from aerodynamic equilibrium)
+# @info "Finding steady state..."
+# old_g_earth = sam.set.g_earth
+# sam.set.g_earth = 0.0
+# find_steady_state!(sam; dt=1/300)
+# sam.set.g_earth = old_g_earth
 
-# Run oscillating simulation
-@info "Running simulation..."
-syslog, _ = sim_oscillate!(sam;
-    dt = config.dt,
-    total_time = config.sim_time,
-    vsm_interval = config.vsm_interval,
-    steering_freq = config.steering_freq,
-    steering_magnitude = config.steering_magnitude,
-    bias = config.steering_bias,
-    prn = true)
+# # Run oscillating simulation
+# @info "Running simulation..."
+# syslog, _ = sim_oscillate!(sam;
+#     dt = config.dt,
+#     total_time = config.sim_time,
+#     vsm_interval = config.vsm_interval,
+#     steering_freq = config.steering_freq,
+#     steering_magnitude = config.steering_magnitude,
+#     bias = config.steering_bias,
+#     prn = true)
 
-# Plot results and show replay
-fig = plot(sam.sys_struct, syslog)
-scr = display(fig)
-wait(scr)
+# # Plot results and show replay
+# fig = plot(sam.sys_struct, syslog)
+# scr = display(fig)
+# wait(scr)
 
-# Interactive replay
-replay(syslog, sam.sys_struct)
+# # Interactive replay
+# replay(syslog, sam.sys_struct)

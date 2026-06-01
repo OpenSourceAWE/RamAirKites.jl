@@ -7,7 +7,7 @@ Functions for adjusting tether length, elevation, and other model parameters.
 """
 
 """
-    adjust_tether_length!(sam::SymbolicAWEModel, tether_length; tether_point_idxs=nothing)
+    adjust_tether_length!(sam::SymbolicAWEModel, tether_length)
 
 Update the winch rest length, reposition tether points in CAD/body frames,
 and reapply the main transform so the wing stays at the requested tether radius.
@@ -15,10 +15,8 @@ and reapply the main transform so the wing stays at the requested tether radius.
 # Arguments
 - `sam`: SymbolicAWEModel to modify
 - `tether_length`: Target tether length in meters
-- `tether_point_idxs`: Indices of tether points (default: auto-detect from model)
 """
-function adjust_tether_length!(sam::SymbolicAWEModel, tether_length_raw;
-                               tether_point_idxs=nothing)
+function adjust_tether_length!(sam::SymbolicAWEModel, tether_length_raw)
     tether_length = float(tether_length_raw)
     sys = sam.sys_struct
     set = sam.set
@@ -27,30 +25,31 @@ function adjust_tether_length!(sam::SymbolicAWEModel, tether_length_raw;
         set.l_tethers[1] = tether_length
     end
 
-    # Auto-detect tether points if not provided
-    if isnothing(tether_point_idxs)
-        # Find points that belong to the first (power) tether and are DYNAMIC
-        tether_point_idxs = Int[]
-        if !isempty(sys.tethers)
-            tether = sys.tethers[1]
-            for seg_idx in tether.segment_idxs
-                seg = sys.segments[seg_idx]
-                for p_idx in seg.point_idxs
-                    point = sys.points[p_idx]
-                    if point.type == SymbolicAWEModels.DYNAMIC && !(p_idx in tether_point_idxs)
-                        push!(tether_point_idxs, p_idx)
-                    end
-                end
-            end
-            sort!(tether_point_idxs)
-        end
-    end
+    # Reposition points for all tethers
+    for tether in sys.tethers
+        seg_idxs = tether.segment_idxs
+        n_seg = length(seg_idxs)
+        n_seg == 0 && continue
 
-    n_points = length(tether_point_idxs)
-    for (n, p_idx) in enumerate(tether_point_idxs)
-        pos = (0.0, 0.0, -n * tether_length / n_points)
-        sys.points[p_idx].pos_cad .= pos
-        sys.points[p_idx].pos_b .= pos
+        # The attach point is the first point of the first segment (belongs to the bridle)
+        attach_idx = sys.segments[seg_idxs[1]].point_idxs[1]
+        # The winch (ground anchor) is the second point of the last segment (STATIC)
+        winch_idx  = sys.segments[seg_idxs[end]].point_idxs[2]
+
+        attach_pos = copy(sys.points[attach_idx].pos_cad)
+        winch_pos  = copy(sys.points[winch_idx].pos_cad)
+        curr_dir   = winch_pos .- attach_pos
+        curr_len   = norm(curr_dir)
+        curr_len < 1e-10 && continue
+        unit_dir = curr_dir ./ curr_len
+
+        # Reposition dynamic intermediate points and the static winch point
+        for (i, seg_idx) in enumerate(seg_idxs)
+            p_idx = sys.segments[seg_idx].point_idxs[2]
+            new_pos = attach_pos .+ (i / n_seg) .* tether_length .* unit_dir
+            sys.points[p_idx].pos_cad .= new_pos
+            sys.points[p_idx].pos_b   .= new_pos
+        end
     end
 
     if !isempty(sys.transforms)
