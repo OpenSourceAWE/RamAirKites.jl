@@ -20,6 +20,7 @@ RamAirKiteMakieExt = "GLMakie"
 
 [compat]
 SymbolicAWEModels = "0.10.0"
+VortexStepMethod = "3.3.4"
 julia = "1.10"
 
 [extras]
