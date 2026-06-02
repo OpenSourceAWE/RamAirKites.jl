@@ -2,7 +2,7 @@
 
 julia_version = "1.12.6"
 manifest_format = "2.0"
-project_hash = "0f8600e1aa8f2a5296eb86eb8504b81f3b81b1c2"
+project_hash = "ed1d29cefeb18e419a95d9e0eaccccb0cb07ea32"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "bbc22a9a08a0ef6460041086d8a7b27940ed4ffd"
@@ -421,9 +421,9 @@ version = "8.10.0"
 
 [[deps.DataStructures]]
 deps = ["OrderedCollections"]
-git-tree-sha1 = "e86f4a2805f7f19bec5129bc9150c38208e5dc23"
+git-tree-sha1 = "6fb53a69613a0b2b68a0d12671717d307ab8b24e"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.19.4"
+version = "0.19.5"
 
 [[deps.DataValueInterfaces]]
 git-tree-sha1 = "bfc1187b79289637fa0ef6d4436ebdfe6905cbd6"
@@ -1351,9 +1351,9 @@ version = "4.14.0"
 
 [[deps.NonlinearSolveBase]]
 deps = ["ADTypes", "Adapt", "ArrayInterface", "CommonSolve", "Compat", "ConcreteStructs", "DifferentiationInterface", "EnzymeCore", "FastClosures", "FunctionWrappers", "FunctionWrappersWrappers", "LinearAlgebra", "LogExpFunctions", "Markdown", "MaybeInplace", "PreallocationTools", "PrecompileTools", "Preferences", "Printf", "RecursiveArrayTools", "SciMLBase", "SciMLJacobianOperators", "SciMLLogging", "SciMLOperators", "SciMLStructures", "Setfield", "StaticArraysCore", "SymbolicIndexingInterface", "TimerOutputs"]
-git-tree-sha1 = "3d322f639cbbf2936e34c2705c6f795ff65edfe7"
+git-tree-sha1 = "e8c55d02b36f6111878de9c4c652421534aa4dc5"
 uuid = "be0214bd-f91f-a760-ac4e-3421ce2b2da0"
-version = "2.30.1"
+version = "2.30.2"
 
     [deps.NonlinearSolveBase.extensions]
     NonlinearSolveBaseBandedMatricesExt = "BandedMatrices"
@@ -1438,9 +1438,9 @@ uuid = "efe28fd5-8261-553b-a9e1-b2916fc3738e"
 version = "0.5.6+0"
 
 [[deps.OrderedCollections]]
-git-tree-sha1 = "05868e21324cede2207c6f0f466b4bfef6d5e7ee"
+git-tree-sha1 = "94ba93778373a53bfd5a0caaf7d809c445292ff4"
 uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
-version = "1.8.1"
+version = "1.8.2"
 
 [[deps.OrdinaryDiffEqBDF]]
 deps = ["ADTypes", "ArrayInterface", "DiffEqBase", "FastBroadcast", "LinearAlgebra", "MacroTools", "MuladdMacro", "OrdinaryDiffEqCore", "OrdinaryDiffEqDifferentiation", "OrdinaryDiffEqNonlinearSolve", "OrdinaryDiffEqSDIRK", "PrecompileTools", "Preferences", "RecursiveArrayTools", "Reexport", "SciMLBase", "TruncatedStacktraces"]
@@ -1612,7 +1612,7 @@ uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 version = "1.11.0"
 
 [[deps.RamAirKite]]
-deps = ["Dates", "KiteUtils", "LinearAlgebra", "Statistics", "SymbolicAWEModels", "UnPack", "VortexStepMethod"]
+deps = ["Dates", "KiteUtils", "LinearAlgebra", "Statistics", "UnPack", "VortexStepMethod"]
 path = "."
 uuid = "7ebed07a-3d9a-4117-97d2-0a397f5b89df"
 version = "0.1.0"
@@ -1875,9 +1875,9 @@ version = "1.11.0"
 
 [[deps.SimpleNonlinearSolve]]
 deps = ["ADTypes", "ArrayInterface", "BracketingNonlinearSolve", "CommonSolve", "ConcreteStructs", "DifferentiationInterface", "FastClosures", "FiniteDiff", "ForwardDiff", "LineSearch", "LinearAlgebra", "MaybeInplace", "NonlinearSolveBase", "PrecompileTools", "Reexport", "SciMLBase", "Setfield", "StaticArraysCore"]
-git-tree-sha1 = "d688de789b7e643326caf9a1051376dadbcd8873"
+git-tree-sha1 = "08d8bafd57b7ea16dc1f69a8bd57db23a2ceb686"
 uuid = "727e6d20-b764-4bd8-a329-72de5adea6c7"
-version = "2.11.1"
+version = "2.12.0"
 
     [deps.SimpleNonlinearSolve.extensions]
     SimpleNonlinearSolveChainRulesCoreExt = "ChainRulesCore"
@@ -2075,9 +2075,9 @@ version = "0.2.8"
 
 [[deps.SymbolicAWEModels]]
 deps = ["AtmosphericModels", "CodecZlib", "ControlSystemsBase", "DataInterpolations", "Dates", "DocStringExtensions", "ForwardDiff", "KiteUtils", "LaTeXStrings", "LinearAlgebra", "Logging", "ModelingToolkit", "NonlinearSolve", "NonlinearSolveQuasiNewton", "OrdinaryDiffEqBDF", "OrdinaryDiffEqCore", "OrdinaryDiffEqNonlinearSolve", "Parameters", "Pkg", "PrecompileTools", "Printf", "RecipesBase", "SHA", "Serialization", "StaticArrays", "Statistics", "SteadyStateDiffEq", "Suppressor", "SymbolicIndexingInterface", "SymbolicUtils", "Symbolics", "TOML", "Tar", "Timers", "UnPack", "VortexStepMethod", "YAML"]
-path = "../SymbolicAWEModels.jl"
+git-tree-sha1 = "a56c693cb58fb54f4f872c435af16b2b1f60aa83"
 uuid = "9c9a347c-5289-41db-a9b9-25ccc76c3360"
-version = "0.10.0"
+version = "0.11.0"
 
     [deps.SymbolicAWEModels.extensions]
     SymbolicAWEModelsMakieExt = ["GeometryBasics", "Makie"]
@@ -2104,9 +2104,9 @@ version = "1.1.0"
 
 [[deps.SymbolicUtils]]
 deps = ["AbstractTrees", "ArrayInterface", "Combinatorics", "ConstructionBase", "DataStructures", "Dictionaries", "DocStringExtensions", "DynamicPolynomials", "EnumX", "ExproniconLite", "Graphs", "LinearAlgebra", "MacroTools", "Moshi", "MultivariatePolynomials", "MutableArithmetics", "NaNMath", "PrecompileTools", "ReadOnlyArrays", "Setfield", "SparseArrays", "SpecialFunctions", "StaticArraysCore", "SymbolicIndexingInterface", "TaskLocalValues", "TermInterface", "WeakCacheSets"]
-git-tree-sha1 = "2b23d7fc8a60bb61cd46ecf49a146fc550226cec"
+git-tree-sha1 = "2317a70d21c68ed77aebd9681e2c8511eb32cd9f"
 uuid = "d1185830-fcd6-423d-90d6-eec64667417b"
-version = "4.33.1"
+version = "4.33.2"
 
     [deps.SymbolicUtils.extensions]
     SymbolicUtilsChainRulesCoreExt = "ChainRulesCore"
