@@ -27,7 +27,7 @@ toc()
 config = RamAirSimConfig(
     physical_model = "ram",      # Options: "ram", "simple_ram", "4_attach_ram"
     sim_time = 10.0,             # Total simulation time [s]
-    dt = 0.05,                   # Time step [s]
+    dt = 0.05,                   # Time step [s] 0.05
     v_wind = 15.51,              # Wind speed [m/s]
     tether_length = 50.0,        # Tether length [m]
     vsm_interval = 0,            # VSM update interval
@@ -44,13 +44,13 @@ sam = create_ram_air_model(config)
 init!(sam; remake=config.remake_cache)
 
 # Plot initial configuration
-fig = plot(sam.sys_struct)
-display(fig)
+# fig = plot(sam.sys_struct)
+# display(fig)
 
 # Find steady state (disable gravity so VSM converges from aerodynamic equilibrium)
 @info "Finding steady state..."
 old_g_earth = sam.set.g_earth
-sam.set.g_earth = 0.0
+# sam.set.g_earth = 0.0
 for point in sam.sys_struct.points
     point.world_frame_damping .= 100.0
 end
@@ -71,11 +71,12 @@ syslog, _ = sim_oscillate!(sam;
     bias = config.steering_bias,
     prn = true)
 
-# Plot results and show replay
-fig = plot(sam.sys_struct, syslog)
-scr = display(fig)
-wait(scr)
+# # Plot results and show replay
+# fig = plot(sam.sys_struct, syslog)
+# scr = display(fig)
+# wait(scr)
 
-# Interactive replay
-replay(syslog, sam.sys_struct)
+# # Interactive replay
+# replay(syslog, sam.sys_struct)
+nothing
 
