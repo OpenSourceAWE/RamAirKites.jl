@@ -34,3 +34,4 @@ test = ["Test", "ControlSystemsBase", "ModelingToolkit", "Printf", "Serializatio
 
 [sources]
 SymbolicAWEModels = {path = "../SymbolicAWEModels.jl"}
+VortexStepMethod = {path = "../VortexStepMethod.jl"}
