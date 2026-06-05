@@ -28,25 +28,25 @@ include("examples/ram_air_kite.jl")
 
 ```julia
 using RamAirKite
+using SymbolicAWEModels
 using GLMakie  # For visualization
 
-# Create configuration
-config = RamAirSimConfig(
-    physical_model = "ram",      # "ram", "simple_ram", or "4_attach_ram"
-    sim_time = 10.0,             # seconds
-    v_wind = 15.51,              # m/s
-    tether_length = 50.0,        # meters
-    steering_freq = 0.5,         # Hz
-    steering_magnitude = 1.0,    # Nm
-)
+# Configure settings
+set_data_path(ram_air_data_path())
+set = Settings("system.yaml")
+set.physical_model = "ram"   # "ram", "simple_ram", or "4_attach_ram"
+set.v_wind = 15.51           # m/s
+set.l_tether = 50.0          # meters
 
-# Run simulation
-sam, syslog = run_ram_air_simulation(config)
-
-# Visualize
-plot(sam.sys_struct, syslog)
-replay(syslog, sam.sys_struct)
+# 1. system structure  2. model  3. init
+sys_struct = create_sys_struct(set)
+sam = SymbolicAWEModel(set, sys_struct)
+# edit sys_struct here (transforms, tethers, group damping, ...) before init!
+init!(sam)
 ```
+
+See `examples/ram_air_kite.jl` for a full stepping loop with logging, steering,
+and replay.
 
 ## Physical Model Variants
 
