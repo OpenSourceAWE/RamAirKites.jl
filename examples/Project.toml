@@ -1,4 +1,5 @@
 [deps]
+DiscretePIDs = "c1363496-6848-4723-8758-079b737f6baf"
 GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
 RamAirKite = "7ebed07a-3d9a-4117-97d2-0a397f5b89df"
 SymbolicAWEModels = "9c9a347c-5289-41db-a9b9-25ccc76c3360"

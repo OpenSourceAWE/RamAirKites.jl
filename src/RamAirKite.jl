@@ -43,7 +43,6 @@ export create_4_attach_ram_sys_struct, create_tether_sys_struct
 export create_sys_struct
 
 # Simulation exports
-export RamAirSimConfig
 export ram_air_data_path
 export sim_turn!, copy_to_simple!
 

@@ -63,24 +63,6 @@ end
         @test isfile(joinpath(path, "vsm_settings.yaml"))
     end
 
-    @testset "RamAirSimConfig Defaults" begin
-        config = RamAirSimConfig()
-        @test config.physical_model == "ram"
-        @test config.sim_time == 10.0
-        @test config.dt == 0.05
-        @test config.v_wind == 15.51
-        @test config.tether_length == 50.0
-        @test config.vsm_interval == 3
-        @test config.steering_freq == 0.5
-    end
-
-    @testset "Physical Model Variants" begin
-        for model in ["ram", "simple_ram", "4_attach_ram"]
-            config = RamAirSimConfig(physical_model=model)
-            @test config.physical_model == model
-        end
-    end
-
     @testset verbose=true "Initialization" begin
         function init_test(elevation, azimuth, heading)
             transform = sam.sys_struct.transforms[1]
