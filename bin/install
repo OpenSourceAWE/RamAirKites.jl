@@ -75,12 +75,13 @@ if (( _available_kb < _required_kb )); then
 fi
 unset _required_kb _available_kb _available_gb
 
-# Determine which Julia version to use (1.11 and 1.12 are supported)
-if [[ $_yes_to_all == true ]]; then
-    _desired_julia=$(julia --startup-file=no -e 'print("$(VERSION.major).$(VERSION.minor)")')
+# Determine which Julia version to use (1.11 and 1.12 are supported).
+# Preserve a supported active Julia (including 1.11), only switch when unsupported.
+_desired_julia=$(julia --startup-file=no -e 'print("$(VERSION.major).$(VERSION.minor)")')
+if [[ "$_desired_julia" == "1.11" || "$_desired_julia" == "1.12" ]]; then
     echo "Using currently active Julia ${_desired_julia}..."
 else
-    echo "Installing and activating Julia 1.12..."
+    echo "Current Julia ${_desired_julia} is unsupported; installing and activating Julia 1.12..."
     juliaup add 1.12
     juliaup default 1.12
     _desired_julia="1.12"
