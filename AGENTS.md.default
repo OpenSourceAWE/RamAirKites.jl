@@ -192,7 +192,7 @@ git clone https://github.com/OpenSourceAWE/SymbolicAWEModels.jl.git
 git clone https://github.com/OpenSourceAWE/VortexStepMethod.jl.git
 ```
 
-The `Project.toml` `[sources]` section handles the path overrides.
+If you need to work against local development copies of these packages, add a `[sources]` section to `Project.toml` — that section will then handle the path overrides.
 
 ### Adding New Model Variants
 
