@@ -47,13 +47,15 @@ RamAirKite.jl is a Julia package for simulating generic ram-air kites (airborne 
 | **KiteUtils.jl** | Settings types, state types, shared utilities |
 | **GLMakie** (weakdep) | 3D visualization via extension |
 
-All three main dependencies are local path-dependencies in `Project.toml`:
+All three main dependencies are regular registered dependencies in `Project.toml` with version constraints in `[compat]`. If you need to work against local development copies of these packages, add a `[sources]` section to `Project.toml`:
+
 ```toml
 [sources]
 SymbolicAWEModels = {path = "../SymbolicAWEModels.jl"}
 VortexStepMethod = {path = "../VortexStepMethod.jl"}
 ```
-Feel free to edit them directly during development. For CI or end-user installation, these should resolve to registered versions as specified in `[compat]`.
+
+During local development with `[sources]`, use `pixi run julia --project -e 'using Pkg; Pkg.resolve()'` to resolve dependencies against the local paths. For CI or end-user installation, remove `[sources]` and use the registered versions as specified in `[compat]`.
 
 ## Simulation Workflow
 
