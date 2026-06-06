@@ -26,14 +26,11 @@ jobs:
       LIBGL_ALWAYS_SOFTWARE: '1'
     strategy:
       fail-fast: false
-    strategy:
-      fail-fast: false
       matrix:
         version:
           - '1.11'
           - '1.12'
           - ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
