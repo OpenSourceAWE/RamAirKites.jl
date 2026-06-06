@@ -1,7 +1,7 @@
 name = "RamAirKite"
 uuid = "7ebed07a-3d9a-4117-97d2-0a397f5b89df"
 version = "0.1.0"
-authors = ["Bart van de Lint"]
+authors = ["Bart van de Lint", "Uwe Fechner"]
 
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
