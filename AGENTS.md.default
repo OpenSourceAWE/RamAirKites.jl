@@ -217,7 +217,7 @@ replay(syslog, sam.sys_struct)       # Interactive replay
 
 ## External Dependencies Note
 
-The `Project.toml` has `[sources]` overrides for local development of `SymbolicAWEModels` and `VortexStepMethod`. For CI or end-user installation, these should resolve to registered package versions as specified in `[compat]`.
+If you add `[sources]` overrides in `Project.toml` for local development of `SymbolicAWEModels` and `VortexStepMethod`, then for CI or end-user installation you should remove `[sources]` and rely on the registered package versions as specified in `[compat]`.
 
 ## Tool routing
 
