@@ -4,6 +4,6 @@
 using Test
 
 @testset "RamAirKite.jl" begin
-    include("test-data_path.jl")
-    include("test-simulation_disabled.jl")
+    include("test-data-path.jl")
+    include("test-simulation-disabled.jl")
 end
