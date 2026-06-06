@@ -1,5 +1,7 @@
 # RamAirKite.jl
 
+[![Test](https://github.com/OpenSourceAWE/RamAirKite.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/OpenSourceAWE/RamAirKite.jl/actions/workflows/CI.yml)
+
 A Julia package for simulation of generic ram-air kites built on [SymbolicAWEModels.jl](https://github.com/OpenSourceAWE/SymbolicAWEModels.jl).
 
 ## Overview
