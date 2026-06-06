@@ -1,0 +1,569 @@
+# RamAirKite.jl Copilot Instructions
+
+## Project Overview
+
+RamAirKite.jl is a Julia package for simulating generic ram-air kites (airborne wind energy). It builds on [SymbolicAWEModels.jl](https://github.com/OpenSourceAWE/SymbolicAWEModels.jl) for the core physics engine and [VortexStepMethod.jl](https://github.com/OpenSourceAWE/VortexStepMethod.jl) for aerodynamic computations. RamAirKite uses generic 3-winch torque control.
+
+## Architecture
+
+### Source Files (in `src/`)
+
+- **`RamAirKite.jl`** — Main module: re-exports from SymbolicAWEModels, includes submodules
+- **`predefined_structures.jl`** — Factory functions for building `SystemStructure` objects:
+  - `create_ram_sys_struct`: Primary "ram" model with stability-enhancing bridle (4 deformable groups, complex pulley bridle system, 4 main tethers, 3 winches)
+  - `create_simple_ram_sys_struct`: Simplified version for faster setup
+  - `create_4_attach_ram_sys_struct`: Model with 4 attachment points
+  - `create_tether_sys_struct`: Tether-only model for validation
+  - `create_sys_struct`: Dispatcher that selects the factory based on `set.physical_model`
+- **`model_setup.jl`** — Utilities for adjusting model state:
+  - `adjust_tether_length!(sam, length)`: Reposition tether points and winch
+  - `adjust_elevation!(sam, elevation)`: Adjust elevation angle
+  - `segment_stretch_stats`: Compute tether segment stretch ratios
+- **`simulation.jl`** — High-level simulation functions:
+  - `RamAirSimConfig`: Configuration struct with fields for physical model variant, wind, tether, steering, and VSM settings
+  - `create_ram_air_model(config)`: Build and configure a `SymbolicAWEModel`
+  - `run_ram_air_simulation(config)`: Full simulation pipeline (create, init, find steady state, run with steering oscillation)
+- **`simulation_utils.jl`** — Lower-level utilities ported from SymbolicAWEModels:
+  - `sim_turn!`: Run a turning maneuver simulation with one-sided steering impulse
+  - `copy_to_simple!`: Copy state between model variants
+
+### Extension (in `ext/`)
+
+- **`RamAirKiteMakieExt.jl`** — GLMakie visualization extension. Loaded automatically when GLMakie is available. Re-exports plotting from SymbolicAWEModels.
+
+### Configuration Files (in `data/ram_air_kite/`)
+
+- **`settings.yaml`**: Main settings — system params (segments, sample_freq), initial conditions (l_tethers, elevations, v_reel_outs), solver (type, tolerances), kite (model, foil, physical_model, top_bridle_points), and bridle configuration
+- **`system.yaml`**: Points to the settings file
+- **`vsm_settings.yaml`**: VSM aerodynamic solver configuration — wing definitions (panels, distribution), solver settings (density, iterations, tolerances, relaxation)
+- **Foil polars**: `ram_air_kite_foil_cl_polar.csv`, `ram_air_kite_foil_cd_polar.csv`, `ram_air_kite_foil_cm_polar.csv`
+
+## Key Dependencies
+
+| Dependency | Purpose |
+|---|---|
+| **SymbolicAWEModels.jl** | Core physics engine (symbolic AWE model with DAE solvers) |
+| **VortexStepMethod.jl** | Aerodynamic panel method (VSM/LLT) |
+| **KiteUtils.jl** | Settings types, state types, shared utilities |
+| **GLMakie** (weakdep) | 3D visualization via extension |
+
+All three main dependencies are regular registered dependencies in `Project.toml` with version constraints in `[compat]`. If you need to work against local development copies of these packages, add a `[sources]` section to `Project.toml`:
+
+```toml
+[sources]
+SymbolicAWEModels = {path = "../SymbolicAWEModels.jl"}
+VortexStepMethod = {path = "../VortexStepMethod.jl"}
+```
+
+During local development with `[sources]`, use `pixi run julia --project -e 'using Pkg; Pkg.resolve()'` to resolve dependencies against the local paths. For CI or end-user installation, remove `[sources]` and use the registered versions as specified in `[compat]`.
+
+## Simulation Workflow
+
+### Basic Usage
+
+```julia
+using RamAirKite
+
+# 1. Create configuration
+config = RamAirSimConfig(
+    physical_model = "ram",       # "ram", "simple_ram", or "4_attach_ram"
+    sim_time = 10.0,
+    dt = 0.05,
+    v_wind = 15.51,
+    tether_length = 50.0,
+    steering_freq = 0.5,
+    steering_magnitude = 1.0,
+)
+
+# 2. Create and initialize model
+sam = create_ram_air_model(config)
+init!(sam; remake=false)
+
+# 3. Find steady state (often disable gravity for VSM convergence)
+find_steady_state!(sam; dt=0.05, vsm_interval=0)
+
+# 4. Run simulation with sinusoidal steering
+syslog, _ = sim_oscillate!(sam;
+    dt = config.dt,
+    total_time = config.sim_time,
+    vsm_interval = config.vsm_interval,
+    steering_freq = config.steering_freq,
+    steering_magnitude = config.steering_magnitude,
+    bias = config.steering_bias,
+    prn = true)
+```
+
+### Alternative: High-Level API
+
+```julia
+sam, syslog = run_ram_air_simulation(config)
+```
+
+### Model Variants
+
+- **`"ram"`**: Full model with bridle system and 2 wing groups (complex, realistic)
+- **`"simple_ram"`**: Simplified model with reduced complexity (faster, for testing)
+- **`"4_attach_ram"`**: Model with 4 attachment points on the kite
+
+### Key Functions
+
+| Function | Purpose |
+|---|---|
+| `init!(sam; remake=false)` | Initialize/reinitialize model (remake rebuilds MTK cache) |
+| `find_steady_state!(sam; kwargs)` | Solve for aerodynamic equilibrium |
+| `sim_oscillate!(sam; kwargs)` | Run sinusoidal steering oscillation simulation |
+| `sim_turn!(sam; kwargs)` | Run turning maneuver with one-sided steering impulse |
+| `adjust_tether_length!(sam, length)` | Change tether length at runtime |
+| `adjust_elevation!(sam, elevation)` | Adjust elevation angle |
+| `update_sys_state!(sam)` | Update system state from integrator |
+| `log!(sam, syslog)` | Log current state |
+| `save_log(syslog, path)` / `load_log(path)` | Persist/restore simulation logs |
+
+## Wing Types
+
+- `QUATERNION`: Quaternion-based orientation (faster, default)
+- `REFINE`: Full refine-based orientation (more accurate, slower)
+
+Set via `config.wing_type = SymbolicAWEModels.REFINE` or `QUATERNION`.
+
+## Code Conventions
+
+### Naming
+
+- Types use `CamelCase`: `RamAirSimConfig`, `SystemStructure`
+- Functions use `snake_case`: `create_ram_air_model`, `adjust_tether_length!`
+- Mutating functions end with `!` per Julia convention
+- Internal helpers use lowercase with underscores
+
+### Struct Pattern
+
+Configuration uses `Base.@kwdef mutable struct` for keyword-constructible mutable structs:
+```julia
+Base.@kwdef mutable struct RamAirSimConfig
+    physical_model::String = "ram"
+    sim_time::Float64 = 10.0
+    # ...
+end
+```
+
+### Re-exports
+
+Public API types/functions from SymbolicAWEModels are re-exported from the main module:
+```julia
+using SymbolicAWEModels: SymbolicAWEModel, SystemStructure, Logger, SysState
+export SymbolicAWEModel, SystemStructure, Logger, SysState
+```
+
+### Coordinate System
+
+- NED (North-East-Down) reference frame
+- Wing geometry defined in CAD frame, transformed to body frame via `cad_to_body_frame`
+- Upwind direction in degrees (typically -90 for conventional orientation)
+
+## Running Tests
+
+```julia
+# Full test suite
+include("test/runtests.jl")
+
+# Or from package mode
+using Pkg; Pkg.test()
+```
+
+Tests exercise all three model variants (`ram`, `simple_ram`, `tether`) and include linearization checks using `ControlSystemsBase` and `ModelingToolkit`.
+
+## Running Examples
+
+```julia
+# Activate the examples project first
+using Pkg; Pkg.activate("examples")
+include("examples/ram_air_kite.jl")
+```
+
+The example project has its own `Project.toml` with local path-dependencies.
+
+## Development Workflow
+
+### Local Dependencies
+
+The key dependencies use local paths during development. After cloning adjacent repos:
+```bash
+git clone https://github.com/OpenSourceAWE/SymbolicAWEModels.jl.git
+git clone https://github.com/OpenSourceAWE/VortexStepMethod.jl.git
+```
+
+If you need to work against local development copies of these packages, add a `[sources]` section to `Project.toml` — that section will then handle the path overrides.
+
+### Adding New Model Variants
+
+1. Add a factory function in `predefined_structures.jl` (following the pattern of `create_ram_sys_struct`)
+2. Register it in `create_sys_struct` dispatcher
+3. Add any new configuration fields to `Settings` via KiteUtils
+4. Add test coverage in `test/runtests.jl`
+
+### Adding New Simulation Config Options
+
+Add fields to `RamAirSimConfig` in `simulation.jl`, then pass them through in `create_ram_air_model` and/or `run_ram_air_simulation`.
+
+### Visualization
+
+Plotting is handled by the `RamAirKiteMakieExt` extension (requires GLMakie):
+```julia
+using GLMakie, RamAirKite
+fig = plot(sam.sys_struct)           # Plot system structure
+fig = plot(sam.sys_struct, syslog)   # Plot with trajectory
+replay(syslog, sam.sys_struct)       # Interactive replay
+```
+
+## External Dependencies Note
+
+If you add `[sources]` overrides in `Project.toml` for local development of `SymbolicAWEModels` and `VortexStepMethod`, then for CI or end-user installation you should remove `[sources]` and rely on the registered package versions as specified in `[compat]`.
+
+## Tool routing
+
+Prefer MCP tools over ad-hoc shell commands whenever a matching tool exists.
+These rules are not suggestions — follow them unless the user explicitly asks
+for a different approach.
+
+## Julia code outside notebooks: use `mcp__kaimon__*`
+
+The `mcp__kaimon__*` tools are the primary interface for working with
+non-notebook Julia code. They route through Julia's actual module
+system and cache state across calls in a persistent REPL worker, so
+they beat `Bash`, `Grep`, `Glob`, and `Read` for nearly every Julia
+task. Do NOT reimplement their lookups via `ex(e="methods(...)")`,
+`ex(e="fieldnames(...)")`, etc. — the dedicated tools format output,
+handle edge cases, and resolve through the module system.
+
+### Routing rules — symbol & definition discovery
+
+- **Methods of a function** (signatures + source locations) →
+  `search_methods(query="funcname")`. Do NOT `grep` for
+  `function funcname` — you'll miss overloads and get textual matches
+  for comments and docstrings.
+- **Type fields, supertype, subtypes** →
+  `type_info(type_expr="MyType")`. Beats
+  `ex(e="fieldnames(MyType)", q=false)` because it returns the full
+  picture (fields, hierarchy, parameters, properties) in one call.
+- **All exported (or internal) names in a module** →
+  `list_names(module_name="seismic")`. Pass `all=true` for
+  non-exported internals.
+- **Fuzzy symbol search across loaded modules** →
+  `workspace_symbols(query="partial_name")`. Uses `names()` on the
+  gate; only finds symbols in modules that are actually loaded.
+- **Symbols defined in a specific file** (functions, structs, macros,
+  constants with line numbers) →
+  `document_symbols(file_path="/abs/path.jl")`. AST-based, does NOT
+  require the module to be loaded — use it for standalone scripts,
+  test helpers, and files whose owning package isn't in the active
+  environment.
+- **Definition of a symbol used at a specific file:line:column** →
+  `goto_definition(file_path=..., line=..., column=...)`. Uses
+  `methods`/`functionloc`/`pathof` on the gate with a file-grep
+  fallback.
+
+### Routing rules — executing code and running tests
+
+- **Arbitrary Julia code** → `ex(e="...")`. Shared REPL; see "The
+  shared REPL contract" below. Add `q=false` when you need the
+  return value for a decision.
+- **Running the test suite** →
+  `run_tests(pattern="...", session=...)`. Do NOT shell out to
+  `julia --project -e 'Pkg.test()'` or invoke `runtests.jl` via
+  `Bash`. See "run_tests details" below.
+- **Macro expansion** → `macro_expand(expression="@time ...")`.
+- **Type-inferred or lowered IR** →
+  `ex(e="code_typed(f, (T,))", q=false)` routed through `ex` — the
+  dedicated `code_typed` / `code_lowered` tools return empty
+  payloads (see "kaimon gotchas" below).
+- **Profiling a hot block** →
+  `ex(e="using Profile; Profile.clear(); @profile ...; Profile.print()", q=false)`
+  routed through `ex` — the dedicated `profile_code` tool returns an
+  empty payload.
+
+### Routing rules — environment and packages
+
+- **Julia version, active project, loaded packages, Revise status** →
+  `investigate_environment(session=...)`. Do NOT parse
+  `Project.toml`/`Manifest.toml` by hand or call
+  `julia -e 'using Pkg; ...'` from Bash.
+- **Adding or removing packages** → `pkg_add(packages=["Foo"])` /
+  `pkg_rm(packages=["Foo"])`. Do NOT run `Pkg.add` via `ex`.
+- **Changing the active project** → do NOT. The project is
+  controlled by the kaimon session, not by you. `Pkg.activate(...)`
+  in an `ex` call will silently corrupt the session's package
+  environment for subsequent calls.
+- **Formatting a file** → `format_code(path=...)`. Requires
+  JuliaFormatter.jl in the project; if the tool errors "not
+  installed", ask the user before `pkg_add`ing it.
+- **Aqua QA checks** → `lint_package`. Requires Aqua.jl; same rule.
+
+### Routing rules — observability and health
+
+- **Verify kaimon is reachable, list connected sessions** → `ping`
+  (use `extended=true` for health stats). Only ping when a call has
+  failed — don't probe proactively.
+- **Audit server-side errors** →
+  `server_log(level="error", lines=30)`. First stop for "why did my
+  last call fail?".
+- **See the last N tool calls with durations and session routing** →
+  `tui_screenshot`. Fastest way to see what just happened on the
+  kaimon side.
+- **Force a fresh REPL state** →
+  `manage_repl(command="restart", session=...)`. Only when Revise
+  can't pick up a change (`__init__` changed, world-age errors that
+  persist after a fix). Not a reflex for every error.
+- **Detailed help for any kaimon tool** →
+  `tool_help(tool_name=..., extended=true)`.
+
+### Routing rules — VSCode integration
+
+- **Open a file at line/column in the editor** →
+  `navigate_to_file(file_path=..., line=..., column=...)`.
+- **Run a VSCode command** →
+  `execute_vscode_command(command="...")`.
+- **Listing available VSCode commands** → read
+  `.vscode/settings.json` directly; the `list_vscode_commands` tool
+  throws `UndefVarError: read_vscode_settings` (see "kaimon
+  gotchas").
+
+### Routing rules — semantic code search (availability-gated)
+
+- **"Find code that does X" when you don't know the symbol name** →
+  `qdrant_search_code(query="natural language")`. Requires a running
+  Qdrant (`http://localhost:6333`) and a prior
+  `qdrant_index_project`. If `qdrant_list_collections` errors with
+  "not reachable", semantic search is unavailable — fall back to
+  `workspace_symbols` (for fuzzy names) or `Grep` (for literal
+  strings), and say so in your response.
+
+### The shared REPL contract
+
+Every `ex` call runs in a persistent Julia worker that the user sees
+live. You and the user share the same REPL.
+
+- **stdout is stripped.** `println`, `print`, `@info`, and anything
+  else that writes to stdout is removed from your tool result. To
+  observe a value, make it the final expression of an `ex` call and
+  pass `q=false`. Put narration in your text response, not in Julia
+  print calls.
+- **Default to `q=true`** (the default). Use `q=false` ONLY when you
+  need the return value for a decision. Imports, assignments, and
+  function definitions should always use `q=true`:
+  ```julia
+  ex(e="using Statistics")                  # q=true (default)
+  ex(e="data = load(...); nothing")         # q=true
+  ex(e="length(result) == 5", q=false)      # q=false: need the bool
+  ex(e="methods(my_fn)", q=false)           # q=false: need to read them
+  ```
+- **`s=true`** (rare) suppresses the `agent>` prompt and REPL echo.
+  Only use it for huge outputs that would spam the user's terminal.
+- **Revise is active** in kaimon sessions by default. Editing a file
+  under `src/` picks up automatically on the next `ex` call; no
+  restart needed unless `__init__` or module-level code changed.
+
+### Multi-session routing
+
+When more than one session is connected, every session-scoped tool
+(`ex`, `run_tests`, `investigate_environment`, `search_methods`,
+`type_info`, `debug_*`, etc.) **requires** an explicit session key,
+or it fails with `No session matched ''`.
+
+- Discover session keys with `ping` — each line shows the 8-char
+  key, the display name, and uptime/PID.
+- The parameter name is `ses` on `ex` and `session` on every other
+  tool — mind the typo trap.
+- **`run_tests` usually spawns a second session** for the project's
+  `test/Project.toml` environment. After the first `run_tests` call,
+  subsequent session-scoped calls will start failing with the "no
+  session matched" error until you disambiguate. Expect this and
+  pass the key explicitly from that point on.
+- To inspect what's in a specific session, call
+  `investigate_environment(session=KEY)` — it reports `pwd`, active
+  project, dev packages, and Revise status for just that worker.
+
+### Background jobs and cancellation
+
+An `ex` call that runs longer than 30 s is automatically promoted
+to a background job. You receive an `eval_id` immediately (as the
+first progress notification AND in the final result object), so
+even a client-side timeout doesn't lose the reference.
+
+- **Polling a promoted or timed-out eval** →
+  `check_eval(eval_id=...)`. Returns status, elapsed, last-activity
+  timestamp, stashed values, and the result if done.
+  **Polling rules:** wait ≥30 s before the first `check_eval`,
+  then ≥60 s between polls. Do NOT tight-loop; the job won't finish
+  faster because you're checking.
+- **List recent jobs** → `list_jobs(status=..., stats=true)`.
+  Background jobs are persisted to SQLite and survive TUI restarts.
+- **Cancelling a runaway job** → `cancel_eval(eval_id=...)`. Julia
+  cannot force-interrupt tasks, so cancellation is cooperative: the
+  running code must periodically check `Gate.is_cancelled()` and
+  `break`. If it doesn't, `cancel_eval` has no effect.
+- **Cancellation-status gotcha:** if the running code DOES honor
+  `Gate.is_cancelled()` and returns normally after the break, the
+  job status will show `completed`, not `cancelled`. Check the
+  returned value to confirm it bailed early.
+- **Intermediate progress reporting from long-running code** →
+  `Gate.stash(key, value)` for values, `Gate.progress(msg)` for
+  status strings. Both are visible via `check_eval`.
+
+### Debugging with Infiltrator
+
+Two workflows, depending on whether you need an interactive pause.
+
+**`@exfiltrate` (no breakpoint, capture-and-continue):**
+
+```julia
+debug_exfiltrate(code="""
+function my_fn(x, y)
+    z = x + y
+    @exfiltrate       # capture all locals at this point
+    return z
+end
+my_fn(1, 2)
+""")
+debug_inspect_safehouse()                        # list captured vars
+debug_inspect_safehouse(expression="typeof(z)")  # eval using captured vars
+debug_clear_safehouse()                          # clean up
+```
+
+Works for any function you can redefine. The first call to
+`debug_inspect_safehouse` prints a harmless
+`Failed to run __is_pkg_loaded(:Makie) || using GLMakie` line —
+ignore.
+
+**`@infiltrate` (interactive breakpoint):**
+
+```julia
+ex(e="using Infiltrator")                           # separate eval!
+ex(e="function_that_hits_@infiltrate(args)")        # pauses here
+debug_ctrl(action="status")                         # file/line + locals
+debug_eval(expression="typeof(x)")                  # any Julia expr
+debug_ctrl(action="continue")                       # resume
+```
+
+`using SomePackage` MUST be a separate `ex` call from the one that
+triggers the breakpoint — combining them runs into world-age
+issues. Assignments in `debug_eval` persist across calls within a
+breakpoint session.
+
+### run_tests details
+
+- **Pattern filtering requires ReTest.** On ReTest-based suites,
+  `pattern="regex"` filters by testset name. For test suites on
+  plain `Test.@testset`, `pattern` is silently ignored and the
+  whole suite runs — no warning.
+- **A non-matching pattern returns `Pass: 0, Total: 0 — PASSED`.**
+  Do NOT interpret "PASSED" as success; check the total count and
+  the `No matching tests` line in the output.
+- `verbose=1` (default) gives per-testset pass/fail summaries; bump
+  higher only when triaging a specific failure.
+- **Orphaned test files** (files in `test/` not reachable from
+  `test/runtests.jl`) cannot be run via `run_tests`. Use
+  `ex(e="include(\"/abs/path/to/test_file.jl\")", ses=...)` —
+  `run_tests` only runs what `runtests.jl` includes.
+- `run_tests` usually spawns a second `test` session — see
+  "Multi-session routing" above.
+
+### Common workflows
+
+- **"Where is `foo` defined?" (name approximately known)** →
+  `workspace_symbols(query="foo")` for the fully-qualified name,
+  then `search_methods(query="Module.foo")` for signatures +
+  file:line. Optionally `navigate_to_file(...)` to open it in the
+  editor.
+- **"What does this file define?"** →
+  `document_symbols(file_path="/abs/path.jl")`. Pure AST parse,
+  works on unloaded files.
+- **"What does this type look like?"** →
+  `type_info(type_expr="MyType")` for fields/hierarchy, then
+  `search_methods(query="MyType")` for constructors and overloads.
+- **"Iterate on a single failing test"** →
+  `run_tests(pattern="failing_testset", session=...)`, read the
+  failure, edit `src/`, re-run the same command. Revise keeps
+  `src/` hot; only `manage_repl(command="restart")` if `__init__`
+  or module-level code changed.
+- **"Inspect locals without restructuring"** → `debug_exfiltrate`
+  with the function redefined to include `@exfiltrate`, then
+  `debug_inspect_safehouse(expression=...)`, then
+  `debug_clear_safehouse()`. Works even for deeply nested
+  functions — Revise picks up the fresh definition.
+- **"Long-running computation"** → `ex(e=..., q=false)`; capture
+  the job ID from the 30 s promotion message; wait ≥30 s; check
+  with `check_eval(eval_id=...)`. Cancel only if the running code
+  checks `Gate.is_cancelled()`.
+- **"A kaimon call failed — now what?"** → (1) `ping` to confirm
+  the session is alive; (2) `server_log(level="error", lines=30)`
+  for the root cause (often a missing dep like
+  Qdrant/JuliaFormatter/Aqua, or a loading error); (3)
+  `tui_screenshot` to see the last N tool calls with durations
+  and preview; (4) fix the root cause, don't silently fall back
+  to `Grep`/`Bash`.
+- **"Debug type instability"** →
+  `ex(e="code_typed(fn, (T1, T2))", q=false, ses=...)`. Look for
+  `Union`, `Any`, or `@_call` in the IR. Route via `ex`, not the
+  (broken) dedicated tool.
+- **"Profile a hot block"** → route via `ex` + `Profile` directly,
+  not the broken `profile_code` tool:
+  ```julia
+  ex(e="""
+  using Profile
+  Profile.clear()
+  @profile (for _ in 1:100; hot_fn(args); end)
+  Profile.print(format=:flat, maxdepth=20)
+  """, q=false, ses=...)
+  ```
+
+### Failure handling
+
+When a kaimon tool errors, **debug the error** before falling back.
+
+- Legitimate fall-back cases (use `Grep`/`Read`/`Bash` and say so
+  in your response):
+  - Non-Julia files (`.md`, `Project.toml`, raw notebooks on disk).
+  - Files in unloaded/unregistered scripts that `document_symbols`
+    can't cover.
+  - Filesystem edits (`Write`/`Edit`, not kaimon).
+- NOT legitimate fall-back cases: the tool took too long; you want
+  `grep` to feel faster; you don't want to deal with session
+  disambiguation.
+- **Missing optional dependencies** (JuliaFormatter.jl, Aqua.jl,
+  Qdrant, Ollama) → tell the user which one is missing. Do NOT
+  auto-`pkg_add` or start external services.
+- **Session seems wedged** → `ping`; if that errors,
+  `manage_repl(command="restart")` is the last-resort reset.
+
+### kaimon gotchas worth remembering
+
+- **stdout is stripped from `ex` results** — `println` output is
+  gone by the time you see the result. Always use `q=false` with a
+  final expression to observe a value.
+- **`run_tests` `pattern` is silently ignored** on plain-`Test`
+  suites (only works with ReTest). A non-matching pattern reports
+  `Pass: 0 — PASSED`, which is a trap.
+- **`code_typed` and `code_lowered` MCP tools return `Any[]`** for
+  both `Base` and user functions. Route through
+  `ex(e="code_typed(f, (T,))", q=false)` instead.
+- **`profile_code` returns an empty payload.** Route through
+  `ex(e="using Profile; @profile ...; Profile.print()")` instead.
+- **`list_vscode_commands` throws
+  `UndefVarError: read_vscode_settings`.** Read
+  `.vscode/settings.json` directly if you need the allow-list.
+- **`run_tests` spawns a second `test` session** for the project's
+  test environment. After the first call, subsequent session-scoped
+  calls need an explicit `ses`/`session` key or they fail with
+  `No session matched ''`.
+- **Parameter-name asymmetry**: it's `ses=` on `ex` and `session=`
+  on every other tool.
+- **Cancelled jobs may report `completed`** — if the running code
+  breaks cleanly after `Gate.is_cancelled()` flips, the job returns
+  normally and the status is `completed`, not `cancelled`. Check
+  the returned value.
+- **Background-job polling**: wait ≥30 s before first `check_eval`,
+  then ≥60 s between polls. Polling faster does not make jobs
+  finish faster.
+- **Revise is active** in kaimon sessions by default; editing
+  `src/` picks up on the next call. Restart is only needed for
+  `__init__` / module-level changes.

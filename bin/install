@@ -145,6 +145,12 @@ if [[ $update == false ]]; then
     else
         echo "Warning: Manifest-v1.12.toml.default not found, continuing without pinned manifest."
     fi
+
+    # Copy AGENTS.md.default to AGENTS.md if AGENTS.md does not already exist
+    if [ -f "AGENTS.md.default" ] && [ ! -f "AGENTS.md" ]; then
+        cp AGENTS.md.default AGENTS.md
+        echo "Copied AGENTS.md.default to AGENTS.md"
+    fi
 else
     rm -f Manifest.toml "Manifest-v${julia_major}.toml"
     echo "--update selected: removed existing manifests for Julia ${julia_major}"
