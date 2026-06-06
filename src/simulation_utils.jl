@@ -111,13 +111,28 @@ function copy_to_simple!(sys::SystemStructure, ssys::SystemStructure)
     moment_frac = sys.groups[1].moment_frac
     moment = [mean(moment[1:2]), mean(moment[3:4])]
     steering_force = [norm(sys.winches[2].force), norm(sys.winches[3].force)]
+
+    # Pick the group point that is actually connected to a simple-model tether.
+    function tether_attachment_point_idx(ssys::SystemStructure, sgroup::Group)
+        for point_idx in sgroup.point_idxs
+            for tether in ssys.tethers
+                segment = ssys.segments[tether.segment_idxs[1]]
+                if point_idx == segment.point_idxs[1]
+                    return point_idx
+                end
+            end
+        end
+        error("Could not find tether attachment point for simple group $(sgroup.idx).")
+    end
+
     for sgroup in ssys.groups
         x_airf = normalize(sgroup.chord)
         init_z_airf = x_airf × sgroup.y_airf
         z_airf = x_airf * sin(sgroup.twist) + init_z_airf * cos(sgroup.twist)
         force = steering_force[sgroup.idx] * normalize(swing.pos_w) ⋅ (swing.R_b_to_w * z_airf)
         r = moment[sgroup.idx] / force
-        spoint = ssys.points[sgroup.point_idxs[1]]
+        spoint_idx = tether_attachment_point_idx(ssys, sgroup)
+        spoint = ssys.points[spoint_idx]
         spoint.pos_b .= sgroup.le_pos + sgroup.chord * (r / norm(sgroup.chord) + moment_frac)
 
         # update pos_w for correct tether len

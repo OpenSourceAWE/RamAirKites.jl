@@ -354,10 +354,12 @@ function create_simple_ram_sys_struct(set::Settings;
         Point(6, [0, 0, -set.l_tether], STATIC; transform=1)
         Point(7, [0, 0, -set.l_tether], STATIC; transform=1)
         Point(8, [0, 0, -set.l_tether], STATIC; transform=1)
+        Point(9, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[1]), WING)
+        Point(10, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[1]), WING)
     ]
     groups = [
-        Group(1, [3], DYNAMIC, 0.25)
-        Group(2, [4], DYNAMIC, 0.25)
+        Group(1, [9, 3], DYNAMIC, 0.25)
+        Group(2, [10, 4], DYNAMIC, 0.25)
     ]
     segments = [
         Segment(1, set, 1, 5; unit_stiffness=unit_stiffness[1], unit_damping=unit_damping[1], diameter_mm=set.power_tether_diameter)
