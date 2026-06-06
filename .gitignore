@@ -31,3 +31,4 @@ install_version_1.12.txt
 data/ram_air_kite/tmp_run.arrow
 *.log
 AGENTS.md
+Manifest-v1.11.toml
