@@ -152,6 +152,8 @@ end
 mkpath(get_data_path())
 save_log(logger, "tmp_run")
 syslog = load_log("tmp_run")
+sl = syslog.syslog
+plot(sl.time, sl.v_app; xlabel="Time [s]", ylabel="Apparent wind speed [m/s]", title="Apparent wind speed over time")
 nothing
 
 # Plot results and show replay
