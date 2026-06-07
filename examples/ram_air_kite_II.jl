@@ -33,8 +33,8 @@ toc()
 # User changeable parameters
 PLOT = true                 # Whether to plot results at the end
 PHYSICAL_MODEL = "ram"       # Options: "ram", "simple_ram", "4_attach_ram"
-SIM_TIME = 10.0               # Total simulation time [s]
-DT = 0.025                   # Time step [s]
+SIM_TIME = 60.0               # Total simulation time [s]
+DT = 0.01                   # Time step [s]
 V_WIND = 12.51               # Wind speed [m/s]
 UPWIND_DIR = -90.0           # Upwind direction [deg]
 TETHER_LENGTH = 50.0         # Tether length [m]
@@ -50,12 +50,12 @@ HEADING_D = 0.43             # Heading PID derivative time
 POSITION_P = 4.0             # Position PID proportional gain
 POSITION_I = 0.2             # Position PID integral time [s]
 POSITION_D = 0.0005             # Position PID derivative time (0 = off)
-POSITION_UMIN = -1.3         # Minimum speed setpoint [m/s]
-POSITION_UMAX = 1.3          # Maximum speed setpoint [m/s]
+POSITION_UMIN = -1.2         # Minimum speed setpoint [m/s]
+POSITION_UMAX = 1.2          # Maximum speed setpoint [m/s]
 SPEED_P = 8.0                # Speed PID proportional gain
 SPEED_I = 0.1                # Speed PID integral time [s]
 SPEED_D = 0.01               # Speed PID derivative time
-SPEED_TAU = 0.1              # Low-pass filter time constant for speed [s]
+SPEED_TAU = 0.12              # Low-pass filter time constant for speed [s]
 TORQUE_UMIN = -40.0          # Minimum torque output [Nm]
 TORQUE_UMAX = 40.0           # Maximum torque output [Nm]
 
