@@ -59,7 +59,7 @@ sys_struct = create_sys_struct(set)
 sam = SymbolicAWEModel(set, sys_struct)
 
 # edit sys_struct before init!
-sys_struct.transforms[1].elevation = deg2rad(85)
+sys_struct.transforms[1].elevation = deg2rad(65)
 # sys_struct.tethers[:steering_left].init_stretch_frac = 1.005
 # sys_struct.tethers[:steering_right].init_stretch_frac = 1.005
 sys_struct.winches[:power_winch].brake = true
