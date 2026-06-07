@@ -63,8 +63,12 @@ set.l_tether = TETHER_LENGTH
         point.body_frame_damping .= 0.0
     end
     for segment in sam.sys_struct.segments
-        segment.compression_frac = 0.01
+        segment.compression_frac = 0.01 # relative compression stiffness
     end
+    # Setting moment_frac = 0.0 means the moment pivot is at the leading edge. 
+    # This effectively zeros out the twist moments from tether forces 
+    # (since the moment arm about the LE is zero), which simplifies the initial 
+    # equilibrium search by removing twist dynamics as a degree of freedom.
     for group in sam.sys_struct.groups
         group.moment_frac = 0.0
     end
