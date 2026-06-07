@@ -153,7 +153,10 @@ mkpath(get_data_path())
 save_log(logger, "tmp_run")
 syslog = load_log("tmp_run")
 sl = syslog.syslog
-plot(sl.time, sl.v_app; xlabel="Time [s]", ylabel="Apparent wind speed [m/s]", title="Apparent wind speed over time")
+
+aero_force_norm = norm.(eachrow(sl.aero_force_b))
+plotx(sl.time, sl.v_app, aero_force_norm; xlabel="Time [s]", ylabels=["Apparent wind speed [m/s]", "Aerodynamic force [N]"], 
+     ysize=11, title="Apparent wind speed and aerodynamic force")
 nothing
 
 # Plot results and show replay
