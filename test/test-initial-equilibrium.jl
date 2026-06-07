@@ -40,8 +40,10 @@ set.l_tether = TETHER_LENGTH
     @test length(sys_struct.points) == 42
     @test length(sys_struct.segments) == 42
     @test length(sys_struct.tethers) == 4
+    @test all(t -> t.len ≈ TETHER_LENGTH, sys_struct.tethers)
     @test length(sys_struct.winches) == 3
     @test length(sys_struct.wings) == 1
+
 end
 toc()
 nothing
