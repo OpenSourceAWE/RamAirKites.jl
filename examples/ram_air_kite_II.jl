@@ -155,11 +155,18 @@ syslog = load_log("tmp_run")
 sl = syslog.syslog
 
 aero_force_norm = norm.(eachrow(sl.aero_force_b))
+l_diff = [sl.l_tether[i][3] - sl.l_tether[i][4] for i in 1:length(sl.time)]
+
 if PLOT
     p=plotx(sl.time, rad2deg.(sl.elevation), rad2deg.(sl.azimuth), rad2deg.(sl.heading), sl.steering, rad2deg.(sl.AoA), sl.v_app, aero_force_norm; xlabel="Time [s]", 
         ylabels=[L"\mathrm{elevation}~[°]", L"\mathrm{azimuth}~[°]", L"\mathrm{heading}~[°]", L"\mathrm{steering}~[-]", L"\mathrm{AoA}~[°]", L"v_a~[\mathrm{ms^{-1}}]", L"\mathrm{aeroforce}~[N]"], 
         ysize=18, fig="Parking ram air kite")
     display(p)
+
+    p2 = plotx(sl.time, l_diff, sl.steering; xlabel="Time [s]",
+               ylabels=[L"\Delta l~[m]", L"\mathrm{steering}~[-]"],
+               ysize=18, fig="Line length diff vs steering")
+    display(p2)
 end
 
 rms_azimuth = rad2deg(sqrt(mean(sl.azimuth .^ 2)))
