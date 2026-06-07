@@ -40,10 +40,8 @@ UPWIND_DIR = -90.0           # Upwind direction [deg]
 TETHER_LENGTH = 50.0         # Tether length [m]
 PROFILE_LAW = 3              # Wind profile law (3 = EXPLOG)
 REMAKE_CACHE = false         # Force rebuild of compiled model cache
-VSM_INTERVAL = 20            # VSM update interval
-MAX_HEADING = 0.0            # Heading setpoint amplitude [deg]
-HEADING_PERIOD = 5.0         # Heading setpoint period [s]
-MAX_STEERING = 2.0           # Steering torque limit [Nm]
+VSM_INTERVAL = 10            # VSM update interval
+MAX_STEERING = 2.0           # Steering limit [m]
 HEADING_P = 0.7              # Heading PID proportional gain
 HEADING_I = 0              # Heading PID integral time (false = off)
 HEADING_D = 0.43             # Heading PID derivative time
@@ -211,11 +209,6 @@ end
 rms_azimuth = rad2deg(sqrt(mean(sl.azimuth .^ 2)))
 @printf("Azimuth RMS error: %.2f°\n", rms_azimuth)
 nothing
-
-# Plot results and show replay
-# fig = plot(sam.sys_struct, syslog;
-#            plot_heading=true, setpoints=Dict(:heading => heading_setpoint))
-# display(fig)
 
 # Interactive replay
 # replay(syslog, sam.sys_struct)
