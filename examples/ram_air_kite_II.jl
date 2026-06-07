@@ -48,6 +48,19 @@ HEADING_P = 0.7              # Heading PID proportional gain
 HEADING_I = 0              # Heading PID integral time (false = off)
 HEADING_D = 0.43             # Heading PID derivative time
 
+# Cascaded position + speed controller for steering lines
+POSITION_P = 4.0             # Position PID proportional gain
+POSITION_I = 0.2             # Position PID integral time [s]
+POSITION_D = 0.0             # Position PID derivative time (0 = off)
+POSITION_UMIN = -1.2         # Minimum speed setpoint [m/s]
+POSITION_UMAX = 1.2          # Maximum speed setpoint [m/s]
+SPEED_P = 8.0                # Speed PID proportional gain
+SPEED_I = 0.1                # Speed PID integral time [s]
+SPEED_D = 0.01               # Speed PID derivative time
+SPEED_TAU = 0.1              # Low-pass filter time constant for speed [s]
+TORQUE_UMIN = -40.0          # Minimum torque output [Nm]
+TORQUE_UMAX = 40.0           # Maximum torque output [Nm]
+
 @info "Creating ram air kite model..."
 set_data_path(ram_air_data_path())
 set = Settings("system.yaml")
@@ -113,7 +126,21 @@ end
 
 heading_pid = DiscretePID(; K=HEADING_P, Ti=HEADING_I, Td=HEADING_D, Ts=dt,
                           umin=-MAX_STEERING, umax=MAX_STEERING)
+pos_pid = DiscretePID(; K=POSITION_P, Ti=POSITION_I, Td=POSITION_D, Ts=dt,
+                       umin=POSITION_UMIN, umax=POSITION_UMAX)
+speed_pid = DiscretePID(; K=SPEED_P, Ti=SPEED_I, Td=SPEED_D, Ts=dt,
+                         umin=TORQUE_UMIN, umax=TORQUE_UMAX)
 max_heading = deg2rad(MAX_HEADING)
+
+# Track steering torque for logging
+steering_torque_history = Float64[]
+dl_setpoint_history = Float64[]
+sizehint!(steering_torque_history, steps)
+sizehint!(dl_setpoint_history, steps)
+
+l_diff_prev = Ref(sys_state.l_tether[3] - sys_state.l_tether[4])
+l_diff_speed_filt = Ref(0.0)
+alpha = dt / (dt + SPEED_TAU)  # low-pass filter coefficient
 
 last_time = time()
 try
@@ -122,7 +149,17 @@ try
 
         current_heading = sam.sys_struct.wings[1].heading
         steering = heading_pid(0, current_heading, 0.0)
-        set_values = [0.0, steering, -steering]
+
+        # Cascaded position → speed → torque control
+        local l_diff = sys_state.l_tether[3] - sys_state.l_tether[4]
+        l_diff_speed_raw = (l_diff - l_diff_prev[]) / dt
+        l_diff_prev[] = l_diff
+        l_diff_speed_filt[] = alpha * l_diff_speed_raw + (1 - alpha) * l_diff_speed_filt[]
+        speed_setpoint = pos_pid(steering, l_diff, 0.0)
+        torque = speed_pid(speed_setpoint, l_diff_speed_filt[], 0.0)
+        push!(steering_torque_history, torque)
+        push!(dl_setpoint_history, steering)
+        set_values = [0.0, torque, -torque]
 
         global steady_torque = torque_damp * steady_torque +
                                (1 - torque_damp) * calc_steady_torque(sam)
@@ -158,14 +195,16 @@ aero_force_norm = norm.(eachrow(sl.aero_force_b))
 l_diff = [sl.l_tether[i][3] - sl.l_tether[i][4] for i in 1:length(sl.time)]
 
 if PLOT
-    p=plotx(sl.time, rad2deg.(sl.elevation), rad2deg.(sl.azimuth), rad2deg.(sl.heading), sl.steering, rad2deg.(sl.AoA), sl.v_app, aero_force_norm; xlabel="Time [s]", 
-        ylabels=[L"\mathrm{elevation}~[°]", L"\mathrm{azimuth}~[°]", L"\mathrm{heading}~[°]", L"\mathrm{steering}~[-]", L"\mathrm{AoA}~[°]", L"v_a~[\mathrm{ms^{-1}}]", L"\mathrm{aeroforce}~[N]"], 
-        ysize=18, fig="Parking ram air kite")
+    p=plotx(sl.time, rad2deg.(sl.elevation), rad2deg.(sl.azimuth), rad2deg.(sl.heading), steering_torque_history, rad2deg.(sl.AoA), sl.v_app, aero_force_norm; xlabel="Time [s]", 
+        ylabels=[L"\mathrm{elevation}~[°]", L"\mathrm{azimuth}~[°]", L"\mathrm{heading}~[°]", L"\mathrm{steering\ torque}~[Nm]", L"\mathrm{AoA}~[°]", L"v_a~[\mathrm{ms^{-1}}]", L"\mathrm{aeroforce}~[N]"], 
+        ysize=18, fig="Ram air kite")
     display(p)
 
-    p2 = plotx(sl.time, l_diff, sl.steering; xlabel="Time [s]",
-               ylabels=[L"\Delta l~[m]", L"\mathrm{steering}~[-]"],
-               ysize=18, fig="Line length diff vs steering")
+    delta_labels = [L"\Delta l_{\mathrm{set}}~[m]", L"\Delta l~[m]"]
+    all_labels = [delta_labels, nothing]
+    p2 = plotx(sl.time, [dl_setpoint_history, l_diff], steering_torque_history; xlabel="Time [s]",
+               ylabels=[L"\mathrm{\Delta_l}~[m]", L"\mathrm{torque}~[Nm]"], labels=all_labels,
+               ysize=18, fig="Delta-l setpoint vs actual")
     display(p2)
 end
 
