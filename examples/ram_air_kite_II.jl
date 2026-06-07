@@ -55,7 +55,7 @@ POSITION_UMAX = 1.2          # Maximum speed setpoint [m/s]
 SPEED_P = 8.0                # Speed PID proportional gain
 SPEED_I = 0.1                # Speed PID integral time [s]
 SPEED_D = 0.01               # Speed PID derivative time
-SPEED_TAU = 0.12              # Low-pass filter time constant for speed [s]
+SPEED_TAU = 0.14              # Low-pass filter time constant for speed [s]
 TORQUE_UMIN = -40.0          # Minimum torque output [Nm]
 TORQUE_UMAX = 40.0           # Maximum torque output [Nm]
 
@@ -75,7 +75,7 @@ sys_struct = create_sys_struct(set)
 sam = SymbolicAWEModel(set, sys_struct)
 
 # edit sys_struct before init!
-sys_struct.transforms[1].elevation = deg2rad(76)
+sys_struct.transforms[1].elevation = deg2rad(74)
 # sys_struct.tethers[:steering_left].init_stretch_frac = 1.005
 # sys_struct.tethers[:steering_right].init_stretch_frac = 1.005
 sys_struct.winches[:power_winch].brake = true
