@@ -34,8 +34,9 @@ set.l_tether = TETHER_LENGTH
 
 @testset "Initial equilibrium" begin
     # 1. system structure
-    global sys_struct
+    global sys_struct, sam
     sys_struct = create_sys_struct(set)
+    toc()
     @test typeof(sys_struct) == SystemStructure{VSMWing{VortexStepMethod.BodyAerodynamics{56, Wing{56, Float64}, Float64}, Wing{56, Float64}, VortexStepMethod.Solver{56, 4, Float64}}}
     @test length(sys_struct.points) == 42
     @test length(sys_struct.segments) == 42
@@ -52,6 +53,21 @@ set.l_tether = TETHER_LENGTH
     @test rad2deg(tf.elevation) ≈ set.elevation
     @test TETHER_LENGTH * sind(set.elevation) ≈ 43.30 atol=0.01
 
+    # 2. model
+    sam = SymbolicAWEModel(set, sys_struct)
+
+    # edit sys_struct before init!
+    sys_struct.transforms[1].elevation = deg2rad(85)
+    sys_struct.winches[:power_winch].brake = true
+    for point in sam.sys_struct.points
+        point.body_frame_damping .= 0.0
+    end
+    for segment in sam.sys_struct.segments
+        segment.compression_frac = 0.01
+    end
+    for group in sam.sys_struct.groups
+        group.moment_frac = 0.0
+    end
+    toc()
 end
-toc()
 nothing
