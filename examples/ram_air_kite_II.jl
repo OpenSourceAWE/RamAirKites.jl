@@ -41,7 +41,7 @@ TETHER_LENGTH = 50.0         # Tether length [m]
 PROFILE_LAW = 3              # Wind profile law (3 = EXPLOG)
 REMAKE_CACHE = false         # Force rebuild of compiled model cache
 VSM_INTERVAL = 10            # VSM update interval
-MAX_STEERING = 2.0           # Steering limit [m]
+MAX_STEERING = 1.5           # Steering limit [m]
 HEADING_P = 0.7              # Heading PID proportional gain
 HEADING_I = 0              # Heading PID integral time (false = off)
 HEADING_D = 0.43             # Heading PID derivative time
@@ -49,7 +49,7 @@ HEADING_D = 0.43             # Heading PID derivative time
 # Cascaded position + speed controller for steering lines
 POSITION_P = 4.0             # Position PID proportional gain
 POSITION_I = 0.2             # Position PID integral time [s]
-POSITION_D = 0.0             # Position PID derivative time (0 = off)
+POSITION_D = 0.0005             # Position PID derivative time (0 = off)
 POSITION_UMIN = -1.3         # Minimum speed setpoint [m/s]
 POSITION_UMAX = 1.3          # Maximum speed setpoint [m/s]
 SPEED_P = 8.0                # Speed PID proportional gain
