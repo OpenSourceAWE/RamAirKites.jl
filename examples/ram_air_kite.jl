@@ -36,12 +36,12 @@ TETHER_LENGTH = 50.0        # Tether length [m]
 PROFILE_LAW = 3             # Wind profile law (3 = EXPLOG)
 REMAKE_CACHE = false        # Force rebuild of compiled model cache
 VSM_INTERVAL = 20           # VSM update interval
-MAX_HEADING = 30.0          # Heading setpoint amplitude [deg]
+MAX_HEADING = 10.0          # Heading setpoint amplitude [deg]
 HEADING_PERIOD = 5.0        # Heading setpoint period [s]
-MAX_STEERING = 2.0          # Steering torque limit [Nm]
-HEADING_P = 1.0             # Heading PID proportional gain
+MAX_STEERING = 10.0          # Steering torque limit [Nm]
+HEADING_P = 2.0             # Heading PID proportional gain
 HEADING_I = false           # Heading PID integral time (false = off)
-HEADING_D = 0.0             # Heading PID derivative time
+HEADING_D = 1.0             # Heading PID derivative time
 
 @info "Creating ram air kite model..."
 set_data_path(ram_air_data_path())
@@ -59,7 +59,7 @@ sys_struct = create_sys_struct(set)
 sam = SymbolicAWEModel(set, sys_struct)
 
 # edit sys_struct before init!
-sys_struct.transforms[1].elevation = deg2rad(70)
+sys_struct.transforms[1].elevation = deg2rad(80)
 # sys_struct.tethers[:steering_left].init_stretch_frac = 1.005
 # sys_struct.tethers[:steering_right].init_stretch_frac = 1.005
 sys_struct.winches[:power_winch].brake = true
@@ -76,16 +76,15 @@ for group in sam.sys_struct.groups
     group.moment_frac = 0.0
 end
 
-depower = 0.009
-sys_struct.tethers[:steering_left].init_stretch_frac = 1.0 - depower
-sys_struct.tethers[:steering_right].init_stretch_frac = 1.0 - depower
+depower = -0.002
+sys_struct.tethers[:steering_left].init_stretch_frac = 1.0 + depower
+sys_struct.tethers[:steering_right].init_stretch_frac = 1.0 + depower
 
 # 3. init
 @info "Initializing model..."
 init!(sam; remake=REMAKE_CACHE)
-
-find_steady_state!(sam; dt=0.05, vsm_interval=0)
-toc("Steady state found after: ")
+depower_len = sys_struct.tethers[:steering_left].len - sys_struct.tethers[:power_left].len
+@info "Depowered by $(depower_len)m"
 
 # Plot initial configuration
 fig = plot(sam.sys_struct)
@@ -102,9 +101,9 @@ sys_state.time = 0.0
 
 steady_torque = calc_steady_torque(sam)
 
-for group in sam.sys_struct.groups
-    group.damping = 200.0
-end
+# for group in sam.sys_struct.groups
+#     group.damping = 200.0
+# end
 
 heading_pid = DiscretePID(; K=HEADING_P, Ti=HEADING_I, Td=HEADING_D, Ts=dt,
                           umin=-MAX_STEERING, umax=MAX_STEERING)
@@ -154,9 +153,10 @@ syslog = load_log("tmp_run")
 
 # Plot results and show replay
 fig = plot(sam.sys_struct, syslog;
-           plot_heading=true, setpoints=Dict(:heading => heading_setpoint))
-display(fig)
+           plot_heading=true, plot_tether=true, setpoints=Dict(:heading => heading_setpoint))
+display(GLMakie.Screen(), fig)
 
 # Interactive replay
-replay(syslog, sam.sys_struct)
+scene = replay(syslog, sam.sys_struct)
+display(GLMakie.Screen(), scene)
 
