@@ -40,7 +40,7 @@ UPWIND_DIR = -90.0           # Upwind direction [deg]
 TETHER_LENGTH = 50.0         # Tether length [m]
 PROFILE_LAW = 3              # Wind profile law (3 = EXPLOG)
 REMAKE_CACHE = false         # Force rebuild of compiled model cache
-VSM_INTERVAL = 10            # VSM update interval
+VSM_INTERVAL = 7            # VSM update interval
 MAX_STEERING = 1.5           # Steering limit [m]
 HEADING_P = 0.7              # Heading PID proportional gain
 HEADING_I = 0              # Heading PID integral time (false = off)
@@ -128,7 +128,6 @@ pos_pid = DiscretePID(; K=POSITION_P, Ti=POSITION_I, Td=POSITION_D, Ts=dt,
                        umin=POSITION_UMIN, umax=POSITION_UMAX)
 speed_pid = DiscretePID(; K=SPEED_P, Ti=SPEED_I, Td=SPEED_D, Ts=dt,
                          umin=TORQUE_UMIN, umax=TORQUE_UMAX)
-max_heading = deg2rad(MAX_HEADING)
 
 # Track steering torque for logging
 steering_torque_history = Float64[]
