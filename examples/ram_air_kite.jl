@@ -76,6 +76,10 @@ for group in sam.sys_struct.groups
     group.moment_frac = 0.0
 end
 
+depower = 0.009
+sys_struct.tethers[:steering_left].init_stretch_frac = 1.0 - depower
+sys_struct.tethers[:steering_right].init_stretch_frac = 1.0 - depower
+
 # 3. init
 @info "Initializing model..."
 init!(sam; remake=REMAKE_CACHE)
