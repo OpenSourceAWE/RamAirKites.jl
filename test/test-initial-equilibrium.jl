@@ -20,7 +20,7 @@ V_WIND = 15.51              # Wind speed [m/s]
 UPWIND_DIR = -90.0          # Upwind direction [deg]
 TETHER_LENGTH = 50.0        # Tether length [m]
 PROFILE_LAW = 3             # Wind profile law (3 = EXPLOG)
-REMAKE_CACHE = false        # Force rebuild of compiled model cache
+REMAKE_CACHE = false         # If true, force rebuild of compiled model cache
 MAX_STEERING = 2.0          # Steering torque limit [Nm]
 
 @info "Creating ram air kite model..."
@@ -36,7 +36,7 @@ set.l_tether = TETHER_LENGTH
     # 1. system structure
     global sys_struct, sam
     sys_struct = create_sys_struct(set)
-    toc()
+    toc("System structure created after: ")
     @test typeof(sys_struct) == SystemStructure{VSMWing{VortexStepMethod.BodyAerodynamics{56, Wing{56, Float64}, Float64}, Wing{56, Float64}, VortexStepMethod.Solver{56, 4, Float64}}}
     @test length(sys_struct.points) == 42
     @test length(sys_struct.segments) == 42
@@ -72,6 +72,9 @@ set.l_tether = TETHER_LENGTH
     for group in sam.sys_struct.groups
         group.moment_frac = 0.0
     end
-    toc()
+    toc("Model created after: ")
+    # 3. init
+    init!(sam; remake=REMAKE_CACHE)
+    toc("Model initialized after: ")
 end
 nothing
