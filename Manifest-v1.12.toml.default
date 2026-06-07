@@ -2,7 +2,7 @@
 
 julia_version = "1.12.6"
 manifest_format = "2.0"
-project_hash = "bbf53ab872e9f2796af28cf382b60e219529db5e"
+project_hash = "8eaca6169194d07807525532aa87e670ab3a5636"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "bbc22a9a08a0ef6460041086d8a7b27940ed4ffd"
@@ -2826,7 +2826,7 @@ version = "0.2.8"
 
 [[deps.SymbolicAWEModels]]
 deps = ["AtmosphericModels", "CodecZlib", "ControlSystemsBase", "DataInterpolations", "Dates", "DocStringExtensions", "ForwardDiff", "KiteUtils", "LaTeXStrings", "LinearAlgebra", "Logging", "ModelingToolkit", "NonlinearSolve", "NonlinearSolveQuasiNewton", "OrdinaryDiffEqBDF", "OrdinaryDiffEqCore", "OrdinaryDiffEqNonlinearSolve", "Parameters", "Pkg", "PrecompileTools", "Printf", "RecipesBase", "SHA", "Serialization", "StaticArrays", "Statistics", "SteadyStateDiffEq", "Suppressor", "SymbolicIndexingInterface", "SymbolicUtils", "Symbolics", "TOML", "Tar", "Timers", "UnPack", "VortexStepMethod", "YAML"]
-path = "../SymbolicAWEModels.jl"
+git-tree-sha1 = "9f0a4acc384a76cdf9b3a6b28359d7a441689d2b"
 uuid = "9c9a347c-5289-41db-a9b9-25ccc76c3360"
 version = "0.11.1"
 weakdeps = ["GeometryBasics", "Makie"]
@@ -3049,7 +3049,7 @@ version = "1.28.0"
 
 [[deps.VortexStepMethod]]
 deps = ["Colors", "DefaultApplication", "DelimitedFiles", "DifferentiationInterface", "FiniteDiff", "ForwardDiff", "Interpolations", "LaTeXStrings", "LinearAlgebra", "Logging", "Measures", "NonlinearSolve", "Parameters", "Pkg", "PreallocationTools", "PrecompileTools", "RecursiveArrayTools", "SciMLBase", "Serialization", "StaticArrays", "Statistics", "StructMapping", "Timers", "Xfoil", "YAML"]
-path = "../VortexStepMethod.jl"
+git-tree-sha1 = "315441a39c8fa3eaa784c4801c3ea15446e8e561"
 uuid = "ed3cd733-9f0f-46a9-93e0-89b8d4998dd9"
 version = "3.3.5"
 
