@@ -78,7 +78,7 @@ for group in sam.sys_struct.groups
     group.moment_frac = 0.0
 end
 
-depower = 0.009
+depower = 0.000
 sys_struct.tethers[:steering_left].init_stretch_frac = 1.0 - depower
 sys_struct.tethers[:steering_right].init_stretch_frac = 1.0 - depower
 
