@@ -48,6 +48,9 @@ set.l_tether = TETHER_LENGTH
     wing_area = 2 * vsm_wing.area_interp(vsm_wing.span)
     @test wing_area ≈ 13.01 atol=0.01
     @test vsm_wing.span ≈ 3.27 atol=0.01
+    tf = sys_struct.transforms[1]
+    @test rad2deg(tf.elevation) ≈ set.elevation
+    @test TETHER_LENGTH * sind(set.elevation) ≈ 43.30 atol=0.01
 
 end
 toc()
