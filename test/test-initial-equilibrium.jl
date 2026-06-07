@@ -8,5 +8,26 @@ tic()
 @info "Loading packages..."
 using Test
 using RamAirKite
+using SymbolicAWEModels
 using LinearAlgebra
 toc()
+
+PHYSICAL_MODEL = "ram"      # Options: "ram", "simple_ram", "4_attach_ram"
+SIM_TIME = 10.0             # Total simulation time [s]
+DT = 0.05                   # Time step [s]
+V_WIND = 15.51              # Wind speed [m/s]
+UPWIND_DIR = -90.0          # Upwind direction [deg]
+TETHER_LENGTH = 50.0        # Tether length [m]
+PROFILE_LAW = 3             # Wind profile law (3 = EXPLOG)
+REMAKE_CACHE = false        # Force rebuild of compiled model cache
+MAX_STEERING = 2.0          # Steering torque limit [Nm]
+
+@info "Creating ram air kite model..."
+set_data_path(ram_air_data_path())
+set = Settings("system.yaml")
+set.physical_model = PHYSICAL_MODEL
+set.v_wind = V_WIND
+set.upwind_dir = UPWIND_DIR
+set.profile_law = PROFILE_LAW
+set.l_tether = TETHER_LENGTH
+
