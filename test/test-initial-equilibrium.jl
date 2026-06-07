@@ -9,6 +9,7 @@ tic()
 using Test
 using RamAirKite
 using SymbolicAWEModels
+using VortexStepMethod
 using LinearAlgebra
 toc()
 
@@ -31,3 +32,15 @@ set.upwind_dir = UPWIND_DIR
 set.profile_law = PROFILE_LAW
 set.l_tether = TETHER_LENGTH
 
+@testset "Initial equilibrium" begin
+    # 1. system structure
+    global sys_struct
+    sys_struct = create_sys_struct(set)
+    @test typeof(sys_struct) == SystemStructure{VSMWing{VortexStepMethod.BodyAerodynamics{56, Wing{56, Float64}, Float64}, Wing{56, Float64}, VortexStepMethod.Solver{56, 4, Float64}}}
+    @test length(sys_struct.points) == 42
+    @test length(sys_struct.tethers) == 4
+    @test length(sys_struct.winches) == 3
+    @test length(sys_struct.wings) == 1
+end
+toc()
+nothing
