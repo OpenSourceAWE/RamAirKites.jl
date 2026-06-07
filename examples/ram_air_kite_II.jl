@@ -114,18 +114,14 @@ end
 heading_pid = DiscretePID(; K=HEADING_P, Ti=HEADING_I, Td=HEADING_D, Ts=dt,
                           umin=-MAX_STEERING, umax=MAX_STEERING)
 max_heading = deg2rad(MAX_HEADING)
-angular_freq = 2π / HEADING_PERIOD
-heading_setpoint = Float64[]
 
 last_time = time()
 try
     for step in 1:steps
         t = step * dt
 
-        target_heading = max_heading * sin(angular_freq * t)
         current_heading = sam.sys_struct.wings[1].heading
-        steering = heading_pid(target_heading, current_heading, 0.0)
-        push!(heading_setpoint, target_heading)
+        steering = heading_pid(0, current_heading, 0.0)
         set_values = [0.0, steering, -steering]
 
         global steady_torque = torque_damp * steady_torque +
@@ -161,7 +157,7 @@ sl = syslog.syslog
 aero_force_norm = norm.(eachrow(sl.aero_force_b))
 if PLOT
     p=plotx(sl.time, rad2deg.(sl.elevation), rad2deg.(sl.azimuth), rad2deg.(sl.heading), sl.steering, rad2deg.(sl.AoA), sl.v_app, aero_force_norm; xlabel="Time [s]", 
-        ylabels=[L"\mathrm{elevation}~[°]", L"\mathrm{azimuth}~[°]", L"\mathrm{heading}~[°]", L"\mathrm{steering}~[-]", L"\mathrm{AoA}~[°]", L"v_a~[\mathrm{m/s}]", L"\mathrm{Aerodynamic}~\mathrm{force}~[N]"], 
+        ylabels=[L"\mathrm{elevation}~[°]", L"\mathrm{azimuth}~[°]", L"\mathrm{heading}~[°]", L"\mathrm{steering}~[-]", L"\mathrm{AoA}~[°]", L"v_a~[\mathrm{ms^{-1}}]", L"\mathrm{aeroforce}~[N]"], 
         ysize=18, fig="Parking ram air kite")
     display(p)
 end
