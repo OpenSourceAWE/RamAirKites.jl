@@ -9,6 +9,7 @@ tic()
 using Test
 using RamAirKite
 using SymbolicAWEModels
+using SymbolicAWEModels: update_sys_struct!
 using VortexStepMethod
 using LinearAlgebra
 toc()
@@ -57,7 +58,7 @@ set.l_tether = TETHER_LENGTH
     sam = SymbolicAWEModel(set, sys_struct)
 
     # edit sys_struct before init!
-    sys_struct.transforms[1].elevation = deg2rad(85)
+    sys_struct.transforms[1].elevation = deg2rad(65)
     sys_struct.winches[:power_winch].brake = true
     for point in sam.sys_struct.points
         point.body_frame_damping .= 0.0
@@ -76,5 +77,22 @@ set.l_tether = TETHER_LENGTH
     # 3. init
     init!(sam; remake=REMAKE_CACHE)
     toc("Model initialized after: ")
+
+    # After init!, find the aerodynamic steady state
+    find_steady_state!(sam; dt=0.05, vsm_interval=0)
+    toc("Steady state found after: ")
+
+    # Sync integrator state → sys_struct fields
+    update_sys_struct!(sam.prob, sam.integrator, sam.sys_struct)
+    forces = [segment.force for segment in sam.sys_struct.segments]
+    println("All segment forces: ", join(round.(forces; digits=2), ", "))
+
+    @test all(f -> 2.0 < f < 300.0, forces)
+
+    # Angle of attack
+    aoa_rad = sam.sys_struct.wings[1].aoa
+    aoa_deg = rad2deg(aoa_rad)
+    println("Angle of attack: $(round(Int, aoa_deg))° ($(round(aoa_rad; digits=4)) rad)")
+    @test 2 < aoa_deg < 15
 end
 nothing
