@@ -155,7 +155,7 @@ syslog = load_log("tmp_run")
 sl = syslog.syslog
 
 aero_force_norm = norm.(eachrow(sl.aero_force_b))
-plotx(sl.time, sl.v_app, aero_force_norm; xlabel="Time [s]", ylabels=["Apparent wind speed [m/s]", "Aerodynamic force [N]"], 
+plotx(sl.time, rad2deg.(sl.elevation), sl.v_app, aero_force_norm; xlabel="Time [s]", ylabels=["elevation [deg]", "Apparent wind speed [m/s]", "Aerodynamic force [N]"], 
      ysize=11, title="Apparent wind speed and aerodynamic force")
 nothing
 
