@@ -156,9 +156,10 @@ syslog = load_log("tmp_run")
 sl = syslog.syslog
 
 aero_force_norm = norm.(eachrow(sl.aero_force_b))
-plotx(sl.time, rad2deg.(sl.elevation), rad2deg.(sl.azimuth), rad2deg.(sl.heading), sl.v_app, aero_force_norm; xlabel="Time [s]", 
+p=plotx(sl.time, rad2deg.(sl.elevation), rad2deg.(sl.azimuth), rad2deg.(sl.heading), sl.v_app, aero_force_norm; xlabel="Time [s]", 
         ylabels=[L"\mathrm{elevation}~[°]", L"\mathrm{azimuth}~[°]", L"\mathrm{heading}~[°]", L"v_a~[\mathrm{m/s}]", L"\mathrm{Aerodynamic}~\mathrm{force}~[N]"], 
      ysize=18, title="Parking ram air kite")
+display(p)
 nothing
 
 # Plot results and show replay
