@@ -25,25 +25,28 @@ using RamAirKite
 using SymbolicAWEModels
 using DiscretePIDs
 using LinearAlgebra
+using Statistics
+using Printf
 
 toc()
 
 # User changeable parameters
-PHYSICAL_MODEL = "ram"      # Options: "ram", "simple_ram", "4_attach_ram"
-SIM_TIME = 5.0             # Total simulation time [s]
-DT = 0.05                   # Time step [s]
-V_WIND = 15.51             # Wind speed [m/s]
-UPWIND_DIR = -90.0          # Upwind direction [deg]
-TETHER_LENGTH = 50.0        # Tether length [m]
-PROFILE_LAW = 3             # Wind profile law (3 = EXPLOG)
-REMAKE_CACHE = false        # Force rebuild of compiled model cache
-VSM_INTERVAL = 20           # VSM update interval
-MAX_HEADING = 0.0          # Heading setpoint amplitude [deg]
-HEADING_PERIOD = 5.0        # Heading setpoint period [s]
-MAX_STEERING = 2.0          # Steering torque limit [Nm]
-HEADING_P = 0.5             # Heading PID proportional gain
-HEADING_I = 0.0           # Heading PID integral time (false = off)
-HEADING_D = 0.0             # Heading PID derivative time
+PLOT = true                 # Whether to plot results at the end
+PHYSICAL_MODEL = "ram"       # Options: "ram", "simple_ram", "4_attach_ram"
+SIM_TIME = 10.0               # Total simulation time [s]
+DT = 0.025                   # Time step [s]
+V_WIND = 12.51               # Wind speed [m/s]
+UPWIND_DIR = -90.0           # Upwind direction [deg]
+TETHER_LENGTH = 50.0         # Tether length [m]
+PROFILE_LAW = 3              # Wind profile law (3 = EXPLOG)
+REMAKE_CACHE = false         # Force rebuild of compiled model cache
+VSM_INTERVAL = 20            # VSM update interval
+MAX_HEADING = 0.0            # Heading setpoint amplitude [deg]
+HEADING_PERIOD = 5.0         # Heading setpoint period [s]
+MAX_STEERING = 2.0           # Steering torque limit [Nm]
+HEADING_P = 0.7              # Heading PID proportional gain
+HEADING_I = 0              # Heading PID integral time (false = off)
+HEADING_D = 0.43             # Heading PID derivative time
 
 @info "Creating ram air kite model..."
 set_data_path(ram_air_data_path())
@@ -61,7 +64,7 @@ sys_struct = create_sys_struct(set)
 sam = SymbolicAWEModel(set, sys_struct)
 
 # edit sys_struct before init!
-sys_struct.transforms[1].elevation = deg2rad(73)
+sys_struct.transforms[1].elevation = deg2rad(76)
 # sys_struct.tethers[:steering_left].init_stretch_frac = 1.005
 # sys_struct.tethers[:steering_right].init_stretch_frac = 1.005
 sys_struct.winches[:power_winch].brake = true
@@ -139,7 +142,7 @@ try
             now = time()
             realtime_factor = (10 * dt) / (now - last_time)
             global last_time = now
-            @info "step $step / $steps, $(round(realtime_factor; digits=2)) times realtime"
+            # @info "step $step / $steps, $(round(realtime_factor; digits=2)) times realtime"
         end
     end
 catch e
@@ -156,10 +159,15 @@ syslog = load_log("tmp_run")
 sl = syslog.syslog
 
 aero_force_norm = norm.(eachrow(sl.aero_force_b))
-p=plotx(sl.time, rad2deg.(sl.elevation), rad2deg.(sl.azimuth), rad2deg.(sl.heading), rad2deg.(sl.AoA), sl.v_app, aero_force_norm; xlabel="Time [s]", 
-        ylabels=[L"\mathrm{elevation}~[°]", L"\mathrm{azimuth}~[°]", L"\mathrm{heading}~[°]", L"\mathrm{AoA}~[°]", L"v_a~[\mathrm{m/s}]", L"\mathrm{Aerodynamic}~\mathrm{force}~[N]"], 
-     ysize=18, fig="Parking ram air kite")
-display(p)
+if PLOT
+    p=plotx(sl.time, rad2deg.(sl.elevation), rad2deg.(sl.azimuth), rad2deg.(sl.heading), sl.steering, rad2deg.(sl.AoA), sl.v_app, aero_force_norm; xlabel="Time [s]", 
+        ylabels=[L"\mathrm{elevation}~[°]", L"\mathrm{azimuth}~[°]", L"\mathrm{heading}~[°]", L"\mathrm{steering}~[-]", L"\mathrm{AoA}~[°]", L"v_a~[\mathrm{m/s}]", L"\mathrm{Aerodynamic}~\mathrm{force}~[N]"], 
+        ysize=18, fig="Parking ram air kite")
+    display(p)
+end
+
+rms_azimuth = rad2deg(sqrt(mean(sl.azimuth .^ 2)))
+@printf("Azimuth RMS error: %.2f°\n", rms_azimuth)
 nothing
 
 # Plot results and show replay
