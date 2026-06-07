@@ -5,6 +5,7 @@ RamAirKite = "7ebed07a-3d9a-4117-97d2-0a397f5b89df"
 SymbolicAWEModels = "9c9a347c-5289-41db-a9b9-25ccc76c3360"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 Timers = "21f18d07-b854-4dab-86f0-c15a3821819a"
+VortexStepMethod = "ed3cd733-9f0f-46a9-93e0-89b8d4998dd9"
 
 [sources]
 RamAirKite = {path = ".."}
