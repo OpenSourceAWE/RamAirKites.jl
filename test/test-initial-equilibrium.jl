@@ -82,6 +82,13 @@ set.l_tether = TETHER_LENGTH
     find_steady_state!(sam; dt=0.05, vsm_interval=0)
     toc("Steady state found after: ")
 
+    # Extra stabilization: free steps to dissipate DAE constraint forces
+    @info "Stabilizing for 2 seconds..."
+    for i in 1:40
+        next_step!(sam; dt=0.05)
+    end
+    toc("Stabilization done after: ")
+
     # Sync integrator state → sys_struct fields
     update_sys_struct!(sam.prob, sam.integrator, sam.sys_struct)
     forces = [segment.force for segment in sam.sys_struct.segments]
