@@ -94,5 +94,12 @@ set.l_tether = TETHER_LENGTH
     aoa_deg = rad2deg(aoa_rad)
     println("Angle of attack: $(round(Int, aoa_deg))° ($(round(aoa_rad; digits=4)) rad)")
     @test 2 < aoa_deg < 15
+
+    # Acceleration
+    acc = sam.sys_struct.wings[1].acc_w
+    println("Wing acceleration: [$(join(round.(acc; digits=2), ", "))] m/s²")
+    acc_norm = norm(acc)
+    println("Acceleration magnitude: $(round(acc_norm, digits=2)) m/s²")
+    # @test acc_norm < 10.0
 end
 nothing
