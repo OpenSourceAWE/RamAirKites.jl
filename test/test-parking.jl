@@ -117,8 +117,10 @@ set.l_tether = TETHER_LENGTH
 
     azimuth_at_10s = Ref(0.0)
     elevation_at_10s = Ref(0.0)
+    heading_at_10s = Ref(0.0)
     azimuth_at_30s = Ref(0.0)
     elevation_at_30s = Ref(0.0)
+    heading_at_30s = Ref(0.0)
 
     for step in 1:steps
         t = step * dt
@@ -149,26 +151,30 @@ set.l_tether = TETHER_LENGTH
         if step == Int(round(10.0 / dt))
             azimuth_at_10s[] = rad2deg(sam.sys_struct.wings[1].azimuth)
             elevation_at_10s[] = rad2deg(sam.sys_struct.wings[1].elevation)
+            heading_at_10s[] = rad2deg(sam.sys_struct.wings[1].heading)
         elseif step == Int(round(30.0 / dt))
             azimuth_at_30s[] = rad2deg(sam.sys_struct.wings[1].azimuth)
             elevation_at_30s[] = rad2deg(sam.sys_struct.wings[1].elevation)
+            heading_at_30s[] = rad2deg(sam.sys_struct.wings[1].heading)
         end
     end
 
     # Check azimuth at 10s: should already be converging
-    @info "Azimuth at 10s: $(round(azimuth_at_10s[], digits=2))°"
+    @info "At 10s — azimuth: $(round(azimuth_at_10s[], digits=2))°, heading: $(round(heading_at_10s[], digits=2))°"
     @test abs(azimuth_at_10s[]) < 5.0
+    @test abs(heading_at_10s[]) < 10.0
 
     # Check elevation at 10s
-    @info "Elevation at 10s: $(round(elevation_at_10s[], digits=2))° (target: $(ELEVATION)° ± 8°)"
+    @info "At 10s — elevation: $(round(elevation_at_10s[], digits=2))° (target: $(ELEVATION)° ± 8°)"
     @test abs(elevation_at_10s[] - ELEVATION) < 8.0
 
     # Check azimuth at 30s: should be well converged
-    @info "Azimuth at 30s: $(round(azimuth_at_30s[], digits=2))°"
+    @info "At 30s — azimuth: $(round(azimuth_at_30s[], digits=2))°, heading: $(round(heading_at_30s[], digits=2))°"
     @test abs(azimuth_at_30s[]) < 5.0
+    @test abs(heading_at_30s[]) < 10.0
 
     # Check elevation at 30s
-    @info "Elevation at 30s: $(round(elevation_at_30s[], digits=2))° (target: $(ELEVATION)° ± 8°)"
+    @info "At 30s — elevation: $(round(elevation_at_30s[], digits=2))° (target: $(ELEVATION)° ± 8°)"
     @test abs(elevation_at_30s[] - ELEVATION) < 8.0
 end
 nothing
