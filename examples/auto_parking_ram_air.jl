@@ -2,12 +2,15 @@
 # SPDX-License-Identifier: MPL-2.0
 
 """
-Ram Air Kite Simulation Example
+Auto-Parking Ram Air Kite Simulation Example
 
-Demonstrates how to use RamAirKite.jl to run a simulation steered by a
-DiscretePID that tracks a sinusoidal heading setpoint. The simulation uses
-the "ram" physical model by default, which includes a bridle system and 2
-wing groups.
+Demonstrates how to use RamAirKite.jl to run a simulation with cascaded
+steering-line position→speed→torque control. A DiscretePID heading
+controller tracks a zero heading setpoint (loitering), while inner control
+loops convert the steering setpoint into a torque command via cascaded
+position and speed PIDs on the delta-length of the steering lines. The
+simulation uses the "ram" physical model by default, which includes a
+bridle system and four wing segment groups.
 """
 
 using Pkg
