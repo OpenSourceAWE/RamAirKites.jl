@@ -2,7 +2,7 @@
 
 julia_version = "1.12.6"
 manifest_format = "2.0"
-project_hash = "91a70121c891e5aa4ff74f9b7bc407b8d8470e6d"
+project_hash = "602c198f9abe63dd45d600ac0d61117d401bc15c"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "bbc22a9a08a0ef6460041086d8a7b27940ed4ffd"
@@ -1674,7 +1674,7 @@ version = "0.24.11"
 
 [[deps.MakieControlPlots]]
 deps = ["CairoMakie", "GLMakie", "JLD2", "LaTeXStrings", "Makie", "PrecompileTools", "Printf", "StaticArraysCore"]
-git-tree-sha1 = "a08e97fc55cbc588216022ee951acaa2668a86dc"
+git-tree-sha1 = "a51bb66f0c6068c9a584e4d3a8201777f017df5f"
 repo-rev = "main"
 repo-url = "https://github.com/OpenSourceAWE/MakieControlPlots.jl.git"
 uuid = "6d616b69-6563-4f6e-8472-6f6c706c6f74"
