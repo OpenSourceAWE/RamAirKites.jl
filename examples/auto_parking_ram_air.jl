@@ -22,7 +22,7 @@ using Timers
 tic()
 @info "Loading packages..."
 using MakieControlPlots
-using MakieControlPlots: plot
+using MakieControlPlots: plot, plotx
 using LaTeXStrings
 using RamAirKite
 using SymbolicAWEModels
