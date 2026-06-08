@@ -8,3 +8,4 @@ using Test
     include("test-initial-equilibrium.jl")
     include("test-simulation-disabled.jl")
 end
+nothing
