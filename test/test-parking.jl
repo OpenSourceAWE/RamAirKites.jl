@@ -159,7 +159,7 @@ set.l_tether = TETHER_LENGTH
         end
     end
 
-    # Check azimuth at 10s: should already be converging
+    # Check azimuth and heading at 10s: should already be converging
     @info "At 10s — azimuth: $(round(azimuth_at_10s[], digits=2))°, heading: $(round(heading_at_10s[], digits=2))°"
     @test abs(azimuth_at_10s[]) < 5.0
     @test abs(heading_at_10s[]) < 10.0
@@ -168,7 +168,7 @@ set.l_tether = TETHER_LENGTH
     @info "At 10s — elevation: $(round(elevation_at_10s[], digits=2))° (target: $(ELEVATION)° ± 8°)"
     @test abs(elevation_at_10s[] - ELEVATION) < 8.0
 
-    # Check azimuth at 30s: should be well converged
+    # Check azimuth and heading at 30s: should be well converged
     @info "At 30s — azimuth: $(round(azimuth_at_30s[], digits=2))°, heading: $(round(heading_at_30s[], digits=2))°"
     @test abs(azimuth_at_30s[]) < 5.0
     @test abs(heading_at_30s[]) < 10.0
