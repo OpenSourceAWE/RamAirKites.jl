@@ -32,19 +32,21 @@ toc()
 
 # User changeable parameters
 PLOT = true                 # Whether to plot results at the end
+PRINT_PROGRESS = true        # Whether to print progress during simulation
 PHYSICAL_MODEL = "ram"       # Options: "ram", "simple_ram", "4_attach_ram"
-SIM_TIME = 60.0               # Total simulation time [s]
-DT = 0.01                   # Time step [s]
+SIM_TIME = 30.0              # Total simulation time [s]
+DT = 0.01                    # Time step [s]
 V_WIND = 12.51               # Wind speed [m/s]
 UPWIND_DIR = -90.0           # Upwind direction [deg]
 TETHER_LENGTH = 50.0         # Tether length [m]
 PROFILE_LAW = 3              # Wind profile law (3 = EXPLOG)
 REMAKE_CACHE = false         # Force rebuild of compiled model cache
-VSM_INTERVAL = 7            # VSM update interval
+VSM_INTERVAL = 7             # VSM update interval
 MAX_STEERING = 1.5           # Steering limit [m]
 HEADING_P = 0.7              # Heading PID proportional gain
-HEADING_I = 0              # Heading PID integral time (false = off)
+HEADING_I = 0                # Heading PID integral time (false = off)
 HEADING_D = 0.43             # Heading PID derivative time
+HEADING_TAU = 0.05           # Low-pass filter time constant for heading [s]
 
 # Cascaded position + speed controller for steering lines
 POSITION_P = 4.0             # Position PID proportional gain
@@ -55,7 +57,7 @@ POSITION_UMAX = 1.2          # Maximum speed setpoint [m/s]
 SPEED_P = 6.0                # Speed PID proportional gain
 SPEED_I = 0.1                # Speed PID integral time [s]
 SPEED_D = 0.0                # Speed PID derivative time (0 = off)
-SPEED_TAU = 0.14              # Low-pass filter time constant for speed [s]
+SPEED_TAU = 0.14             # Low-pass filter time constant for speed [s]
 TORQUE_UMIN = -40.0          # Minimum torque output [Nm]
 TORQUE_UMAX = 40.0           # Maximum torque output [Nm]
 
@@ -138,6 +140,8 @@ sizehint!(dl_setpoint_history, steps)
 l_diff_prev = Ref(sys_state.l_tether[3] - sys_state.l_tether[4])
 l_diff_speed_filt = Ref(0.0)
 alpha = dt / (dt + SPEED_TAU)  # low-pass filter coefficient
+heading_filt = Ref(sam.sys_struct.wings[1].heading)
+alpha_heading = dt / (dt + HEADING_TAU)  # heading low-pass filter coefficient
 
 last_time = time()
 try
@@ -172,7 +176,9 @@ try
             now = time()
             realtime_factor = (10 * dt) / (now - last_time)
             global last_time = now
-            # @info "step $step / $steps, $(round(realtime_factor; digits=2)) times realtime"
+            if PRINT_PROGRESS
+                @info "step $step / $steps, $(round(realtime_factor; digits=2)) times realtime"
+            end
         end
     end
 catch e
@@ -193,7 +199,7 @@ l_diff = [sl.l_tether[i][3] - sl.l_tether[i][4] for i in 1:length(sl.time)]
 
 if PLOT
     p=plotx(sl.time, rad2deg.(sl.elevation), rad2deg.(sl.azimuth), rad2deg.(sl.heading), steering_torque_history, rad2deg.(sl.AoA), sl.v_app, aero_force_norm; xlabel="Time [s]", 
-        ylabels=[L"\mathrm{elevation}~[°]", L"\mathrm{azimuth}~[°]", L"\mathrm{heading}~[°]", L"\mathrm{steering\ torque}~[Nm]", L"\mathrm{AoA}~[°]", L"v_a~[\mathrm{ms^{-1}}]", L"\mathrm{aeroforce}~[N]"], 
+        ylabels=[L"\mathrm{elevation}~[°]", L"\mathrm{azimuth}~[°]", L"\mathrm{heading}~[°]", L"\mathrm{steering}~[Nm]", L"\mathrm{AoA}~[°]", L"v_a~[\mathrm{ms^{-1}}]", L"\mathrm{aeroforce}~[N]"], 
         ysize=18, fig="Ram air kite")
     display(p)
 
