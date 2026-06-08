@@ -5,5 +5,6 @@ using Test
 
 @testset "RamAirKite.jl" begin
     include("test-data-path.jl")
+    include("test-initial-equilibrium.jl")
     include("test-simulation-disabled.jl")
 end

@@ -160,17 +160,19 @@ export SymbolicAWEModel, SystemStructure, Logger, SysState
 - Wing geometry defined in CAD frame, transformed to body frame via `cad_to_body_frame`
 - Upwind direction in degrees (typically -90 for conventional orientation)
 
-## Running Tests
-
 ```julia
 # Full test suite
 include("test/runtests.jl")
 
+# One test set
+include("test/test-data-path.jl")
+# or
+include("test/test-initial-equilibrium.jl")
+# or include any other script that starts with test- in the test folder
+
 # Or from package mode
 using Pkg; Pkg.test()
 ```
-
-Tests exercise all three model variants (`ram`, `simple_ram`, `tether`) and include linearization checks using `ControlSystemsBase` and `ModelingToolkit`.
 
 ## Running Examples
 
