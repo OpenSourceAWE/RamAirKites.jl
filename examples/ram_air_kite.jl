@@ -103,7 +103,7 @@ init!(sam; remake=REMAKE_CACHE)
 find_steady_state!(sam; dt=0.05, vsm_interval=0)
 
 depower_len = sys_struct.tethers[:steering_left].len - sys_struct.tethers[:power_left].len
-@info "Depowered by $(depower_len)m"
+@info "Depowered by $(round(depower_len; digits=2)) m"
 
 # Plot initial configuration
 fig = plot(sam.sys_struct)
