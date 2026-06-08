@@ -55,9 +55,9 @@ and replay.
 The package supports three physical model variants, each with different levels of complexity:
 
 ### `"ram"` (default)
-Standard 2-group ram-air kite with bridle system:
+Standard 4-group ram-air kite with bridle system:
 - Full bridle geometry
-- 2 deformable wing groups (left/right)
+- 4 deformable wing groups along span
 - Suitable for most simulations
 
 ### `"simple_ram"`

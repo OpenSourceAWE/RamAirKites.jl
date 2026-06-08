@@ -1,13 +1,16 @@
-# Copyright (c) 2025 Bart van de Lint
+# Copyright (c) 2025 Bart van de Lint, Uwe Fechner
 # SPDX-License-Identifier: MPL-2.0
 
 """
-Ram Air Kite Simulation Example
+Auto-Parking Ram Air Kite Simulation Example
 
 Demonstrates how to use RamAirKite.jl to run a simulation with cascaded
-steering-line position→speed→torque control, tracking a sinusoidal heading
-setpoint. The simulation uses the "ram" physical model by default, which
-includes a bridle system and four wing section groups.
+steering-line position→speed→torque control. A DiscretePID heading
+controller tracks a zero heading setpoint (loitering), while inner control
+loops convert the steering setpoint into a torque command via cascaded
+position and speed PIDs on the delta-length of the steering lines. The
+simulation uses the "ram" physical model by default, which includes a
+bridle system and four wing segment groups.
 """
 
 using Pkg
@@ -18,31 +21,32 @@ end
 using Timers
 tic()
 @info "Loading packages..."
-using GLMakie
-import MakieControlPlots as mcp
+using MakieControlPlots
+using MakieControlPlots: plot, plotx
 using LaTeXStrings
 using RamAirKite
 using SymbolicAWEModels
 using DiscretePIDs
 using LinearAlgebra
+using Statistics
+using Printf
 
 toc()
 
 # User changeable parameters
-PHYSICAL_MODEL = "ram"      # Options: "ram", "simple_ram", "4_attach_ram"
-SIM_TIME = 10.0             # Total simulation time [s]
-DT = 0.01                   # Time step [s] (must be small for cascaded control)
-V_WIND = 12.51             # Wind speed [m/s]
-UPWIND_DIR = -90.0          # Upwind direction [deg]
-TETHER_LENGTH = 50.0        # Tether length [m]
-ELEVATION = 80.0            # Initial elevation angle [deg]
-AERO_Z_OFFSET = 1.0         # Body-frame z-offset for VSM panels [m]
-PROFILE_LAW = 3             # Wind profile law (3 = EXPLOG)
-REMAKE_CACHE = false        # Force rebuild of compiled model cache
-VSM_INTERVAL = 7            # VSM update interval
-MAX_HEADING = 10.0          # Heading setpoint amplitude [deg]
-HEADING_PERIOD = 5.0        # Heading setpoint period [s]
-MAX_STEERING = 1.5           # Steering limit [m] (position setpoint)
+PLOT = true                 # Whether to plot results at the end
+PRINT_PROGRESS = false        # Whether to print progress during simulation
+PHYSICAL_MODEL = "ram"       # Options: "ram", "simple_ram", "4_attach_ram"
+SIM_TIME = 30.0              # Total simulation time [s]
+DT = 0.01                    # Time step [s]
+V_WIND = 12.51               # Wind speed [m/s]
+UPWIND_DIR = -90.0           # Upwind direction [deg]
+TETHER_LENGTH = 50.0         # Tether length [m]
+ELEVATION = 74.0             # Initial elevation angle [deg]
+PROFILE_LAW = 3              # Wind profile law (3 = EXPLOG)
+REMAKE_CACHE = false         # Force rebuild of compiled model cache
+VSM_INTERVAL = 7             # VSM update interval
+MAX_STEERING = 1.5           # Steering limit [m]
 HEADING_P = 0.7              # Heading PID proportional gain
 HEADING_I = 0                # Heading PID integral time (false = off)
 HEADING_D = 0.43             # Heading PID derivative time
@@ -50,7 +54,7 @@ HEADING_D = 0.43             # Heading PID derivative time
 # Cascaded position + speed controller for steering lines
 POSITION_P = 4.0             # Position PID proportional gain
 POSITION_I = 0.2             # Position PID integral time [s]
-POSITION_D = 0.0005          # Position PID derivative time (0 = off)
+POSITION_D = 0.0005             # Position PID derivative time (0 = off)
 POSITION_UMIN = -1.2         # Minimum speed setpoint [m/s]
 POSITION_UMAX = 1.2          # Maximum speed setpoint [m/s]
 SPEED_P = 6.0                # Speed PID proportional gain
@@ -77,7 +81,6 @@ sam = SymbolicAWEModel(set, sys_struct)
 
 # edit sys_struct before init!
 sys_struct.transforms[1].elevation = deg2rad(ELEVATION)
-sys_struct.wings[1].aero_z_offset = AERO_Z_OFFSET
 # sys_struct.tethers[:steering_left].init_stretch_frac = 1.005
 # sys_struct.tethers[:steering_right].init_stretch_frac = 1.005
 sys_struct.winches[:power_winch].brake = true
@@ -94,21 +97,19 @@ for group in sam.sys_struct.groups
     group.moment_frac = 0.0
 end
 
-depower = -0.002
-sys_struct.tethers[:steering_left].init_stretch_frac = 1.0 + depower
-sys_struct.tethers[:steering_right].init_stretch_frac = 1.0 + depower
+depower = 0.000
+sys_struct.tethers[:steering_left].init_stretch_frac = 1.0 - depower
+sys_struct.tethers[:steering_right].init_stretch_frac = 1.0 - depower
 
 # 3. init
 @info "Initializing model..."
 init!(sam; remake=REMAKE_CACHE)
 
 find_steady_state!(sam; dt=0.05, vsm_interval=0)
-
-depower_len = sys_struct.tethers[:steering_left].len - sys_struct.tethers[:power_left].len
-@info "Depowered by $(round(depower_len; digits=2)) m"
+toc("Steady state found after: ")
 
 # Plot initial configuration
-fig = plot(sam.sys_struct)
+# fig = plot(sam.sys_struct)
 
 # Run heading-tracking simulation
 @info "Running simulation..."
@@ -133,15 +134,11 @@ pos_pid = DiscretePID(; K=POSITION_P, Ti=POSITION_I, Td=POSITION_D, Ts=dt,
 speed_pid = DiscretePID(; K=SPEED_P, Ti=SPEED_I, Td=SPEED_D, Ts=dt,
                          umin=TORQUE_UMIN, umax=TORQUE_UMAX)
 
-# Track steering torque and delta-l for logging
+# Track steering torque for logging
 steering_torque_history = Float64[]
 dl_setpoint_history = Float64[]
 sizehint!(steering_torque_history, steps)
 sizehint!(dl_setpoint_history, steps)
-
-max_heading = deg2rad(MAX_HEADING)
-angular_freq = 2π / HEADING_PERIOD
-heading_setpoint = Float64[]
 
 l_diff_prev = Ref(sys_state.l_tether[3] - sys_state.l_tether[4])
 l_diff_speed_filt = Ref(0.0)
@@ -152,12 +149,8 @@ try
     for step in 1:steps
         t = step * dt
 
-        target_heading = max_heading * sin(angular_freq * t)
         current_heading = sam.sys_struct.wings[1].heading
-        push!(heading_setpoint, target_heading)
-
-        # Outer loop: heading PID outputs a steering position setpoint (delta-l)
-        steering = heading_pid(target_heading, current_heading, 0.0)
+        steering = heading_pid(0, current_heading, 0.0)
 
         # Cascaded position → speed → torque control
         local l_diff = sys_state.l_tether[3] - sys_state.l_tether[4]
@@ -184,7 +177,9 @@ try
             now = time()
             realtime_factor = (10 * dt) / (now - last_time)
             global last_time = now
-            @info "step $step / $steps, $(round(realtime_factor; digits=2)) times realtime"
+            if PRINT_PROGRESS
+                @info "step $step / $steps, $(round(realtime_factor; digits=2)) times realtime"
+            end
         end
     end
 catch e
@@ -194,23 +189,29 @@ end
 mkpath(get_data_path())
 save_log(logger, "tmp_run")
 syslog = load_log("tmp_run")
-
-# Plot results and show replay
-fig = plot(sam.sys_struct, syslog;
-           plot_heading=true, plot_tether=true, setpoints=Dict(:heading => heading_setpoint))
-display(GLMakie.Screen(), fig)
-
-# Plot heading setpoint vs actual heading using MakieControlPlots
 sl = syslog.syslog
-time_vec = sl.time[1:length(heading_setpoint)]
-p = mcp.plot(time_vec, [rad2deg.(heading_setpoint), rad2deg.(sl.heading[1:length(heading_setpoint)])];
-          xlabel=L"\mathrm{Time}~[s]",
-          ylabel=L"\mathrm{Heading}~[°]",
-          labels=["Setpoint", "Actual"],
-          ysize=18, fig="Heading setpoint vs actual")
-display(p)
+
+aero_force_norm = norm.(eachrow(sl.aero_force_b))
+l_diff = [sl.l_tether[i][3] - sl.l_tether[i][4] for i in 1:length(sl.time)]
+
+if PLOT
+    p=plotx(sl.time, rad2deg.(sl.elevation), rad2deg.(sl.azimuth), rad2deg.(sl.heading), steering_torque_history, rad2deg.(sl.AoA), sl.v_app, aero_force_norm; xlabel="Time [s]", 
+        ylabels=[L"\mathrm{elevation}~[°]", L"\mathrm{azimuth}~[°]", L"\mathrm{heading}~[°]", L"\mathrm{steering}~[Nm]", L"\mathrm{AoA}~[°]", L"v_a~[\mathrm{ms^{-1}}]", L"\mathrm{aeroforce}~[N]"], 
+        ysize=18, fig="Ram air kite")
+    display(p)
+
+    delta_labels = [L"\Delta l_{\mathrm{set}}~[m]", L"\Delta l~[m]"]
+    all_labels = [delta_labels, nothing]
+    p2 = plotx(sl.time, [dl_setpoint_history, l_diff], steering_torque_history; xlabel="Time [s]",
+               ylabels=[L"\mathrm{\Delta_l}~[m]", L"\mathrm{torque}~[Nm]"], labels=all_labels,
+               ysize=18, fig="Delta-l setpoint vs actual")
+    display(p2)
+end
+
+rms_azimuth = rad2deg(sqrt(mean(sl.azimuth .^ 2)))
+@printf("Azimuth RMS error: %.2f°\n", rms_azimuth)
+nothing
 
 # Interactive replay
-scene = replay(syslog, sam.sys_struct)
-display(GLMakie.Screen(), scene)
+# replay(syslog, sam.sys_struct)
 

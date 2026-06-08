@@ -36,10 +36,10 @@ set.l_tether = TETHER_LENGTH
 
 @testset "Initial equilibrium" begin
     # 1. system structure
-    global sys_struct, sam
     sys_struct = create_sys_struct(set)
     toc("System structure created after: ")
-    @test typeof(sys_struct) == SystemStructure{VSMWing{VortexStepMethod.BodyAerodynamics{56, Wing{56, Float64}, Float64}, Wing{56, Float64}, VortexStepMethod.Solver{56, 4, Float64}}}
+    @test sys_struct isa SystemStructure
+    @test sys_struct.wings[1] isa VSMWing
     @test length(sys_struct.points) == 42
     @test length(sys_struct.segments) == 42
     @test length(sys_struct.tethers) == 4
@@ -98,21 +98,21 @@ set.l_tether = TETHER_LENGTH
     # Sync integrator state → sys_struct fields
     update_sys_struct!(sam.prob, sam.integrator, sam.sys_struct)
     forces = [segment.force for segment in sam.sys_struct.segments]
-    println("All segment forces: ", join(round.(forces; digits=2), ", "))
+    @test all(f -> 0.05 < f < 300.0, forces)
 
-    # @test all(f -> 0.2 < f < 300.0, forces)
-
-    # Angle of attack
-    aoa_rad = sam.sys_struct.wings[1].aoa
+    # Angle of attack — using the geometric formula from update_sys_state!
+    # (atan of apparent wind in body frame), without the twist correction
+    # that wing.aoa includes. This matches the SysLog AoA used in plotting.
+    wing = sam.sys_struct.wings[1]
+    aoa_rad = atan(wing.va_b[3], wing.va_b[1])
     aoa_deg = rad2deg(aoa_rad)
-    println("Angle of attack: $(round(aoa_deg; digits=2))° ($(round(aoa_rad; digits=4)) rad)")
-    # @test 2 < aoa_deg < 15
+    @debug "Angle of attack (geometric): $(round(aoa_deg; digits=2))°"
+    @test 2 < aoa_deg < 15
 
     # Acceleration
     acc = sam.sys_struct.wings[1].acc_w
-    println("Wing acceleration: [$(join(round.(acc; digits=2), ", "))] m/s²")
     acc_norm = norm(acc)
-    println("Acceleration magnitude: $(round(acc_norm, digits=2)) m/s²")
-    # @test acc_norm < 10.0
+    @debug "Acceleration magnitude: $(round(acc_norm, digits=2)) m/s²"
+    @test acc_norm < 10.0
 end
 nothing

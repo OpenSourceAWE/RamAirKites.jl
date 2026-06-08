@@ -165,9 +165,9 @@ export SymbolicAWEModel, SystemStructure, Logger, SysState
 include("test/runtests.jl")
 
 # One test set
-include("test/test-data-path.jl) 
+include("test/test-data-path.jl")
 # or
-include("test/test-initial-equilibirum")
+include("test/test-initial-equilibrium.jl")
 # or include any other script that starts with test- in the test folder
 
 # Or from package mode
