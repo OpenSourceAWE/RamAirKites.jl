@@ -32,13 +32,14 @@ toc()
 
 # User changeable parameters
 PLOT = true                 # Whether to plot results at the end
-PRINT_PROGRESS = true        # Whether to print progress during simulation
+PRINT_PROGRESS = false        # Whether to print progress during simulation
 PHYSICAL_MODEL = "ram"       # Options: "ram", "simple_ram", "4_attach_ram"
 SIM_TIME = 30.0              # Total simulation time [s]
 DT = 0.01                    # Time step [s]
 V_WIND = 12.51               # Wind speed [m/s]
 UPWIND_DIR = -90.0           # Upwind direction [deg]
 TETHER_LENGTH = 50.0         # Tether length [m]
+ELEVATION = 74.0             # Initial elevation angle [deg]
 PROFILE_LAW = 3              # Wind profile law (3 = EXPLOG)
 REMAKE_CACHE = false         # Force rebuild of compiled model cache
 VSM_INTERVAL = 7             # VSM update interval
@@ -77,7 +78,7 @@ sys_struct = create_sys_struct(set)
 sam = SymbolicAWEModel(set, sys_struct)
 
 # edit sys_struct before init!
-sys_struct.transforms[1].elevation = deg2rad(74)
+sys_struct.transforms[1].elevation = deg2rad(ELEVATION)
 # sys_struct.tethers[:steering_left].init_stretch_frac = 1.005
 # sys_struct.tethers[:steering_right].init_stretch_frac = 1.005
 sys_struct.winches[:power_winch].brake = true
