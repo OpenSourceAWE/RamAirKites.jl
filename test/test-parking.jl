@@ -12,18 +12,20 @@ using SymbolicAWEModels
 using SymbolicAWEModels: update_sys_struct!
 using VortexStepMethod
 using LinearAlgebra
+using DiscretePIDs
 toc()
 
-PHYSICAL_MODEL = "ram"      # Options: "ram", "simple_ram", "4_attach_ram"
-SIM_TIME = 10.0             # Total simulation time [s]
-DT = 0.05                   # Time step [s]
-V_WIND = 15.51              # Wind speed [m/s]
-UPWIND_DIR = -85.0          # Upwind direction [deg]
-TETHER_LENGTH = 50.0        # Tether length [m]
-ELEVATION = 80.0            # Initial elevation angle [deg]
-PROFILE_LAW = 3             # Wind profile law (3 = EXPLOG)
-REMAKE_CACHE = false         # If true, force rebuild of compiled model cache
-MAX_STEERING = 2.0          # Steering torque limit [Nm]
+PHYSICAL_MODEL = "ram"       # Options: "ram", "simple_ram", "4_attach_ram"
+SIM_TIME = 10.0              # Total simulation time [s]
+DT = 0.01                    # Time step [s]
+V_WIND = 12.51               # Wind speed [m/s]
+UPWIND_DIR = -90.0           # Upwind direction [deg]
+TETHER_LENGTH = 50.0         # Tether length [m]
+ELEVATION = 74.0             # Initial elevation angle [deg]
+PROFILE_LAW = 3              # Wind profile law (3 = EXPLOG)
+REMAKE_CACHE = false         # Force rebuild of compiled model cache
+VSM_INTERVAL = 7             # VSM update interval
+MAX_STEERING = 1.5           # Steering limit [m]
 
 @info "Creating ram air kite model..."
 set_data_path(ram_air_data_path())
@@ -67,10 +69,8 @@ set.l_tether = TETHER_LENGTH
     for segment in sam.sys_struct.segments
         segment.compression_frac = 0.01 # relative compression stiffness
     end
-    # set init_stretched_frac differently for the front and rear tethers
-    depower = 0.009
-    sys_struct.tethers[:steering_left].init_stretch_frac = 1.0 - depower
-    sys_struct.tethers[:steering_right].init_stretch_frac = 1.0 - depower
+    sys_struct.tethers[:steering_left].init_stretch_frac = 1.0
+    sys_struct.tethers[:steering_right].init_stretch_frac = 1.0
 
     # Setting moment_frac = 0.0 means the moment pivot is at the leading edge. 
     # This effectively zeros out the twist moments from tether forces 
@@ -85,7 +85,7 @@ set.l_tether = TETHER_LENGTH
     toc("Model initialized after: ")
 
     # After init!, find the aerodynamic steady state
-    find_steady_state!(sam; dt=0.05, vsm_interval=5)
+    find_steady_state!(sam; dt=0.05, vsm_interval=0)
     toc("Steady state found after: ")
 
     # Extra stabilization: free steps to dissipate DAE constraint forces
@@ -112,12 +112,68 @@ set.l_tether = TETHER_LENGTH
     acc_norm = norm(acc)
     @debug "Acceleration magnitude: $(round(acc_norm, digits=2)) m/s²"
 
-    # add the parking code from auto_parking_ram_air.jl here, to verify that the parking procedure can run without errors in this test setup
+    # --- Parking procedure: heading-tracking (loitering) with cascaded PID control ---
     @info "Starting parking procedure..."
 
-    # Wait for 10 seconds
+    dt = DT
+    steps = Int(round(SIM_TIME / dt))
+    torque_damp = 0.9
 
-    # Check that norm(azimuth) is smaller than 5 degrees
-    # Check that elevation is within 8 degrees of the initial elevation (ELEVATION)
+    logger = Logger(sam, steps + 1)
+    sys_state = SysState(sam)
+    sys_state.time = 0.0
+
+    steady_torque = Ref(calc_steady_torque(sam))
+
+    for group in sam.sys_struct.groups
+        group.damping = 200.0
+    end
+
+    heading_pid = DiscretePID(; K=0.7, Ti=0, Td=0.43, Ts=dt,
+                              umin=-MAX_STEERING, umax=MAX_STEERING)
+    pos_pid = DiscretePID(; K=4.0, Ti=0.2, Td=0.0005, Ts=dt,
+                           umin=-1.2, umax=1.2)
+    speed_pid = DiscretePID(; K=6.0, Ti=0.1, Td=0.0, Ts=dt,
+                             umin=-40.0, umax=40.0)
+
+    l_diff_prev = Ref(sys_state.l_tether[3] - sys_state.l_tether[4])
+    l_diff_speed_filt = Ref(0.0)
+    alpha = dt / (dt + 0.14)  # low-pass filter coefficient (SPEED_TAU=0.14)
+
+    for step in 1:steps
+        t = step * dt
+
+        current_heading = sam.sys_struct.wings[1].heading
+        steering = heading_pid(0, current_heading, 0.0)
+
+        # Cascaded position → speed → torque control
+        local l_diff = sys_state.l_tether[3] - sys_state.l_tether[4]
+        l_diff_speed_raw = (l_diff - l_diff_prev[]) / dt
+        l_diff_prev[] = l_diff
+        l_diff_speed_filt[] = alpha * l_diff_speed_raw + (1 - alpha) * l_diff_speed_filt[]
+        speed_setpoint = pos_pid(steering, l_diff, 0.0)
+        torque = speed_pid(speed_setpoint, l_diff_speed_filt[], 0.0)
+        set_values = [0.0, torque, -torque]
+
+        steady_torque[] = torque_damp * steady_torque[] +
+                          (1 - torque_damp) * calc_steady_torque(sam)
+        set_torques = steady_torque[] .+ set_values
+
+        next_step!(sam; set_values=set_torques, dt, vsm_interval=VSM_INTERVAL)
+
+        update_sys_state!(sys_state, sam)
+        sys_state.time = t
+        log!(logger, sys_state)
+    end
+
+    # Check that azimuth is within 5 degrees of zero
+    azimuth_deg = rad2deg(sam.sys_struct.wings[1].azimuth)
+    @info "Final azimuth: $(round(azimuth_deg, digits=2))°"
+    @test abs(azimuth_deg) < 5.0
+
+    # Check that elevation is within 8 degrees of the initial elevation
+    elevation_deg = rad2deg(sam.sys_struct.wings[1].elevation)
+    @info "Final elevation: $(round(elevation_deg, digits=2))° (target: $(ELEVATION)° ± 8°)"
+    @test abs(elevation_deg - ELEVATION) < 8.0
 end
 nothing
