@@ -183,11 +183,7 @@ try
         end
     end
 catch e
-    if e isa AssertionError || e isa InterruptException
-        println("Sim failed")
-    else
-        rethrow(e)
-    end
+    rethrow(e)
 end
 
 mkpath(get_data_path())
