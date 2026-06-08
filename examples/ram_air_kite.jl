@@ -202,10 +202,10 @@ display(GLMakie.Screen(), fig)
 sl = syslog.syslog
 time_vec = sl.time[1:length(heading_setpoint)]
 p = mcp.plot(time_vec, [rad2deg.(heading_setpoint), rad2deg.(sl.heading[1:length(heading_setpoint)])];
-          xlabel="Time [s]",
-          ylabel=L"\mathrm{heading}~[°]",
+          xlabel=L"\mathrm{Time}~[s]",
+          ylabel=L"\mathrm{Heading}~[°]",
           labels=["Setpoint", "Actual"],
-          ysize=12, fig="Heading setpoint vs actual")
+          ysize=18, fig="Heading setpoint vs actual")
 display(p)
 
 # Interactive replay
