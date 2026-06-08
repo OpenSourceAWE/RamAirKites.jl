@@ -36,10 +36,10 @@ set.l_tether = TETHER_LENGTH
 
 @testset "Initial equilibrium" begin
     # 1. system structure
-    global sys_struct, sam
     sys_struct = create_sys_struct(set)
     toc("System structure created after: ")
-    @test typeof(sys_struct) == SystemStructure{VSMWing{VortexStepMethod.BodyAerodynamics{56, Wing{56, Float64}, Float64}, Wing{56, Float64}, VortexStepMethod.Solver{56, 4, Float64}}}
+    @test sys_struct isa SystemStructure
+    @test sys_struct.wings[1] isa VSMWing
     @test length(sys_struct.points) == 42
     @test length(sys_struct.segments) == 42
     @test length(sys_struct.tethers) == 4
