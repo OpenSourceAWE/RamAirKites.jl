@@ -50,7 +50,6 @@ MAX_STEERING = 1.5           # Steering limit [m]
 HEADING_P = 0.7              # Heading PID proportional gain
 HEADING_I = 0                # Heading PID integral time (false = off)
 HEADING_D = 0.43             # Heading PID derivative time
-HEADING_TAU = 0.05           # Low-pass filter time constant for heading [s]
 
 # Cascaded position + speed controller for steering lines
 POSITION_P = 4.0             # Position PID proportional gain
@@ -144,8 +143,6 @@ sizehint!(dl_setpoint_history, steps)
 l_diff_prev = Ref(sys_state.l_tether[3] - sys_state.l_tether[4])
 l_diff_speed_filt = Ref(0.0)
 alpha = dt / (dt + SPEED_TAU)  # low-pass filter coefficient
-heading_filt = Ref(sam.sys_struct.wings[1].heading)
-alpha_heading = dt / (dt + HEADING_TAU)  # heading low-pass filter coefficient
 
 last_time = time()
 try
