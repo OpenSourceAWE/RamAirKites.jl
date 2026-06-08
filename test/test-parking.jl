@@ -16,7 +16,7 @@ using DiscretePIDs
 toc()
 
 PHYSICAL_MODEL = "ram"       # Options: "ram", "simple_ram", "4_attach_ram"
-SIM_TIME = 10.0              # Total simulation time [s]
+SIM_TIME = 30.0              # Total simulation time [s]
 DT = 0.01                    # Time step [s]
 V_WIND = 12.51               # Wind speed [m/s]
 UPWIND_DIR = -90.0           # Upwind direction [deg]
@@ -115,6 +115,11 @@ set.l_tether = TETHER_LENGTH
     l_diff_speed_filt = Ref(0.0)
     alpha = dt / (dt + 0.14)  # low-pass filter coefficient (SPEED_TAU=0.14)
 
+    azimuth_at_10s = Ref(0.0)
+    elevation_at_10s = Ref(0.0)
+    azimuth_at_30s = Ref(0.0)
+    elevation_at_30s = Ref(0.0)
+
     for step in 1:steps
         t = step * dt
 
@@ -139,16 +144,31 @@ set.l_tether = TETHER_LENGTH
         update_sys_state!(sys_state, sam)
         sys_state.time = t
         log!(logger, sys_state)
+
+        # Capture state at checkpoints
+        if step == Int(round(10.0 / dt))
+            azimuth_at_10s[] = rad2deg(sam.sys_struct.wings[1].azimuth)
+            elevation_at_10s[] = rad2deg(sam.sys_struct.wings[1].elevation)
+        elseif step == Int(round(30.0 / dt))
+            azimuth_at_30s[] = rad2deg(sam.sys_struct.wings[1].azimuth)
+            elevation_at_30s[] = rad2deg(sam.sys_struct.wings[1].elevation)
+        end
     end
 
-    # Check that azimuth is within 5 degrees of zero
-    azimuth_deg = rad2deg(sam.sys_struct.wings[1].azimuth)
-    @info "Final azimuth: $(round(azimuth_deg, digits=2))°"
-    @test abs(azimuth_deg) < 5.0
+    # Check azimuth at 10s: should already be converging
+    @info "Azimuth at 10s: $(round(azimuth_at_10s[], digits=2))°"
+    @test abs(azimuth_at_10s[]) < 5.0
 
-    # Check that elevation is within 8 degrees of the initial elevation
-    elevation_deg = rad2deg(sam.sys_struct.wings[1].elevation)
-    @info "Final elevation: $(round(elevation_deg, digits=2))° (target: $(ELEVATION)° ± 8°)"
-    @test abs(elevation_deg - ELEVATION) < 8.0
+    # Check elevation at 10s
+    @info "Elevation at 10s: $(round(elevation_at_10s[], digits=2))° (target: $(ELEVATION)° ± 8°)"
+    @test abs(elevation_at_10s[] - ELEVATION) < 8.0
+
+    # Check azimuth at 30s: should be well converged
+    @info "Azimuth at 30s: $(round(azimuth_at_30s[], digits=2))°"
+    @test abs(azimuth_at_30s[]) < 5.0
+
+    # Check elevation at 30s
+    @info "Elevation at 30s: $(round(elevation_at_30s[], digits=2))° (target: $(ELEVATION)° ± 8°)"
+    @test abs(elevation_at_30s[] - ELEVATION) < 8.0
 end
 nothing
