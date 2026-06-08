@@ -88,33 +88,8 @@ set.l_tether = TETHER_LENGTH
     find_steady_state!(sam; dt=0.05, vsm_interval=0)
     toc("Steady state found after: ")
 
-    # Extra stabilization: free steps to dissipate DAE constraint forces
-    @info "Stabilizing for 2 seconds..."
-    for _ in 1:40
-        next_step!(sam; dt=0.05)
-    end
-    toc("Stabilization done after: ")
-
-    # Sync integrator state → sys_struct fields
-    update_sys_struct!(sam.prob, sam.integrator, sam.sys_struct)
-    forces = [segment.force for segment in sam.sys_struct.segments]
-
-    # Angle of attack — using the geometric formula from update_sys_state!
-    # (atan of apparent wind in body frame), without the twist correction
-    # that wing.aoa includes. This matches the SysLog AoA used in plotting.
-    wing = sam.sys_struct.wings[1]
-    aoa_rad = atan(wing.va_b[3], wing.va_b[1])
-    aoa_deg = rad2deg(aoa_rad)
-    @debug "Angle of attack (geometric): $(round(aoa_deg; digits=2))°"
-
-    # Acceleration
-    acc = sam.sys_struct.wings[1].acc_w
-    acc_norm = norm(acc)
-    @debug "Acceleration magnitude: $(round(acc_norm, digits=2)) m/s²"
-
-    # --- Parking procedure: heading-tracking (loitering) with cascaded PID control ---
+    # Run heading-tracking simulation (parking procedure)
     @info "Starting parking procedure..."
-
     dt = DT
     steps = Int(round(SIM_TIME / dt))
     torque_damp = 0.9
