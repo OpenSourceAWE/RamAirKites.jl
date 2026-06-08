@@ -19,7 +19,7 @@ Here's the breakdown of why both count to **42** — it's a coincidence based on
 | **Tether segments** — each tether generates `n_segments = 3` segments, × 4 tethers | **12** |
 | **Total segments** | **42** |
 
-**Why they're equal:** It's a numerical coincidence. The bridle adds the same number of points and segments (30 each) because each bridle side is a closed network where every point is connected by exactly one segment. Then the tethers add 8 more points but 12 more segments — these happen to bring both totals to the same number:
+**Why they're equal:** The bridle contributes the same number of points and segments (15 each per side) because `create_bridle` appends 15 points and 15 segments. Then the tethers add 8 more points but 12 more segments — these happen to bring both totals to the same number:
 
 - **Points:** 30 + 4 + 8 = **42**
 - **Segments:** 30 + 12 = **42**
