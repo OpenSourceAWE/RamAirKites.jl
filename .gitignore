@@ -34,3 +34,5 @@ AGENTS.md
 Manifest-v1.11.toml
 install_version_1.11.txt
 output/
+.JuliaFormatter.toml
+.JETLSConfig.toml

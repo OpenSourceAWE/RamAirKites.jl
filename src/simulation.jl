@@ -12,5 +12,5 @@ Provides high-level functions for creating and running ram air kite simulations.
 Return the path to the ram air kite data directory bundled with RamAirKite.jl.
 """
 function ram_air_data_path()
-    return joinpath(pkgdir(@__MODULE__), "data", "ram_air_kite")
+    return joinpath(@__DIR__, "..", "data", "ram_air_kite") |> abspath
 end

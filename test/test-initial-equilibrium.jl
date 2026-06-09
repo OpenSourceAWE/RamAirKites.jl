@@ -31,7 +31,7 @@ MAX_STEERING = 2.0          # Steering torque limit [Nm]
 
 @info "Creating ram air kite model..."
 set_data_path(ram_air_data_path())
-set = Settings("system.yaml")
+set::Settings = Settings("system.yaml")
 set.physical_model = PHYSICAL_MODEL
 set.v_wind = V_WIND
 set.upwind_dir = UPWIND_DIR
@@ -100,6 +100,8 @@ set.l_tether = TETHER_LENGTH
     toc("Stabilization done after: ")
 
     # Sync integrator state → sys_struct fields
+    @assert sam.prob !== nothing "Expected sam.prob to be initialized"
+    @assert sam.integrator !== nothing "Expected sam.integrator to be initialized"
     update_sys_struct!(sam.prob, sam.integrator, sam.sys_struct)
     forces = [segment.force for segment in sam.sys_struct.segments]
     @test all(f -> 0.05 < f < 300.0, forces)
