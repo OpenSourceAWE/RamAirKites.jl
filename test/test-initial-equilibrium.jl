@@ -100,7 +100,9 @@ set.l_tether = TETHER_LENGTH
     toc("Stabilization done after: ")
 
     # Sync integrator state → sys_struct fields
-    update_sys_struct!(sam.prob, sam.integrator, sam.sys_struct)
+    if !isnothing(sam.prob) && !isnothing(sam.integrator)
+        update_sys_struct!(sam.prob, sam.integrator, sam.sys_struct)
+    end
     forces = [segment.force for segment in sam.sys_struct.segments]
     @test all(f -> 0.05 < f < 300.0, forces)
 
