@@ -1,3 +1,6 @@
+# Copyright (c) 2025 Bart van de Lint, Uwe Fechner
+# SPDX-License-Identifier: MPL-2.0
+
 # Disabled failing simulation tests.
 # Keep this testset in a separate file for easier re-enabling later.
 # This block includes its own setup so the file stays independent when re-enabled.
