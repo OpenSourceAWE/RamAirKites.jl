@@ -48,7 +48,7 @@ REMAKE_CACHE = false         # Force rebuild of compiled model cache
 VSM_INTERVAL = 7             # VSM update interval
 MAX_STEERING = 1.5           # Steering limit [m]
 HEADING_P = 0.7              # Heading PID proportional gain
-HEADING_I = 5.0         # Heading PID integral time (false = off)
+HEADING_I = 1.5         # Heading PID integral time (false = off)
 HEADING_D = 0.43             # Heading PID derivative time
 
 # Cascaded position + speed controller for steering lines
