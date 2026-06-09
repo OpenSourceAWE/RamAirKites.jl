@@ -1,0 +1,12 @@
+#!/bin/bash -eu
+# SPDX-FileCopyrightText: 2026 Uwe Fechner
+# SPDX-License-Identifier: MIT
+
+if [[ $(basename $(pwd)) == "bin" ]]; then
+    cd ..
+fi
+
+julia --project=. -e 'using Pkg; Pkg.free("KiteUtils")'
+julia --project=. -e 'using Pkg; Pkg.free("VortexStepMethod")'
+julia --project=. -e 'using Pkg; Pkg.free("SymbolicAWEModels")'
+julia --project=. -e 'using Pkg; Pkg.status()'
