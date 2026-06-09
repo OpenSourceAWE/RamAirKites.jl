@@ -100,9 +100,8 @@ set.l_tether = TETHER_LENGTH
     toc("Stabilization done after: ")
 
     # Sync integrator state → sys_struct fields
-    if isnothing(sam.prob) || isnothing(sam.integrator)
-        error("Expected sam.prob and sam.integrator to be initialized before syncing sys_struct")
-    end
+    @assert sam.prob !== nothing "Expected sam.prob to be initialized"
+    @assert sam.integrator !== nothing "Expected sam.integrator to be initialized"
     update_sys_struct!(sam.prob, sam.integrator, sam.sys_struct)
     forces = [segment.force for segment in sam.sys_struct.segments]
     @test all(f -> 0.05 < f < 300.0, forces)
