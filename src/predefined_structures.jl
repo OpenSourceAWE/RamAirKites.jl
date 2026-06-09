@@ -19,7 +19,7 @@ using SymbolicAWEModels: create_vsm_wing, calc_pos, cad_to_body_frame
 Calculate the coordinates of a point `Q` that lies on a line defined by vector `v`
 and is at a distance `l` from a given point `P`.
 """
-function find_axis_point(P, l, v=[0,0,1])
+function find_axis_point(P, l::Real, v=[0,0,1])
     D = (v ⋅ P)^2 - norm(v)^2 * (norm(P)^2 - l^2)
     D < 0 && error("No real solution: l is too small or parameters invalid")
     t = (v ⋅ P - √D) / norm(v)^2
