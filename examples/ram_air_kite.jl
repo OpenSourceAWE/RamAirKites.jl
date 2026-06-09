@@ -220,8 +220,9 @@ sub_syslog = StructArrays.StructArray(sub_data)
 sub_log = SysLog{length(first(sub_data).X)}("tmp_run_sub", syslog.colmeta, sub_syslog)
 if RECORD_VIDEO
     video_path = joinpath("output", "ram_air_kite_simulation.mp4")
+    mkpath(dirname(video_path))
     @info "Recording video to $video_path (this may take a while)..."
-    SymbolicAWEModels.record(syslog, sam.sys_struct, video_path; framerate=Int64(round(1 / (DT))))
+    SymbolicAWEModels.record(syslog, sam.sys_struct, video_path; framerate=Int(round(1 / DT)))
 end
 scene = SymbolicAWEModels.replay(sub_log, sam.sys_struct)
 display(GLMakie.Screen(), scene)
