@@ -213,7 +213,7 @@ p = mcp.plot(time_vec, [rad2deg.(heading_setpoint), rad2deg.(sl.heading[1:length
 display(p)
 
 # Interactive replay with frame skipping for faster playback
-REPLAY_SKIP = 10              # Only render every Nth frame
+REPLAY_SKIP = 5              # Only render every Nth frame
 sub_idx = 1:REPLAY_SKIP:length(syslog.syslog)
 sub_data = collect(syslog.syslog[sub_idx])
 sub_syslog = StructArrays.StructArray(sub_data)
@@ -224,7 +224,7 @@ if RECORD_VIDEO
     @info "Recording video to $video_path (this may take a while)..."
     SymbolicAWEModels.record(syslog, sam.sys_struct, video_path; framerate=Int(round(1 / DT)))
 end
-scene = SymbolicAWEModels.replay(sub_log, sam.sys_struct)
+scene = SymbolicAWEModels.replay(sub_log, sam.sys_struct; replay_speed=2.0)
 display(GLMakie.Screen(), scene)
 
 
