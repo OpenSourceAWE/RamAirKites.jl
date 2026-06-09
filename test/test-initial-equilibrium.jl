@@ -31,7 +31,7 @@ MAX_STEERING = 2.0          # Steering torque limit [Nm]
 
 @info "Creating ram air kite model..."
 set_data_path(ram_air_data_path())
-set = Settings("system.yaml")
+set::Settings = Settings("system.yaml")
 set.physical_model = PHYSICAL_MODEL
 set.v_wind = V_WIND
 set.upwind_dir = UPWIND_DIR
