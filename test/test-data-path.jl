@@ -1,3 +1,6 @@
+# Copyright (c) 2025 Bart van de Lint, Uwe Fechner
+# SPDX-License-Identifier: MPL-2.0
+
 using Test
 using RamAirKite
 

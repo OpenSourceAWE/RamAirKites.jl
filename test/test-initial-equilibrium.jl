@@ -1,7 +1,11 @@
+# Copyright (c) 2025 Bart van de Lint, Uwe Fechner
+# SPDX-License-Identifier: MPL-2.0
+
 using Pkg
 if Base.active_project() != joinpath(@__DIR__, "Project.toml")
     Pkg.activate(joinpath(@__DIR__))
 end
+Pkg.instantiate()
 
 using Timers
 tic()
