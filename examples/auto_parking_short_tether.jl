@@ -52,7 +52,7 @@ HEADING_I = 5.0         # Heading PID integral time (false = off)
 HEADING_D = 0.43             # Heading PID derivative time
 
 # Cascaded position + speed controller for steering lines
-POSITION_P = 5.0             # Position PID proportional gain
+POSITION_P = 7.0             # Position PID proportional gain
 POSITION_I = 2.0             # Position PID integral time [s]
 POSITION_D = 0.0005             # Position PID derivative time (0 = off)
 POSITION_UMIN = -1.2         # Minimum speed setpoint [m/s]
