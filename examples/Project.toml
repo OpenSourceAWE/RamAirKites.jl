@@ -11,5 +11,4 @@ Timers = "21f18d07-b854-4dab-86f0-c15a3821819a"
 VortexStepMethod = "ed3cd733-9f0f-46a9-93e0-89b8d4998dd9"
 
 [sources]
-MakieControlPlots = {rev = "main", url = "https://github.com/OpenSourceAWE/MakieControlPlots.jl.git"}
 RamAirKite = {path = ".."}
