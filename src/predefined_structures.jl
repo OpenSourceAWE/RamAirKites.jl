@@ -87,8 +87,6 @@ function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)])
     segments = Segment[]
     pulleys = Pulley[]
     tethers = Tether[]
-    winches = Winch[]
-    wings = VSMWing[]
 
     attach_points = Point[]
 
@@ -213,8 +211,6 @@ function create_4_attach_ram_sys_struct(set::Settings)
     segments = Segment[]
     pulleys = Pulley[]
     tethers = Tether[]
-    winches = Winch[]
-    wings = VSMWing[]
 
     attach_points = Point[]
 
