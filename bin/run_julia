@@ -63,7 +63,7 @@ fi
 if [[ ${#julia_extra_args[@]} -gt 0 ]]; then
     JULIA_ARGS=("${julia_extra_args[@]}")
 else
-    JULIA_ARGS=(-i -e "using Revise; $julia_init")
+    JULIA_ARGS=(-i -e "menu() = include(\"examples/menu.jl\"); $julia_init")
 fi
 
 if test -f "bin/kps-image-${julia_major}.so"; then
