@@ -98,7 +98,7 @@ function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)])
     dynamics_type = set.quasi_static ? QUASI_STATIC : DYNAMIC
     z = vsm_wing.R_cad_body[:, 3]
 
-    function create_bridle(bridle_top, gammas)
+    function create_bridle(bridle_top, gammas, points, groups, segments, pulleys, attach_points)
         i_pnt = length(points)
         i_seg = length(segments)
         i_pul = length(pulleys)
@@ -162,8 +162,8 @@ function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)])
     end
 
     gammas = [-3/4, -1/4, 1/4, 3/4] * vsm_wing.gamma_tip
-    create_bridle(bridle_top_left, gammas[[1, 2]])
-    create_bridle(bridle_top_right, gammas[[3, 4]])
+    create_bridle(bridle_top_left, gammas[[1, 2]], points, groups, segments, pulleys, attach_points)
+    create_bridle(bridle_top_right, gammas[[3, 4]], points, groups, segments, pulleys, attach_points)
 
     points, tethers, power_left_anchor =
         add_tether!(points, tethers, :power_left, set, attach_points[1];
@@ -224,7 +224,7 @@ function create_4_attach_ram_sys_struct(set::Settings)
     dynamics_type = set.quasi_static ? QUASI_STATIC : DYNAMIC
     z = vsm_wing.R_cad_body[:, 3]
 
-    function create_bridle(bridle_top, gammas)
+    function create_bridle(bridle_top, gammas, points, groups, segments, pulleys, attach_points)
         i_pnt = length(points)
         i_seg = length(segments)
         i_pul = length(pulleys)
@@ -292,8 +292,8 @@ function create_4_attach_ram_sys_struct(set::Settings)
     end
 
     gammas = [-3/4, -1/4, 1/4, 3/4] * vsm_wing.gamma_tip
-    create_bridle(bridle_top_left, gammas[[1, 2]])
-    create_bridle(bridle_top_right, gammas[[3, 4]])
+    create_bridle(bridle_top_left, gammas[[1, 2]], points, groups, segments, pulleys, attach_points)
+    create_bridle(bridle_top_right, gammas[[3, 4]], points, groups, segments, pulleys, attach_points)
 
     points, tethers, power_left_anchor =
         add_tether!(points, tethers, :power_left, set, attach_points[1];
