@@ -34,8 +34,8 @@ using Printf
 toc()
 
 # User changeable parameters
-PLOT = true                 # Whether to plot results at the end
-PRINT_PROGRESS = false        # Whether to print progress during simulation
+PLOT = true                  # Whether to plot results at the end
+PRINT_PROGRESS = false       # Whether to print progress during simulation
 PHYSICAL_MODEL = "ram"       # Options: "ram", "simple_ram", "4_attach_ram"
 SIM_TIME = 30.0              # Total simulation time [s]
 DT = 0.01                    # Time step [s]
@@ -48,19 +48,19 @@ REMAKE_CACHE = false         # Force rebuild of compiled model cache
 VSM_INTERVAL = 7             # VSM update interval
 MAX_STEERING = 1.5           # Steering limit [m]
 HEADING_P = 0.7              # Heading PID proportional gain
-HEADING_I = 0                # Heading PID integral time (false = off)
+HEADING_I = 1.5         # Heading PID integral time (false = off)
 HEADING_D = 0.43             # Heading PID derivative time
 
 # Cascaded position + speed controller for steering lines
-POSITION_P = 4.0             # Position PID proportional gain
-POSITION_I = 0.2             # Position PID integral time [s]
+POSITION_P = 10.0             # Position PID proportional gain
+POSITION_I = 2.0             # Position PID integral time [s]
 POSITION_D = 0.0005             # Position PID derivative time (0 = off)
 POSITION_UMIN = -1.2         # Minimum speed setpoint [m/s]
 POSITION_UMAX = 1.2          # Maximum speed setpoint [m/s]
-SPEED_P = 6.0                # Speed PID proportional gain
-SPEED_I = 0.1                # Speed PID integral time [s]
+SPEED_P = 14                # Speed PID proportional gain
+SPEED_I = 0.08                # Speed PID integral time [s]
 SPEED_D = 0.0                # Speed PID derivative time (0 = off)
-SPEED_TAU = 0.14             # Low-pass filter time constant for speed [s]
+SPEED_TAU = 0.16             # Low-pass filter time constant for speed [s]
 TORQUE_UMIN = -40.0          # Minimum torque output [Nm]
 TORQUE_UMAX = 40.0           # Maximum torque output [Nm]
 
