@@ -108,15 +108,15 @@ set.l_tether = TETHER_LENGTH
     # (atan of apparent wind in body frame), without the twist correction
     # that wing.aoa includes. This matches the SysLog AoA used in plotting.
     wing = sam.sys_struct.wings[1]
-aoa_rad = atan(wing.va_b[3], wing.va_b[1])
-aoa_deg = rad2deg(aoa_rad)
-@debug "Angle of attack (geometric): $(round(aoa_deg; digits=2))°"
-@test 2 < aoa_deg < 15
+    aoa_rad = atan(wing.va_b[3], wing.va_b[1])
+    aoa_deg = rad2deg(aoa_rad)
+    @debug "Angle of attack (geometric): $(round(aoa_deg; digits=2))°"
+    @test 2 < aoa_deg < 15
 
     # Acceleration
-acc = sam.sys_struct.wings[1].acc_w
-acc_norm = norm(acc)
-@debug "Acceleration magnitude: $(round(acc_norm, digits=2)) m/s²"
-@test acc_norm < 10.0
+    acc = sam.sys_struct.wings[1].acc_w
+    acc_norm = norm(acc)
+    @debug "Acceleration magnitude: $(round(acc_norm, digits=2)) m/s²"
+    @test acc_norm < 10.0
 end
 nothing
