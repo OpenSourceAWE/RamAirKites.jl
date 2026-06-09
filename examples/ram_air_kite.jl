@@ -25,6 +25,7 @@ using RamAirKite
 using SymbolicAWEModels
 using DiscretePIDs
 using LinearAlgebra
+using StructArrays
 
 toc()
 
@@ -34,13 +35,13 @@ SIM_TIME = 10.0             # Total simulation time [s]
 DT = 0.01                   # Time step [s] (must be small for cascaded control)
 V_WIND = 12.51             # Wind speed [m/s]
 UPWIND_DIR = -90.0          # Upwind direction [deg]
-TETHER_LENGTH = 50.0        # Tether length [m]
+TETHER_LENGTH = 25.0        # Tether length [m]
 ELEVATION = 74.0            # Initial elevation angle [deg]
 AERO_Z_OFFSET = 0.0         # Body-frame z-offset for VSM panels [m]
 PROFILE_LAW = 3             # Wind profile law (3 = EXPLOG)
 REMAKE_CACHE = false        # Force rebuild of compiled model cache
 VSM_INTERVAL = 7            # VSM update interval
-MAX_HEADING = 10.0          # Heading setpoint amplitude [deg]
+MAX_HEADING = 20.0          # Heading setpoint amplitude [deg]
 HEADING_PERIOD = 5.0        # Heading setpoint period [s]
 MAX_STEERING = 1.5           # Steering limit [m] (position setpoint)
 HEADING_P = 0.7              # Heading PID proportional gain
@@ -210,7 +211,12 @@ p = mcp.plot(time_vec, [rad2deg.(heading_setpoint), rad2deg.(sl.heading[1:length
           ysize=18, fig="Heading setpoint vs actual")
 display(p)
 
-# Interactive replay
-scene = replay(syslog, sam.sys_struct)
+# Interactive replay with frame skipping for faster playback
+REPLAY_SKIP = 10              # Only render every Nth frame
+sub_idx = 1:REPLAY_SKIP:length(syslog.syslog)
+sub_data = collect(syslog.syslog[sub_idx])
+sub_syslog = StructArrays.StructArray(sub_data)
+sub_log = SysLog{length(first(sub_data).X)}("tmp_run_sub", syslog.colmeta, sub_syslog)
+scene = SymbolicAWEModels.replay(sub_log, sam.sys_struct)
 display(GLMakie.Screen(), scene)
 

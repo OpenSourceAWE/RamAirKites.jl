@@ -5,10 +5,11 @@ LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 MakieControlPlots = "6d616b69-6563-4f6e-8472-6f6c706c6f74"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 RamAirKite = "7ebed07a-3d9a-4117-97d2-0a397f5b89df"
+StructArrays = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
 SymbolicAWEModels = "9c9a347c-5289-41db-a9b9-25ccc76c3360"
 Timers = "21f18d07-b854-4dab-86f0-c15a3821819a"
 VortexStepMethod = "ed3cd733-9f0f-46a9-93e0-89b8d4998dd9"
 
 [sources]
-MakieControlPlots = {url = "https://github.com/OpenSourceAWE/MakieControlPlots.jl.git", rev = "main"}
+MakieControlPlots = {rev = "main", url = "https://github.com/OpenSourceAWE/MakieControlPlots.jl.git"}
 RamAirKite = {path = ".."}
