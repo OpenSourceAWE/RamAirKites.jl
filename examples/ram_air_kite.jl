@@ -36,7 +36,7 @@ V_WIND = 12.51             # Wind speed [m/s]
 UPWIND_DIR = -90.0          # Upwind direction [deg]
 TETHER_LENGTH = 50.0        # Tether length [m]
 ELEVATION = 80.0            # Initial elevation angle [deg]
-AERO_Z_OFFSET = 1.0         # Body-frame z-offset for VSM panels [m]
+AERO_Z_OFFSET = 0.0         # Body-frame z-offset for VSM panels [m]
 PROFILE_LAW = 3             # Wind profile law (3 = EXPLOG)
 REMAKE_CACHE = false        # Force rebuild of compiled model cache
 VSM_INTERVAL = 7            # VSM update interval
