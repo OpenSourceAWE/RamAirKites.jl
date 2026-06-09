@@ -449,7 +449,7 @@ function create_sys_struct(set::Settings; kwargs...)
     elseif model == "simple_ram"
         return create_simple_ram_sys_struct(set; kwargs...)
     elseif model == "4_attach_ram"
-        return create_4_attach_ram_sys_struct(set; kwargs...)
+        return create_4_attach_ram_sys_struct(set)
     elseif model == "tether"
         return create_tether_sys_struct(set; kwargs...)
     else
