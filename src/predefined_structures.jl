@@ -203,7 +203,7 @@ deforming with the wing group twist dynamics.
 # Arguments
 - `set::Settings`: Configuration parameters from `KiteUtils.jl`.
 """
-function create_4_attach_ram_sys_struct(set::Settings; kwargs...)
+function create_4_attach_ram_sys_struct(set::Settings)
     vsm_set_path = joinpath(get_data_path(), "vsm_settings.yaml")
     vsm_set = VortexStepMethod.VSMSettings(vsm_set_path; data_prefix=false)
     vsm_wing = create_vsm_wing(set, vsm_set; prn=false)
