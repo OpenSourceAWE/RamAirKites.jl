@@ -31,7 +31,8 @@ toc()
 
 # User changeable parameters
 PHYSICAL_MODEL = "ram"      # Options: "ram", "simple_ram", "4_attach_ram"
-SIM_TIME = 10.0             # Total simulation time [s]
+SIM_TIME = 15.0             # Total simulation time [s]
+RECORD_VIDEO = false         # Whether to record a video of the simulation (can be slow)
 DT = 0.01                   # Time step [s] (must be small for cascaded control)
 V_WIND = 12.51             # Wind speed [m/s]
 UPWIND_DIR = -90.0          # Upwind direction [deg]
@@ -217,6 +218,12 @@ sub_idx = 1:REPLAY_SKIP:length(syslog.syslog)
 sub_data = collect(syslog.syslog[sub_idx])
 sub_syslog = StructArrays.StructArray(sub_data)
 sub_log = SysLog{length(first(sub_data).X)}("tmp_run_sub", syslog.colmeta, sub_syslog)
+if RECORD_VIDEO
+    video_path = joinpath("output", "ram_air_kite_simulation.mp4")
+    @info "Recording video to $video_path (this may take a while)..."
+    SymbolicAWEModels.record(syslog, sam.sys_struct, video_path; framerate=Int64(round(1 / (DT))))
+end
 scene = SymbolicAWEModels.replay(sub_log, sam.sys_struct)
 display(GLMakie.Screen(), scene)
+
 
