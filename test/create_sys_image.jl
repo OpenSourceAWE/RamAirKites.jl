@@ -67,5 +67,5 @@ PackageCompiler.create_sysimage(
      :AtmosphericModels, :KiteUtils, :VortexStepMethod,
      :SymbolicAWEModels];
     sysimage_path="kps-image_tmp.so",
-    precompile_execution_file=joinpath("test", "test_for_precompile.jl")
+    precompile_execution_file=joinpath(@__DIR__, "test_for_precompile.jl")
 )
