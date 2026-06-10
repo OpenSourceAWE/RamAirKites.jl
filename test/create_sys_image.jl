@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Jelle Poland, Bart van de Lint, Uwe Fechner
+# SPDX-FileCopyrightText: 2026 Bart van de Lint, Uwe Fechner
 # SPDX-License-Identifier: MPL-2.0
 
 using PackageCompiler
@@ -11,11 +11,11 @@ using StaticArrays, NonlinearSolve, OrdinaryDiffEqBDF,
       OrdinaryDiffEqCore, OrdinaryDiffEqNonlinearSolve, SteadyStateDiffEq,
       ModelingToolkit, ControlSystemsBase, SymbolicIndexingInterface
 
-# --- Data & I/O ---
-using CSV, DataFrames, HDF5, Parameters, DiscretePIDs
+# --- Utilities ---
+using Parameters, DiscretePIDs
 
 # --- Visualization ---
-using GLMakie, Colors, LaTeXStrings
+using GLMakie, LaTeXStrings
 
 # --- Open Source AWE Packages ---
 using AtmosphericModels, KiteUtils, VortexStepMethod,
@@ -62,8 +62,8 @@ PackageCompiler.create_sysimage(
      :StaticArrays, :NonlinearSolve, :OrdinaryDiffEqBDF,
      :OrdinaryDiffEqCore, :OrdinaryDiffEqNonlinearSolve, :SteadyStateDiffEq,
      :ModelingToolkit, :ControlSystemsBase, :SymbolicIndexingInterface,
-     :CSV, :DataFrames, :HDF5, :Parameters, :DiscretePIDs,
-     :GLMakie, :Colors, :LaTeXStrings,
+     :Parameters, :DiscretePIDs,
+     :GLMakie, :LaTeXStrings,
      :AtmosphericModels, :KiteUtils, :VortexStepMethod,
      :SymbolicAWEModels];
     sysimage_path="kps-image_tmp.so",
