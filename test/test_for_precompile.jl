@@ -6,6 +6,7 @@ using RamAirKite
 using RamAirKite: ram_air_data_path
 using KiteUtils: Settings, set_data_path
 using DiscretePIDs
+using SymbolicAWEModels
 
 set_data_path(ram_air_data_path())
 set = Settings("system.yaml")
