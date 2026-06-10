@@ -25,38 +25,40 @@ using RamAirKite
 using SymbolicAWEModels
 using DiscretePIDs
 using LinearAlgebra
+using StructArrays
 
 toc()
 
 # User changeable parameters
 PHYSICAL_MODEL = "ram"      # Options: "ram", "simple_ram", "4_attach_ram"
-SIM_TIME = 10.0             # Total simulation time [s]
+SIM_TIME = 15.0             # Total simulation time [s]
+RECORD_VIDEO = false         # Whether to record a video of the simulation (can be slow)
 DT = 0.01                   # Time step [s] (must be small for cascaded control)
 V_WIND = 12.51             # Wind speed [m/s]
 UPWIND_DIR = -90.0          # Upwind direction [deg]
-TETHER_LENGTH = 50.0        # Tether length [m]
-ELEVATION = 80.0            # Initial elevation angle [deg]
+TETHER_LENGTH = 25.0        # Tether length [m]
+ELEVATION = 74.0            # Initial elevation angle [deg]
 AERO_Z_OFFSET = 0.0         # Body-frame z-offset for VSM panels [m]
 PROFILE_LAW = 3             # Wind profile law (3 = EXPLOG)
 REMAKE_CACHE = false        # Force rebuild of compiled model cache
 VSM_INTERVAL = 7            # VSM update interval
-MAX_HEADING = 10.0          # Heading setpoint amplitude [deg]
+MAX_HEADING = 20.0          # Heading setpoint amplitude [deg]
 HEADING_PERIOD = 5.0        # Heading setpoint period [s]
 MAX_STEERING = 1.5           # Steering limit [m] (position setpoint)
 HEADING_P = 0.7              # Heading PID proportional gain
-HEADING_I = 0                # Heading PID integral time (false = off)
+HEADING_I = 1.5              # Heading PID integral time (false = off)
 HEADING_D = 0.43             # Heading PID derivative time
 
 # Cascaded position + speed controller for steering lines
-POSITION_P = 4.0             # Position PID proportional gain
-POSITION_I = 0.2             # Position PID integral time [s]
+POSITION_P = 10.0             # Position PID proportional gain
+POSITION_I = 2.0             # Position PID integral time [s]
 POSITION_D = 0.0005          # Position PID derivative time (0 = off)
 POSITION_UMIN = -1.2         # Minimum speed setpoint [m/s]
 POSITION_UMAX = 1.2          # Maximum speed setpoint [m/s]
-SPEED_P = 6.0                # Speed PID proportional gain
-SPEED_I = 0.1                # Speed PID integral time [s]
+SPEED_P = 14                # Speed PID proportional gain
+SPEED_I = 0.08                # Speed PID integral time [s]
 SPEED_D = 0.0                # Speed PID derivative time (0 = off)
-SPEED_TAU = 0.14             # Low-pass filter time constant for speed [s]
+SPEED_TAU = 0.16             # Low-pass filter time constant for speed [s]
 TORQUE_UMIN = -40.0          # Minimum torque output [Nm]
 TORQUE_UMAX = 40.0           # Maximum torque output [Nm]
 
@@ -94,9 +96,9 @@ for group in sam.sys_struct.groups
     group.moment_frac = 0.0
 end
 
-depower = -0.002
-sys_struct.tethers[:steering_left].init_stretch_frac = 1.0 + depower
-sys_struct.tethers[:steering_right].init_stretch_frac = 1.0 + depower
+depower = 0.0
+sys_struct.tethers[:steering_left].init_stretch_frac = 1.0 - depower
+sys_struct.tethers[:steering_right].init_stretch_frac = 1.0 - depower
 
 # 3. init
 @info "Initializing model..."
@@ -108,7 +110,7 @@ depower_len = sys_struct.tethers[:steering_left].len - sys_struct.tethers[:power
 @info "Depowered by $(round(depower_len; digits=2)) m"
 
 # Plot initial configuration
-fig = plot(sam.sys_struct)
+fig = Makie.plot(sam.sys_struct)
 
 # Run heading-tracking simulation
 @info "Running simulation..."
@@ -196,7 +198,7 @@ save_log(logger, "tmp_run")
 syslog = load_log("tmp_run")
 
 # Plot results and show replay
-fig = plot(sam.sys_struct, syslog;
+fig = Makie.plot(sam.sys_struct, syslog;
            plot_heading=true, plot_tether=true, setpoints=Dict(:heading => heading_setpoint))
 display(GLMakie.Screen(), fig)
 
@@ -210,7 +212,19 @@ p = mcp.plot(time_vec, [rad2deg.(heading_setpoint), rad2deg.(sl.heading[1:length
           ysize=18, fig="Heading setpoint vs actual")
 display(p)
 
-# Interactive replay
-scene = replay(syslog, sam.sys_struct)
+# Interactive replay with frame skipping for faster playback
+REPLAY_SKIP = 5              # Only render every Nth frame
+sub_idx = 1:REPLAY_SKIP:length(syslog.syslog)
+sub_data = collect(syslog.syslog[sub_idx])
+sub_syslog = StructArrays.StructArray(sub_data)
+sub_log = SysLog{length(first(sub_data).X)}("tmp_run_sub", syslog.colmeta, sub_syslog)
+if RECORD_VIDEO
+    video_path = joinpath("output", "ram_air_kite_simulation.mp4")
+    mkpath(dirname(video_path))
+    @info "Recording video to $video_path (this may take a while)..."
+    SymbolicAWEModels.record(syslog, sam.sys_struct, video_path; framerate=Int(round(1 / DT)))
+end
+scene = SymbolicAWEModels.replay(sub_log, sam.sys_struct; replay_speed=2.0)
 display(GLMakie.Screen(), scene)
+
 

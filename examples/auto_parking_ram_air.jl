@@ -34,8 +34,8 @@ using Printf
 toc()
 
 # User changeable parameters
-PLOT = true                 # Whether to plot results at the end
-PRINT_PROGRESS = false        # Whether to print progress during simulation
+PLOT = true                  # Whether to plot results at the end
+PRINT_PROGRESS = false       # Whether to print progress during simulation
 PHYSICAL_MODEL = "ram"       # Options: "ram", "simple_ram", "4_attach_ram"
 SIM_TIME = 30.0              # Total simulation time [s]
 DT = 0.01                    # Time step [s]
@@ -48,19 +48,19 @@ REMAKE_CACHE = false         # Force rebuild of compiled model cache
 VSM_INTERVAL = 7             # VSM update interval
 MAX_STEERING = 1.5           # Steering limit [m]
 HEADING_P = 0.7              # Heading PID proportional gain
-HEADING_I = 0                # Heading PID integral time (false = off)
+HEADING_I = 1.5         # Heading PID integral time (false = off)
 HEADING_D = 0.43             # Heading PID derivative time
 
 # Cascaded position + speed controller for steering lines
-POSITION_P = 4.0             # Position PID proportional gain
-POSITION_I = 0.2             # Position PID integral time [s]
+POSITION_P = 10.0             # Position PID proportional gain
+POSITION_I = 2.0             # Position PID integral time [s]
 POSITION_D = 0.0005             # Position PID derivative time (0 = off)
 POSITION_UMIN = -1.2         # Minimum speed setpoint [m/s]
 POSITION_UMAX = 1.2          # Maximum speed setpoint [m/s]
-SPEED_P = 6.0                # Speed PID proportional gain
-SPEED_I = 0.1                # Speed PID integral time [s]
+SPEED_P = 14                # Speed PID proportional gain
+SPEED_I = 0.08                # Speed PID integral time [s]
 SPEED_D = 0.0                # Speed PID derivative time (0 = off)
-SPEED_TAU = 0.14             # Low-pass filter time constant for speed [s]
+SPEED_TAU = 0.16             # Low-pass filter time constant for speed [s]
 TORQUE_UMIN = -40.0          # Minimum torque output [Nm]
 TORQUE_UMAX = 40.0           # Maximum torque output [Nm]
 
@@ -195,15 +195,18 @@ aero_force_norm = norm.(eachrow(sl.aero_force_b))
 l_diff = [sl.l_tether[i][3] - sl.l_tether[i][4] for i in 1:length(sl.time)]
 
 if PLOT
-    p=plotx(sl.time, rad2deg.(sl.elevation), rad2deg.(sl.azimuth), rad2deg.(sl.heading), steering_torque_history, rad2deg.(sl.AoA), sl.v_app, aero_force_norm; xlabel="Time [s]", 
-        ylabels=[L"\mathrm{elevation}~[°]", L"\mathrm{azimuth}~[°]", L"\mathrm{heading}~[°]", L"\mathrm{steering}~[Nm]", L"\mathrm{AoA}~[°]", L"v_a~[\mathrm{ms^{-1}}]", L"\mathrm{aeroforce}~[N]"], 
+    p=plotx(sl.time, rad2deg.(sl.elevation), rad2deg.(sl.azimuth), rad2deg.(sl.heading),
+        dl_setpoint_history, rad2deg.(sl.AoA), sl.v_app, aero_force_norm; 
+        xlabel=L"\mathrm{Time}~[s]", 
+        ylabels=[L"\mathrm{elevation}~[°]", L"\mathrm{azimuth}~[°]", 
+                 L"\mathrm{heading}~[°]", L"\Delta l_{\mathrm{set}}~[m]", L"\mathrm{AoA}~[°]", L"v_a~[\mathrm{ms^{-1}}]", L"\mathrm{aeroforce}~[N]"], 
         ysize=18, fig="Ram air kite")
     display(p)
 
     delta_labels = [L"\Delta l_{\mathrm{set}}~[m]", L"\Delta l~[m]"]
     all_labels = [delta_labels, nothing]
-    p2 = plotx(sl.time, [dl_setpoint_history, l_diff], steering_torque_history; xlabel="Time [s]",
-               ylabels=[L"\mathrm{\Delta_l}~[m]", L"\mathrm{torque}~[Nm]"], labels=all_labels,
+    p2 = plotx(sl.time, [dl_setpoint_history, l_diff], steering_torque_history; xlabel=L"\mathrm{Time}~[s]",
+               ylabels=[L"\Delta l~[m]", L"\mathrm{torque}~[Nm]"], labels=all_labels,
                ysize=18, fig="Delta-l setpoint vs actual")
     display(p2)
 end
