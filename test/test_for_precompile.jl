@@ -67,7 +67,6 @@ l_diff_prev = Ref(sys_state.l_tether[3] - sys_state.l_tether[4])
 l_diff_speed_filt = Ref(0.0)
 alpha = dt / (dt + 0.16)  # low-pass filter coefficient
 
-last_time = time()
 try
     for step in 1:steps
         t = step * dt
