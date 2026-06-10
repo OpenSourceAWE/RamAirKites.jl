@@ -138,15 +138,16 @@ speed_pid = DiscretePID(; K=SPEED_P, Ti=SPEED_I, Td=SPEED_D, Ts=dt,
 # Track steering torque and delta-l for logging
 steering_torque_history = Float64[]
 dl_setpoint_history = Float64[]
+steering_speed_history = Float64[]  # filtered v_reelout difference
 sizehint!(steering_torque_history, steps)
 sizehint!(dl_setpoint_history, steps)
+sizehint!(steering_speed_history, steps)
 
 max_heading = deg2rad(MAX_HEADING)
 angular_freq = 2π / HEADING_PERIOD
 heading_setpoint = Float64[]
 
-l_diff_prev = Ref(sys_state.l_tether[3] - sys_state.l_tether[4])
-l_diff_speed_filt = Ref(0.0)
+v_reelout_diff_filt = Ref(0.0)
 alpha = dt / (dt + SPEED_TAU)  # low-pass filter coefficient
 
 last_time = time()
@@ -162,11 +163,11 @@ for step in 1:steps
 
     # Cascaded position → speed → torque control
     local l_diff = sys_state.l_tether[3] - sys_state.l_tether[4]
-    l_diff_speed_raw = (l_diff - l_diff_prev[]) / dt
-    l_diff_prev[] = l_diff
-    l_diff_speed_filt[] = alpha * l_diff_speed_raw + (1 - alpha) * l_diff_speed_filt[]
+    v_reelout_diff = sys_state.v_reelout[2] - sys_state.v_reelout[3]
+    v_reelout_diff_filt[] = alpha * v_reelout_diff + (1 - alpha) * v_reelout_diff_filt[]
+    push!(steering_speed_history, v_reelout_diff_filt[])
     speed_setpoint = pos_pid(steering, l_diff, 0.0)
-    torque = speed_pid(speed_setpoint, l_diff_speed_filt[], 0.0)
+    torque = speed_pid(speed_setpoint, v_reelout_diff_filt[], 0.0)
     push!(steering_torque_history, torque)
     push!(dl_setpoint_history, steering)
     set_values = [0.0, torque, -torque]
