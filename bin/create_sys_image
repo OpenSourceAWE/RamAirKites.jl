@@ -127,5 +127,6 @@ $JULIA_CMD --startup-file=no --project -J "$SOFILE" -e '
 # so the first `./bin/run_julia` launch doesn't need to recompile them.
 # shellcheck disable=SC2086
 $JULIA_CMD --startup-file=no -J "$SOFILE" -e 'using Revise, Distributed'
+$JULIA_CMD --startup-file=no -J "$SOFILE" -e 'using Revise, Pkg; Pkg.activate("examples"); using MakieControlPlots'
 
 echo "✅ System image creation and precompilation complete!"
