@@ -67,34 +67,30 @@ l_diff_prev = Ref(sys_state.l_tether[3] - sys_state.l_tether[4])
 l_diff_speed_filt = Ref(0.0)
 alpha = dt / (dt + 0.16)  # low-pass filter coefficient
 
-try
-    for step in 1:steps
-        t = step * dt
+for step in 1:steps
+    t = step * dt
 
-        current_heading = sam.sys_struct.wings[1].heading
-        steering = heading_pid(0, current_heading, 0.0)
+    current_heading = sam.sys_struct.wings[1].heading
+    steering = heading_pid(0, current_heading, 0.0)
 
-        # Cascaded position → speed → torque control
-        local l_diff = sys_state.l_tether[3] - sys_state.l_tether[4]
-        l_diff_speed_raw = (l_diff - l_diff_prev[]) / dt
-        l_diff_prev[] = l_diff
-        l_diff_speed_filt[] = alpha * l_diff_speed_raw + (1 - alpha) * l_diff_speed_filt[]
-        speed_setpoint = pos_pid(steering, l_diff, 0.0)
-        torque = speed_pid(speed_setpoint, l_diff_speed_filt[], 0.0)
-        set_values = [0.0, torque, -torque]
+    # Cascaded position → speed → torque control
+    local l_diff = sys_state.l_tether[3] - sys_state.l_tether[4]
+    l_diff_speed_raw = (l_diff - l_diff_prev[]) / dt
+    l_diff_prev[] = l_diff
+    l_diff_speed_filt[] = alpha * l_diff_speed_raw + (1 - alpha) * l_diff_speed_filt[]
+    speed_setpoint = pos_pid(steering, l_diff, 0.0)
+    torque = speed_pid(speed_setpoint, l_diff_speed_filt[], 0.0)
+    set_values = [0.0, torque, -torque]
 
-        global steady_torque = torque_damp * steady_torque +
-                               (1 - torque_damp) * calc_steady_torque(sam)
-        set_torques = steady_torque .+ set_values
+    global steady_torque = torque_damp * steady_torque +
+                           (1 - torque_damp) * calc_steady_torque(sam)
+    set_torques = steady_torque .+ set_values
 
-        next_step!(sam; set_values=set_torques, dt, vsm_interval=VSM_INTERVAL)
+    next_step!(sam; set_values=set_torques, dt, vsm_interval=VSM_INTERVAL)
 
-        update_sys_state!(sys_state, sam)
-        sys_state.time = t
-        log!(logger, sys_state)
-    end
-catch e
-    rethrow(e)
+    update_sys_state!(sys_state, sam)
+    sys_state.time = t
+    log!(logger, sys_state)
 end
 
 mkpath(get_data_path())
