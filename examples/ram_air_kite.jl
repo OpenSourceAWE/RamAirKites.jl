@@ -150,8 +150,7 @@ l_diff_speed_filt = Ref(0.0)
 alpha = dt / (dt + SPEED_TAU)  # low-pass filter coefficient
 
 last_time = time()
-try
-    for step in 1:steps
+for step in 1:steps
         t = step * dt
 
         target_heading = max_heading * sin(angular_freq * t)
@@ -189,9 +188,6 @@ try
             @info "step $step / $steps, $(round(realtime_factor; digits=2)) times realtime"
         end
     end
-catch e
-    rethrow(e)
-end
 
 mkpath(get_data_path())
 save_log(logger, "tmp_run")
