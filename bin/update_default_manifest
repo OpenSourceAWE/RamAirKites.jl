@@ -55,5 +55,5 @@ if git diff --cached --quiet; then
     echo "No changes to default manifests, nothing to commit."
 else
     git commit -m "Update default manifest for Julia $julia_major"
-    echo "Committed updated default manifests."
+    echo "Committed updated default manifest."
 fi
