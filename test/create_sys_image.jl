@@ -8,7 +8,7 @@ using Pkg, LinearAlgebra, Statistics, Serialization, Printf, Dates
 
 # --- Numerical & Scientific Computing ---
 using StaticArrays, NonlinearSolve, OrdinaryDiffEqBDF,
-      OrdinaryDiffEqCore, OrdinaryDiffEqNonlinearSolve,
+      OrdinaryDiffEqCore,
       ModelingToolkit, ControlSystemsBase, SymbolicIndexingInterface
 
 # --- Utilities ---
@@ -60,7 +60,7 @@ end
 PackageCompiler.create_sysimage(
     [:Pkg, :LinearAlgebra, :Statistics, :Serialization, :Printf, :Dates,
      :StaticArrays, :NonlinearSolve, :OrdinaryDiffEqBDF,
-     :OrdinaryDiffEqCore, :OrdinaryDiffEqNonlinearSolve,
+     :OrdinaryDiffEqCore,
      :ModelingToolkit, :ControlSystemsBase, :SymbolicIndexingInterface,
      :Parameters, :DiscretePIDs,
      :GLMakie, :LaTeXStrings,
