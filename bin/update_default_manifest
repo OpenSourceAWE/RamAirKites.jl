@@ -47,8 +47,6 @@ elif [[ $julia_major == "1.12" ]]; then
     echo "Deleted all manifest files in examples/"
 fi
 
-echo "Done."
-
 # Commit only the default manifest files
 git add "Manifest-v${julia_major}.toml.default"
 if git diff --cached --quiet; then
@@ -57,3 +55,5 @@ else
     git commit -m "Update default manifest for Julia $julia_major"
     echo "Committed updated default manifest."
 fi
+
+echo "Done."
