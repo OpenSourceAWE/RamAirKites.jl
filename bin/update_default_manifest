@@ -1,0 +1,50 @@
+#!/bin/bash -eu
+# SPDX-FileCopyrightText: 2025 Uwe Fechner
+# SPDX-License-Identifier: MIT
+
+if [[ $(basename $(pwd)) == "bin" ]]; then
+    cd ..
+fi
+
+# update the main project
+julia --project=. -e 'using Pkg; Pkg.Registry.update(); Pkg.update()'
+# update the example project
+julia --project=examples -e 'using Pkg; Pkg.update()'
+# update the test project
+julia --project=test -e 'using Pkg; Pkg.update()'
+
+# determine the Julia version and update the corresponding default manifest
+julia_version=$(julia --version | awk '{print($3)}')
+julia_major=${julia_version:0:3}
+if [[ $julia_major == "1.1" ]]; then
+    julia_major=${julia_version:0:4}
+fi
+
+# Normalize main manifest (Pkg.update may write Manifest.toml instead of versioned)
+if [ ! -f "Manifest-v${julia_major}.toml" ] && [ -f "Manifest.toml" ]; then
+    mv "Manifest.toml" "Manifest-v${julia_major}.toml"
+    echo "Renamed Manifest.toml to Manifest-v${julia_major}.toml"
+fi
+
+if [[ $julia_major == "1.11" ]]; then
+    # For Julia 1.11: use the examples manifest as the main default manifest
+    # Normalize examples manifest name first
+    if [ ! -f "examples/Manifest-v1.11.toml" ] && [ -f "examples/Manifest.toml" ]; then
+        mv "examples/Manifest.toml" "examples/Manifest-v1.11.toml"
+        echo "Renamed examples/Manifest.toml to examples/Manifest-v1.11.toml"
+    fi
+    # Copy examples manifest to main manifest
+    cp "examples/Manifest-v1.11.toml" "Manifest-v1.11.toml"
+    echo "Copied examples/Manifest-v1.11.toml to Manifest-v1.11.toml"
+    # Make it the default
+    cp "Manifest-v1.11.toml" "Manifest-v1.11.toml.default"
+    echo "Copied Manifest-v1.11.toml to Manifest-v1.11.toml.default"
+elif [[ $julia_major == "1.12" ]]; then
+    # For Julia 1.12: copy main manifest to .default and delete all examples manifests
+    cp "Manifest-v1.12.toml" "Manifest-v1.12.toml.default"
+    echo "Copied Manifest-v1.12.toml to Manifest-v1.12.toml.default"
+    rm -f examples/Manifest.toml examples/Manifest-v1.11.toml examples/Manifest-v1.12.toml examples/Manifest-v1.11.toml.default examples/Manifest-v1.12.toml.default
+    echo "Deleted all manifest files in examples/"
+fi
+
+echo "Done."
