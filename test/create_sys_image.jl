@@ -8,7 +8,7 @@ using Pkg, LinearAlgebra, Statistics, Serialization, Printf, Dates
 
 # --- Numerical & Scientific Computing ---
 using StaticArrays, NonlinearSolve, OrdinaryDiffEqBDF,
-      OrdinaryDiffEqCore, OrdinaryDiffEqNonlinearSolve, SteadyStateDiffEq,
+      OrdinaryDiffEqCore, OrdinaryDiffEqNonlinearSolve,
       ModelingToolkit, ControlSystemsBase, SymbolicIndexingInterface
 
 # --- Utilities ---
@@ -60,12 +60,13 @@ end
 PackageCompiler.create_sysimage(
     [:Pkg, :LinearAlgebra, :Statistics, :Serialization, :Printf, :Dates,
      :StaticArrays, :NonlinearSolve, :OrdinaryDiffEqBDF,
-     :OrdinaryDiffEqCore, :OrdinaryDiffEqNonlinearSolve, :SteadyStateDiffEq,
+     :OrdinaryDiffEqCore, :OrdinaryDiffEqNonlinearSolve,
      :ModelingToolkit, :ControlSystemsBase, :SymbolicIndexingInterface,
      :Parameters, :DiscretePIDs,
      :GLMakie, :LaTeXStrings,
      :AtmosphericModels, :KiteUtils, :VortexStepMethod,
      :SymbolicAWEModels];
     sysimage_path="kps-image_tmp.so",
+    include_transitive_dependencies=true,
     precompile_execution_file=joinpath(@__DIR__, "test_for_precompile.jl")
 )
