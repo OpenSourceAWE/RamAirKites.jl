@@ -41,3 +41,4 @@ bin/kps-image-1.12.so
 examples/*.bak
 examples/*.bak2
 ram-air-kite.code-workspace
+bin/del_package
