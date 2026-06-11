@@ -105,6 +105,23 @@ end
 '
 echo
 
+echo "Checking whether TestEnv is installed in the global Julia environment..."
+julia -e '
+using Pkg
+
+shared_env = Base.load_path_expand("@v#.#")
+Pkg.activate(shared_env; io=devnull)
+
+if haskey(Pkg.project().dependencies, "TestEnv")
+    println("TestEnv is already installed in $(shared_env); updating to latest version...")
+    Pkg.update("TestEnv")
+else
+    println("Installing TestEnv in $(shared_env)...")
+    Pkg.add("TestEnv")
+end
+'
+echo
+
 # Detect Julia version
 julia_version=$(julia --version | awk '{print($3)}')
 julia_major=${julia_version:0:3}
@@ -332,6 +349,18 @@ elif [[ $_ec -ne 0 ]]; then FAILED_RESOLVES+=("examples"); fi
 echo "Precompiling examples project..."
 julia --project=examples -e 'using Pkg; Pkg.precompile()'
 normalize_manifest_name "examples"
+
+# Instantiate and precompile test project (using TestEnv to get bounds checks enabled)
+echo "Instantiating and precompiling test project..."
+julia --project -e '
+using Pkg
+using TestEnv
+TestEnv.activate()
+Pkg.resolve()
+Pkg.instantiate()
+Pkg.precompile()
+'
+normalize_manifest_name "test"
 
 echo
 if [[ ${#FAILED_RESOLVES[@]} -eq 0 && ${#RETRIED_RESOLVES[@]} -eq 0 ]]; then
