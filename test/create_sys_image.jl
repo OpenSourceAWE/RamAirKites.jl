@@ -4,12 +4,10 @@
 using PackageCompiler
 
 # --- Standard Library & General Utilities ---
-using Pkg, LinearAlgebra, Statistics, Serialization, Printf, Dates
+using Pkg, LinearAlgebra, Statistics, Serialization, Printf
 
 # --- Numerical & Scientific Computing ---
-using StaticArrays, NonlinearSolve, OrdinaryDiffEqBDF,
-      OrdinaryDiffEqCore, OrdinaryDiffEqNonlinearSolve, SteadyStateDiffEq,
-      ModelingToolkit, ControlSystemsBase, SymbolicIndexingInterface
+using StaticArrays
 
 # --- Utilities ---
 using Parameters, DiscretePIDs
@@ -58,14 +56,13 @@ end
 
 @info "Creating sysimage ..."
 PackageCompiler.create_sysimage(
-    [:Pkg, :LinearAlgebra, :Statistics, :Serialization, :Printf, :Dates,
-     :StaticArrays, :NonlinearSolve, :OrdinaryDiffEqBDF,
-     :OrdinaryDiffEqCore, :OrdinaryDiffEqNonlinearSolve, :SteadyStateDiffEq,
-     :ModelingToolkit, :ControlSystemsBase, :SymbolicIndexingInterface,
+    [:Pkg, :LinearAlgebra, :Statistics, :Serialization, :Printf,
+     :StaticArrays,
      :Parameters, :DiscretePIDs,
      :GLMakie, :LaTeXStrings,
      :AtmosphericModels, :KiteUtils, :VortexStepMethod,
      :SymbolicAWEModels];
     sysimage_path="kps-image_tmp.so",
+    include_transitive_dependencies=true,
     precompile_execution_file=joinpath(@__DIR__, "test_for_precompile.jl")
 )
