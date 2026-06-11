@@ -19,7 +19,6 @@ using KiteUtils
 using LinearAlgebra
 using Statistics
 using UnPack
-using Dates
 
 # Re-export commonly used types from SymbolicAWEModels
 export SymbolicAWEModel, SystemStructure, Logger, SysState

@@ -4,12 +4,10 @@
 using PackageCompiler
 
 # --- Standard Library & General Utilities ---
-using Pkg, LinearAlgebra, Statistics, Serialization, Printf, Dates
+using Pkg, LinearAlgebra, Statistics, Serialization, Printf
 
 # --- Numerical & Scientific Computing ---
-using StaticArrays, NonlinearSolve, OrdinaryDiffEqBDF,
-      OrdinaryDiffEqCore,
-      ModelingToolkit, ControlSystemsBase, SymbolicIndexingInterface
+using StaticArrays
 
 # --- Utilities ---
 using Parameters, DiscretePIDs
@@ -58,10 +56,8 @@ end
 
 @info "Creating sysimage ..."
 PackageCompiler.create_sysimage(
-    [:Pkg, :LinearAlgebra, :Statistics, :Serialization, :Printf, :Dates,
-     :StaticArrays, :NonlinearSolve, :OrdinaryDiffEqBDF,
-     :OrdinaryDiffEqCore,
-     :ModelingToolkit, :ControlSystemsBase, :SymbolicIndexingInterface,
+    [:Pkg, :LinearAlgebra, :Statistics, :Serialization, :Printf,
+     :StaticArrays,
      :Parameters, :DiscretePIDs,
      :GLMakie, :LaTeXStrings,
      :AtmosphericModels, :KiteUtils, :VortexStepMethod,
