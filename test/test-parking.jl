@@ -26,6 +26,7 @@ V_WIND = 12.51               # Wind speed [m/s]
 UPWIND_DIR = -90.0           # Upwind direction [deg]
 TETHER_LENGTH = 50.0         # Tether length [m]
 ELEVATION = 74.0             # Initial elevation angle [deg]
+AERO_Z_OFFSET = 1.0          # Body-frame z-offset for VSM panels [m]
 PROFILE_LAW = 3              # Wind profile law (3 = EXPLOG)
 REMAKE_CACHE = false         # Force rebuild of compiled model cache
 VSM_INTERVAL = 7             # VSM update interval
@@ -46,8 +47,8 @@ set.l_tether = TETHER_LENGTH
     toc("System structure created after: ")
     @test sys_struct isa SystemStructure
     @test sys_struct.wings[1].aero isa AbstractVSMAero
-    @test length(sys_struct.points) == 42
-    @test length(sys_struct.segments) == 42
+    @test length(sys_struct.points) == 46
+    @test length(sys_struct.segments) == 46
     @test length(sys_struct.tethers) == 4
     @test all(t -> t.len ≈ TETHER_LENGTH, sys_struct.tethers)
     @test length(sys_struct.winches) == 3
@@ -66,6 +67,7 @@ set.l_tether = TETHER_LENGTH
 
     # edit sys_struct before init!
     sys_struct.transforms[1].elevation = deg2rad(ELEVATION)
+    sys_struct.wings[1].aero_z_offset = AERO_Z_OFFSET
     sys_struct.winches[:power_winch].brake = true
     for point in sam.sys_struct.points
         point.body_frame_damping .= 0.0
@@ -73,8 +75,9 @@ set.l_tether = TETHER_LENGTH
     for segment in sam.sys_struct.segments
         segment.compression_frac = 0.01 # relative compression stiffness
     end
-    sys_struct.tethers[:steering_left].init_stretch_frac = 1.0
-    sys_struct.tethers[:steering_right].init_stretch_frac = 1.0
+    depower = 0.01
+    sys_struct.tethers[:steering_left].init_stretch_frac = 1.0 + depower
+    sys_struct.tethers[:steering_right].init_stretch_frac = 1.0 + depower
 
     # Setting moment_frac = 0.0 means the moment pivot is at the leading edge. 
     # This effectively zeros out the twist moments from tether forces 
