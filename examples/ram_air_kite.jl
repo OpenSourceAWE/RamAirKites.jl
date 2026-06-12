@@ -7,7 +7,7 @@ Ram Air Kite Simulation Example
 Demonstrates how to use RamAirKite.jl to run a simulation with cascaded
 steering-line position→speed→torque control, tracking a sinusoidal heading
 setpoint. The simulation uses the "ram" physical model by default, which
-includes a bridle system and four wing section groups.
+includes a bridle system and four wing section twist surfaces.
 """
 
 using Pkg
@@ -38,7 +38,7 @@ V_WIND = 12.51             # Wind speed [m/s]
 UPWIND_DIR = -90.0          # Upwind direction [deg]
 TETHER_LENGTH = 25.0        # Tether length [m]
 ELEVATION = 74.0            # Initial elevation angle [deg]
-AERO_Z_OFFSET = 0.0         # Body-frame z-offset for VSM panels [m]
+AERO_Z_OFFSET = 1.0         # Body-frame z-offset for VSM panels [m]
 PROFILE_LAW = 3             # Wind profile law (3 = EXPLOG)
 REMAKE_CACHE = false        # Force rebuild of compiled model cache
 VSM_INTERVAL = 7            # VSM update interval
@@ -50,7 +50,7 @@ HEADING_I = 1.5              # Heading PID integral time (false = off)
 HEADING_D = 0.43             # Heading PID derivative time
 
 # Cascaded position + speed controller for steering lines
-POSITION_P = 10.0             # Position PID proportional gain
+POSITION_P = 5.0             # Position PID proportional gain
 POSITION_I = 2.0             # Position PID integral time [s]
 POSITION_D = 0.0005          # Position PID derivative time (0 = off)
 POSITION_UMIN = -1.2         # Minimum speed setpoint [m/s]
@@ -92,13 +92,13 @@ end
 for segment in sam.sys_struct.segments
     segment.compression_frac = 0.01
 end
-for group in sam.sys_struct.groups
-    group.moment_frac = 0.0
+for twist_surface in sam.sys_struct.twist_surfaces
+    twist_surface.moment_frac = 0.0
 end
 
-depower = 0.0
-sys_struct.tethers[:steering_left].init_stretch_frac = 1.0 - depower
-sys_struct.tethers[:steering_right].init_stretch_frac = 1.0 - depower
+depower = 0.01
+sys_struct.tethers[:steering_left].init_stretch_frac = 1.0 + depower
+sys_struct.tethers[:steering_right].init_stretch_frac = 1.0 + depower
 
 # 3. init
 @info "Initializing model..."
@@ -124,8 +124,8 @@ sys_state.time = 0.0
 
 steady_torque = calc_steady_torque(sam)
 
-for group in sam.sys_struct.groups
-    group.damping = 200.0
+for twist_surface in sam.sys_struct.twist_surfaces
+    twist_surface.damping = 200.0
 end
 
 heading_pid = DiscretePID(; K=HEADING_P, Ti=HEADING_I, Td=HEADING_D, Ts=dt,
@@ -176,7 +176,16 @@ for step in 1:steps
                             (1 - torque_damp) * calc_steady_torque(sam)
     set_torques = steady_torque .+ set_values
 
-    next_step!(sam; set_values=set_torques, dt, vsm_interval=VSM_INTERVAL)
+    try
+        next_step!(sam; set_values=set_torques, dt, vsm_interval=VSM_INTERVAL)
+    catch err
+        @warn "Simulation stopped early at step $step / $steps; plotting logged data" exception=err
+        pop!(heading_setpoint)
+        pop!(steering_speed_history)
+        pop!(steering_torque_history)
+        pop!(dl_setpoint_history)
+        break
+    end
 
     update_sys_state!(sys_state, sam)
     sys_state.time = t

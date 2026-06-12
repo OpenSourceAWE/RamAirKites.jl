@@ -42,3 +42,4 @@ examples/*.bak
 examples/*.bak2
 ram-air-kite.code-workspace
 bin/del_package
+*.arrow

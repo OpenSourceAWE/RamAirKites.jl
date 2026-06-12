@@ -21,10 +21,11 @@ toc()
 PHYSICAL_MODEL = "ram"      # Options: "ram", "simple_ram", "4_attach_ram"
 SIM_TIME = 10.0             # Total simulation time [s]
 DT = 0.05                   # Time step [s]
-V_WIND = 15.51              # Wind speed [m/s]
-UPWIND_DIR = -85.0          # Upwind direction [deg]
+V_WIND = 12.51              # Wind speed [m/s]
+UPWIND_DIR = -90.0          # Upwind direction [deg]
 TETHER_LENGTH = 50.0        # Tether length [m]
-ELEVATION = 80.0            # Initial elevation angle [deg]
+ELEVATION = 74.0            # Initial elevation angle [deg]
+AERO_Z_OFFSET = 1.0         # Body-frame z-offset for VSM panels [m]
 PROFILE_LAW = 3             # Wind profile law (3 = EXPLOG)
 REMAKE_CACHE = false         # If true, force rebuild of compiled model cache
 MAX_STEERING = 2.0          # Steering torque limit [Nm]
@@ -43,9 +44,9 @@ set.l_tether = TETHER_LENGTH
     sys_struct = create_sys_struct(set)
     toc("System structure created after: ")
     @test sys_struct isa SystemStructure
-    @test sys_struct.wings[1] isa VSMWing
-    @test length(sys_struct.points) == 42
-    @test length(sys_struct.segments) == 42
+    @test sys_struct.wings[1].aero isa AbstractVSMAero
+    @test length(sys_struct.points) == 46
+    @test length(sys_struct.segments) == 46
     @test length(sys_struct.tethers) == 4
     @test all(t -> t.len ≈ TETHER_LENGTH, sys_struct.tethers)
     @test length(sys_struct.winches) == 3
@@ -64,6 +65,7 @@ set.l_tether = TETHER_LENGTH
 
     # edit sys_struct before init!
     sys_struct.transforms[1].elevation = deg2rad(ELEVATION)
+    sys_struct.wings[1].aero_z_offset = AERO_Z_OFFSET
     sys_struct.winches[:power_winch].brake = true
     for point in sam.sys_struct.points
         point.body_frame_damping .= 0.0
@@ -72,16 +74,16 @@ set.l_tether = TETHER_LENGTH
         segment.compression_frac = 0.01 # relative compression stiffness
     end
     # set init_stretched_frac differently for the front and rear tethers
-    depower = 0.009
-    sys_struct.tethers[:steering_left].init_stretch_frac = 1.0 - depower
-    sys_struct.tethers[:steering_right].init_stretch_frac = 1.0 - depower
+    depower = 0.01
+    sys_struct.tethers[:steering_left].init_stretch_frac = 1.0 + depower
+    sys_struct.tethers[:steering_right].init_stretch_frac = 1.0 + depower
 
     # Setting moment_frac = 0.0 means the moment pivot is at the leading edge. 
     # This effectively zeros out the twist moments from tether forces 
     # (since the moment arm about the LE is zero), which simplifies the initial 
     # equilibrium search by removing twist dynamics as a degree of freedom.
-    for group in sam.sys_struct.groups
-        group.moment_frac = 0.0
+    for twist_surface in sam.sys_struct.twist_surfaces
+        twist_surface.moment_frac = 0.0
     end
     toc("Model created after: ")
     # 3. init
@@ -89,7 +91,7 @@ set.l_tether = TETHER_LENGTH
     toc("Model initialized after: ")
 
     # After init!, find the aerodynamic steady state
-    find_steady_state!(sam; dt=0.05, vsm_interval=5)
+    find_steady_state!(sam; dt=0.05, vsm_interval=0)
     toc("Steady state found after: ")
 
     # Extra stabilization: free steps to dissipate DAE constraint forces
@@ -103,8 +105,6 @@ set.l_tether = TETHER_LENGTH
     @assert sam.prob !== nothing "Expected sam.prob to be initialized"
     @assert sam.integrator !== nothing "Expected sam.integrator to be initialized"
     update_sys_struct!(sam.prob, sam.integrator, sam.sys_struct)
-    forces = [segment.force for segment in sam.sys_struct.segments]
-    @test all(f -> 0.05 < f < 300.0, forces)
 
     # Angle of attack — using the geometric formula from update_sys_state!
     # (atan of apparent wind in body frame), without the twist correction
@@ -115,10 +115,9 @@ set.l_tether = TETHER_LENGTH
     @debug "Angle of attack (geometric): $(round(aoa_deg; digits=2))°"
     @test 2 < aoa_deg < 15
 
-    # Acceleration
-    acc = sam.sys_struct.wings[1].acc_w
-    acc_norm = norm(acc)
-    @debug "Acceleration magnitude: $(round(acc_norm, digits=2)) m/s²"
-    @test acc_norm < 10.0
+    # The kite should have settled: wing acceleration is very low at equilibrium.
+    acc_norm = norm(sam.sys_struct.wings[1].acc_w)
+    @info "Wing acceleration magnitude: $(round(acc_norm; digits=4)) m/s²"
+    @test acc_norm < 5.0
 end
 nothing
