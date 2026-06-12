@@ -30,21 +30,21 @@ toc()
 PHYSICAL_MODEL = "ram"       # Options: "ram", "simple_ram", "4_attach_ram"
 SIM_TIME = 20.0              # Total simulation time [s]
 DT = 0.02                    # Time step [s]
-INITIAL_STEERING = -0.015    # Initial steering line length difference [m]
+INITIAL_STEERING = -0.012    # Initial steering line length difference [m]
 V_WIND = 12.51               # Wind speed [m/s]
 UPWIND_DIR = -90.0           # Upwind direction [deg]
-TETHER_LENGTH = 100.0        # Tether length [m]
+TETHER_LENGTH = 50.0        # Tether length [m]
 ELEVATION = 74               # Initial elevation angle [deg]
 VSM_INTERVAL = 3             # VSM update interval (steps)
 OFFSET_DEG = 4.0             # Heading offset for direction reversal [deg]
-STEERING_SEQ = [0.1, -0.2, 0.3, -0.4, 0.5, -0.6] .* 0.2  # Steering setpoint sequence [m]
+STEERING_SEQ = [0.1, -0.2, 0.3, -0.4, 0.5, -0.6, 0.7, -0.8, 0.9, -0.9, 1.0, -1.0] .* 0.3  # Steering setpoint sequence [m]
 
 # Cascaded position → speed → torque PID parameters
 POSITION_P = 10.0            # Position PID proportional gain
 POSITION_I = 2.0             # Position PID integral time [s]
 POSITION_D = 0.0005          # Position PID derivative time (0 = off)
-POSITION_UMIN = -1.2         # Minimum speed setpoint [m/s]
-POSITION_UMAX = 1.2          # Maximum speed setpoint [m/s]
+POSITION_UMIN = -1.2*0.2         # Minimum speed setpoint [m/s]
+POSITION_UMAX = 1.2*0.2          # Maximum speed setpoint [m/s]
 SPEED_P = 14                 # Speed PID proportional gain
 SPEED_I = 0.08               # Speed PID integral time [s]
 SPEED_D = 0.0                # Speed PID derivative time (0 = off)
@@ -278,7 +278,7 @@ function plot_steering_vs_turn_rate()
 
     G = psi_dot ./ sl.v_app ./ delayed_steering  # °/s / (m/s) / m = °/m
     for (i, _) in enumerate(G)
-        if abs(delayed_steering[i]) < 0.1
+        if abs(delayed_steering[i]) < 0.05
             G[i] = NaN
         end
     end
@@ -329,12 +329,12 @@ if PLOT
     using MakieControlPlots
 end
 
-# time, v_app, psi, beta, psi_dot, steering = plot_steering_vs_turn_rate()
+time, v_app, psi, beta, psi_dot, steering = plot_steering_vs_turn_rate()
 
-# c1, c2 = calc_c1_c2(v_app, psi, beta, psi_dot, steering)
-# println("Turn-rate law coefficients:")
-# println("  c1 (steering gain): $(round(c1, digits=6))")
-# println("  c2 (pendulum stability): $(round(c2, digits=6))")
+c1, c2 = calc_c1_c2(v_app, psi, beta, psi_dot, steering)
+println("Turn-rate law coefficients:")
+println("  c1 (steering gain): $(round(c1, digits=6))")
+println("  c2 (pendulum stability): $(round(c2, digits=6))")
 
 # plot_turnrate_law(c1, c2, time, v_app, psi, beta, psi_dot, steering)
 lg = load_log("tmp_run")
@@ -345,3 +345,19 @@ p=plotx(sl.time, rad2deg.(sl.elevation), rad2deg.(sl.azimuth), rad2deg.(sl.headi
 display(p)
 
 @info "Done!"
+
+# 100 m tether
+# Delay of turnrate: 0.12 s
+# Mean turnrate-law factor: 12.581 °/m ± 97.21 %
+# Mean turnrate-law factor: 0.2196 rad/m ± 97.21 %
+# Turn-rate law coefficients:
+#   c1 (steering gain): 0.25957
+#   c2 (pendulum stability): 38.044747
+
+# 50 m tether
+# Delay of turnrate: 0.48 s
+# Mean turnrate-law factor: 45.013 °/m ± 27.92 %
+# Mean turnrate-law factor: 0.7856 rad/m ± 27.92 %
+# Turn-rate law coefficients:
+#   c1 (steering gain): 0.7841
+#   c2 (pendulum stability): 8.551764
