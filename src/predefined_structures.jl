@@ -73,7 +73,7 @@ end
 
 Create a `SystemStructure` for the primary "ram" model with a stability-enhancing bridle.
 
-The model features 4 deformable twist_surfaces (3 deforming points + 1 static point each),
+The model features 4 deformable twist_surfaces (4 deforming points each),
 a complex pulley bridle system, 4 main tethers, and 3 winches.
 
 # Arguments
