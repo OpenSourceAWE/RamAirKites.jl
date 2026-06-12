@@ -336,7 +336,7 @@ println("Turn-rate law coefficients:")
 println("  c1 (steering gain): $(round(c1, digits=6))")
 println("  c2 (pendulum stability): $(round(c2, digits=6))")
 
-# plot_turnrate_law(c1, c2, time, v_app, psi, beta, psi_dot, steering)
+plot_turnrate_law(c1, c2, time, v_app, psi, beta, psi_dot, steering)
 lg = load_log("tmp_run")
 sl = lg.syslog
 steering = sl.var_01
