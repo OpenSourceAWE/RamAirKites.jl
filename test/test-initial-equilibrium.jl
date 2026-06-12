@@ -43,7 +43,7 @@ set.l_tether = TETHER_LENGTH
     sys_struct = create_sys_struct(set)
     toc("System structure created after: ")
     @test sys_struct isa SystemStructure
-    @test sys_struct.wings[1] isa VSMWing
+    @test sys_struct.wings[1].aero isa AbstractVSMAero
     @test length(sys_struct.points) == 42
     @test length(sys_struct.segments) == 42
     @test length(sys_struct.tethers) == 4
