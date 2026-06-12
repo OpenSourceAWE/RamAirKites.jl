@@ -28,7 +28,7 @@ toc()
 # ==================== USER PARAMETERS ==================== #
 
 PHYSICAL_MODEL = "ram"      # Options: "ram", "simple_ram", "4_attach_ram"
-SIM_TIME = 30.0              # Total simulation time [s]
+SIM_TIME = 20.0              # Total simulation time [s]
 DT = 0.02                    # Time step [s]
 V_WIND = 12.51                # Wind speed [m/s]
 UPWIND_DIR = -90.0           # Upwind direction [deg]
@@ -134,7 +134,7 @@ function simulate(sam, logger, steps; plot=false)
         t = i * dt - dt
 
         # After 10 seconds, start steering
-        if !steering_active && t >= 10.0
+        if !steering_active && t >= 2.0
             steering_active = true
             steering_setpoint = abs(STEERING_SEQ[seq_idx])
         end
@@ -336,7 +336,8 @@ end
 # plot_turnrate_law(c1, c2, time, v_app, psi, beta, psi_dot, steering)
 lg = load_log("tmp_run")
 sl = lg.syslog
-plot(sl.time, rad2deg.(sl.elevation))
-plot(sl.time, rad2deg.(sl.azimuth))
+steering = sl.var_01 
+p=plotx(sl.time, rad2deg.(sl.elevation), rad2deg.(sl.azimuth), rad2deg.(sl.heading), steering; ylabels=["elevation [°]", "azimuth [°]", "heading [°]", "steering [m]"], fig="elevation and azimuth")
+display(p)
 
 @info "Done!"
