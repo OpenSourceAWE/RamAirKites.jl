@@ -52,7 +52,7 @@ HEADING_I = 1.5         # Heading PID integral time (false = off)
 HEADING_D = 0.43             # Heading PID derivative time
 
 # Cascaded position + speed controller for steering lines
-POSITION_P = 10.0             # Position PID proportional gain
+POSITION_P = 5.0             # Position PID proportional gain
 POSITION_I = 2.0             # Position PID integral time [s]
 POSITION_D = 0.0005             # Position PID derivative time (0 = off)
 POSITION_UMIN = -1.2         # Minimum speed setpoint [m/s]
@@ -97,9 +97,9 @@ for twist_surface in sam.sys_struct.twist_surfaces
     twist_surface.moment_frac = 0.0
 end
 
-depower = 0.000
-sys_struct.tethers[:steering_left].init_stretch_frac = 1.0 - depower
-sys_struct.tethers[:steering_right].init_stretch_frac = 1.0 - depower
+depower = 0.01
+sys_struct.tethers[:steering_left].init_stretch_frac = 1.0 + depower
+sys_struct.tethers[:steering_right].init_stretch_frac = 1.0 + depower
 
 # 3. init
 @info "Initializing model..."
