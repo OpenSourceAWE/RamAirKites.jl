@@ -30,15 +30,13 @@ toc()
 PHYSICAL_MODEL = "ram"      # Options: "ram", "simple_ram", "4_attach_ram"
 SIM_TIME = 30.0              # Total simulation time [s]
 DT = 0.02                    # Time step [s]
-V_WIND = 10.0                # Wind speed [m/s]
+V_WIND = 12.51                # Wind speed [m/s]
 UPWIND_DIR = -90.0           # Upwind direction [deg]
 TETHER_LENGTH = 100.0        # Tether length [m]
-ELEVATION = 69.4             # Initial elevation angle [deg]
+ELEVATION = 74             # Initial elevation angle [deg]
 VSM_INTERVAL = 3             # VSM update interval (steps)
 OFFSET_DEG = 5.0             # Heading offset for direction reversal [deg]
-DL_START = 0.05               # Initial delta-length setpoint [m]
-DL_STEP = 0.05                # Delta-length increment per step [m]
-DL_MAX = 0.3                 # Maximum delta-length setpoint [m]
+STEERING_SEQ = [0.1, -0.2, 0.3, -0.4] .* 0.2  # Steering setpoint sequence [m]
 
 # Cascaded position → speed → torque PID parameters
 POSITION_P = 10.0            # Position PID proportional gain
@@ -122,20 +120,26 @@ alpha = dt / (dt + SPEED_TAU)  # low-pass filter coefficient
 
 function simulate(sam, logger, steps; plot=false)
     OFFSET = OFFSET_DEG
-    delta_l = DL_START    # delta-length setpoint [m]
     v_reelout_diff_filt = Ref(0.0)  # low-pass filtered reelout speed diff
 
     heading = 0.0
     # Previous sys_state heading for rate calculation
     prev_sys_heading = 0.0
+    seq_idx = 1
+    # Start with zero steering; sequence activates at t >= 10
+    steering_setpoint = 0.0
+    steering_active = false
 
     for i in 1:steps
         t = i * dt - dt
 
         # After 10 seconds, start steering
-        if t >= 10.0 && t < 10.05
-            steering_setpoint = -delta_l
-        elseif t > 10.05
+        if !steering_active && t >= 10.0
+            steering_active = true
+            steering_setpoint = abs(STEERING_SEQ[seq_idx])
+        end
+
+        if steering_active
             # heading is in [-π, π], 0 = pointing toward ground station
             last_heading = heading
             heading = sam.sys_struct.wings[1].heading
@@ -143,19 +147,20 @@ function simulate(sam, logger, steps; plot=false)
                 heading -= 2π
             end
 
-            if rad2deg(heading) < -OFFSET
-                steering_setpoint = delta_l          # steer right
-            elseif rad2deg(heading) > OFFSET
-                steering_setpoint = -delta_l         # steer left
+            if seq_idx <= length(STEERING_SEQ) && rad2deg(heading) < -OFFSET
+                steering_setpoint = abs(STEERING_SEQ[seq_idx])  # steer right
+            elseif seq_idx <= length(STEERING_SEQ) && rad2deg(heading) > OFFSET
+                steering_setpoint = -abs(STEERING_SEQ[seq_idx]) # steer left
                 if rad2deg(last_heading) <= OFFSET   # just crossed 0°
-                    delta_l += DL_STEP
-                    @info "Incremented delta-l to $delta_l m at t=$t s"
+                    seq_idx += 1
+                    if seq_idx <= length(STEERING_SEQ)
+                        @info "Advanced to seq_idx=$seq_idx, setpoint=$(STEERING_SEQ[seq_idx]) m at t=$t s"
+                    else
+                        @info "Finished all sequence values at t=$t s"
+                    end
                 end
-            else
-                steering_setpoint = 0.0
             end
-        else
-            steering_setpoint = 0.0
+            # else: heading within OFFSET band — hold current steering_setpoint
         end
 
         # --- Cascaded position→speed→torque ---
@@ -164,7 +169,6 @@ function simulate(sam, logger, steps; plot=false)
         v_reelout_diff_filt[] = alpha * v_reelout_diff + (1 - alpha) * v_reelout_diff_filt[]
         speed_setpoint = pos_pid(steering_setpoint, l_diff, 0.0)
         torque = speed_pid(speed_setpoint, v_reelout_diff_filt[], 0.0)
-        applied_torque = torque
 
         set_values = [0.0, torque, -torque]
 
@@ -182,31 +186,24 @@ function simulate(sam, logger, steps; plot=false)
         sys_state.var_15 = rad2deg(sys_state.heading - prev_sys_heading) / dt
         prev_sys_heading = sys_state.heading
 
-        # Store delta-length setpoint in var_01 for analysis
-        sys_state.var_01 = steering_setpoint
+        # Store actual line length difference (not setpoint) in var_01 for analysis
+        sys_state.var_01 = l_diff
 
         log!(logger, sys_state)
 
-        if plot && mod(i, 5) == 1
-            @printf "t=%.1f  heading=%.1f°  dl_setpoint=%.3f m  torque=%.1f N·m\n" t rad2deg(sam.sys_struct.wings[1].heading) steering_setpoint applied_torque
-        end
+        # if plot && mod(i, 5) == 1
+        #     @printf "t=%.1f  heading=%.1f°  dl_setpoint=%.3f m  torque=%.1f N·m\n" t rad2deg(sam.sys_struct.wings[1].heading) steering_setpoint applied_torque
+        # end
 
-        if mod(i, 100) == 0
-            @info "step $i / $steps, dl_setpoint=$delta_l m"
-        end
-
-        # Check break at end of loop so printing happens first
-        if delta_l > DL_MAX
-            @info "Reached DL_MAX, stopping simulation at t=$t s"
-            break
+        if mod(i, 20) == 0
+            @info "step $i / $steps, steering_setpoint=$steering_setpoint m"
         end
     end
-    return delta_l
 end
 
 @info "Running simulation..."
-final_dl = simulate(sam, logger, steps; plot=true)
-@info "Simulation finished, final delta-l setpoint: $final_dl m"
+simulate(sam, logger, steps; plot=true)
+@info "Simulation finished"
 
 mkpath(get_data_path())
 save_log(logger, "tmp_run")
@@ -270,7 +267,7 @@ function plot_steering_vs_turn_rate()
     sl = lg.syslog
     psi = rad2deg.(wrap2pi.(sl.heading))
     psi_dot = sl.var_15  # deg/s
-    var_01 = sl.var_01  # delta-length setpoint [m]
+    var_01 = sl.var_01  # actual line length difference [m] (not setpoint)
 
     delta = delay(var_01, psi_dot ./ sl.v_app)
     println("Delay of turnrate: $(round(delta * dt, digits=3)) s")
@@ -329,18 +326,17 @@ if PLOT
     using MakieControlPlots
 end
 
-time, v_app, psi, beta, psi_dot, steering = plot_steering_vs_turn_rate()
+# time, v_app, psi, beta, psi_dot, steering = plot_steering_vs_turn_rate()
 
-c1, c2 = calc_c1_c2(v_app, psi, beta, psi_dot, steering)
-println("Turn-rate law coefficients:")
-println("  c1 (steering gain): $(round(c1, digits=6))")
-println("  c2 (pendulum stability): $(round(c2, digits=6))")
+# c1, c2 = calc_c1_c2(v_app, psi, beta, psi_dot, steering)
+# println("Turn-rate law coefficients:")
+# println("  c1 (steering gain): $(round(c1, digits=6))")
+# println("  c2 (pendulum stability): $(round(c2, digits=6))")
 
-plot_turnrate_law(c1, c2, time, v_app, psi, beta, psi_dot, steering)
-
-if PLOT && Sys.isapple()
-    # On macOS, keep the display open
-    println("Plots displayed - close window to continue")
-end
+# plot_turnrate_law(c1, c2, time, v_app, psi, beta, psi_dot, steering)
+lg = load_log("tmp_run")
+sl = lg.syslog
+plot(sl.time, rad2deg.(sl.elevation))
+plot(sl.time, rad2deg.(sl.azimuth))
 
 @info "Done!"
