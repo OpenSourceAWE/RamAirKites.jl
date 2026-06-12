@@ -3,16 +3,17 @@ uuid = "7ebed07a-3d9a-4117-97d2-0a397f5b89df"
 version = "0.1.0"
 authors = ["Bart van de Lint", "Uwe Fechner"]
 
+[workspace]
+projects = ["examples", "test"]
+
 [deps]
+KitePodModels = "9de5dc81-f971-414a-927b-652b2f41c539"
 KiteUtils = "90980105-b163-44e5-ba9f-8b1c83bb0533"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 SymbolicAWEModels = "9c9a347c-5289-41db-a9b9-25ccc76c3360"
 UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
 VortexStepMethod = "ed3cd733-9f0f-46a9-93e0-89b8d4998dd9"
-
-[workspace]
-projects = ["examples", "test"]
 
 [weakdeps]
 GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
@@ -21,5 +22,6 @@ GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
 RamAirKiteMakieExt = "GLMakie"
 
 [compat]
+KitePodModels = "0.4.0"
 SymbolicAWEModels = "0.11.1"
 julia = "1.11, 1.12"
