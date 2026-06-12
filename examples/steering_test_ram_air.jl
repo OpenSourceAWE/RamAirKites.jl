@@ -36,9 +36,9 @@ TETHER_LENGTH = 100.0        # Tether length [m]
 ELEVATION = 69.4             # Initial elevation angle [deg]
 VSM_INTERVAL = 3             # VSM update interval (steps)
 OFFSET_DEG = 5.0             # Heading offset for direction reversal [deg]
-DL_START = 0.5               # Initial delta-length setpoint [m]
-DL_STEP = 0.5                # Delta-length increment per step [m]
-DL_MAX = 3.0                 # Maximum delta-length setpoint [m]
+DL_START = 0.05               # Initial delta-length setpoint [m]
+DL_STEP = 0.05                # Delta-length increment per step [m]
+DL_MAX = 0.3                 # Maximum delta-length setpoint [m]
 
 # Cascaded position → speed → torque PID parameters
 POSITION_P = 10.0            # Position PID proportional gain
@@ -124,10 +124,7 @@ function simulate(sam, logger, steps; plot=false)
     OFFSET = OFFSET_DEG
     delta_l = DL_START    # delta-length setpoint [m]
     v_reelout_diff_filt = Ref(0.0)  # low-pass filtered reelout speed diff
-    applied_torque = 0.0
 
-    # Heading tracking (matching original test logic from KitePodModels)
-    last_heading = 0.0
     heading = 0.0
     # Previous sys_state heading for rate calculation
     prev_sys_heading = 0.0
@@ -151,9 +148,6 @@ function simulate(sam, logger, steps; plot=false)
             elseif rad2deg(heading) > OFFSET
                 steering_setpoint = -delta_l         # steer left
                 if rad2deg(last_heading) <= OFFSET   # just crossed 0°
-                    if delta_l >= DL_MAX
-                        break
-                    end
                     delta_l += DL_STEP
                     @info "Incremented delta-l to $delta_l m at t=$t s"
                 end
@@ -200,6 +194,12 @@ function simulate(sam, logger, steps; plot=false)
         if mod(i, 100) == 0
             @info "step $i / $steps, dl_setpoint=$delta_l m"
         end
+
+        # Check break at end of loop so printing happens first
+        if delta_l > DL_MAX
+            @info "Reached DL_MAX, stopping simulation at t=$t s"
+            break
+        end
     end
     return delta_l
 end
@@ -215,9 +215,13 @@ save_log(logger, "tmp_run")
 
 # wrap2pi: wrap angle to [-π, π]
 function wrap2pi(theta)
-    (theta .+= π) .%= 2π
-    theta[theta .< 0] .+= 2π
-    return theta .- π
+    theta = theta % (2π)
+    if theta > π
+        theta -= 2π
+    elseif theta < -π
+        theta += 2π
+    end
+    return theta
 end
 
 function crosscor_simple(x, y, max_lag)
