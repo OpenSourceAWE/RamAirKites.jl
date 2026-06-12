@@ -101,55 +101,61 @@ function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)])
         i_pnt = length(points)
         i_seg = length(segments)
         i_pul = length(pulleys)
-        i_grp = length(twist_surfaces)
+        i_surface = length(twist_surfaces)
 
         points_new = [
             Point(1+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[1]), WING)
-            Point(2+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[3]), WING)
-            Point(3+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[4]), WING)
-            Point(4+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[1]), WING)
-            Point(5+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[3]), WING)
-            Point(6+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[4]), WING)
+            Point(2+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[2]), WING)
+            Point(3+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[3]), WING)
+            Point(4+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[4]), WING)
+            Point(5+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[1]), WING)
+            Point(6+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[2]), WING)
+            Point(7+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[3]), WING)
+            Point(8+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[4]), WING)
         ]
         twist_surfaces_new = [
-            TwistSurface(1+i_grp, [1+i_pnt, 2+i_pnt, 3+i_pnt], DYNAMIC, 0.25)
-            TwistSurface(2+i_grp, [4+i_pnt, 5+i_pnt, 6+i_pnt], DYNAMIC, 0.25)
+            TwistSurface(1+i_surface, [1+i_pnt, 2+i_pnt, 3+i_pnt, 4+i_pnt], DYNAMIC, 0.25)
+            TwistSurface(2+i_surface, [5+i_pnt, 6+i_pnt, 7+i_pnt, 8+i_pnt], DYNAMIC, 0.25)
         ]
 
         body_frame_damping = 1.0
         points_new = [
             points_new
-            Point(7+i_pnt, bridle_top[1], dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
-            Point(8+i_pnt, bridle_top[2], WING)
-            Point(9+i_pnt, bridle_top[3], dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
-            Point(10+i_pnt, bridle_top[4], dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
-            Point(11+i_pnt, bridle_top[2] - 1z, dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
-            Point(12+i_pnt, bridle_top[1] - 2z, dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
-            Point(13+i_pnt, bridle_top[3] - 2z, dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
-            Point(14+i_pnt, bridle_top[1] - 4z, dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
-            Point(15+i_pnt, bridle_top[3] - 4z, dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(9+i_pnt, bridle_top[1], dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(10+i_pnt, bridle_top[2], dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(11+i_pnt, bridle_top[3], dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(12+i_pnt, bridle_top[4], dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(13+i_pnt, bridle_top[2] - 1z, dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(14+i_pnt, bridle_top[1] - 2z, dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(15+i_pnt, bridle_top[3] - 2z, dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(16+i_pnt, bridle_top[1] - 4z, dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(17+i_pnt, bridle_top[3] - 4z, dynamics_type; body_frame_damping, world_frame_damping=0.0, transform=1)
         ]
         bk = bridle_kwargs(set)
         segments_new = [
-            Segment(1+i_seg, set, 1+i_pnt, 7+i_pnt; bk...)
-            Segment(2+i_seg, set, 2+i_pnt, 9+i_pnt; bk...)
-            Segment(3+i_seg, set, 3+i_pnt, 10+i_pnt; bk...)
-            Segment(4+i_seg, set, 4+i_pnt, 7+i_pnt; bk...)
+            Segment(1+i_seg, set, 1+i_pnt, 9+i_pnt; bk...)
+            Segment(2+i_seg, set, 2+i_pnt, 10+i_pnt; bk...)
+            Segment(3+i_seg, set, 3+i_pnt, 11+i_pnt; bk...)
+            Segment(4+i_seg, set, 4+i_pnt, 12+i_pnt; bk...)
+
             Segment(5+i_seg, set, 5+i_pnt, 9+i_pnt; bk...)
             Segment(6+i_seg, set, 6+i_pnt, 10+i_pnt; bk...)
-            Segment(7+i_seg, set, 7+i_pnt, 12+i_pnt; bk..., l0=2)
-            Segment(8+i_seg, set, 8+i_pnt, 11+i_pnt; bk..., l0=1)
-            Segment(9+i_seg, set, 9+i_pnt, 13+i_pnt; bk..., l0=2)
-            Segment(10+i_seg, set, 10+i_pnt, 15+i_pnt; bk..., l0=4)
-            Segment(11+i_seg, set, 11+i_pnt, 12+i_pnt; bk..., l0=1)
-            Segment(12+i_seg, set, 11+i_pnt, 13+i_pnt; bk..., l0=1)
-            Segment(13+i_seg, set, 12+i_pnt, 14+i_pnt; bk..., l0=2)
-            Segment(14+i_seg, set, 13+i_pnt, 14+i_pnt; bk..., l0=2)
-            Segment(15+i_seg, set, 13+i_pnt, 15+i_pnt; bk..., l0=2)
+            Segment(7+i_seg, set, 7+i_pnt, 11+i_pnt; bk...)
+            Segment(8+i_seg, set, 8+i_pnt, 12+i_pnt; bk...)
+
+            Segment(9+i_seg, set, 9+i_pnt, 14+i_pnt; bk..., l0=2)
+            Segment(10+i_seg, set, 10+i_pnt, 13+i_pnt; bk..., l0=1)
+            Segment(11+i_seg, set, 11+i_pnt, 15+i_pnt; bk..., l0=2)
+            Segment(12+i_seg, set, 12+i_pnt, 17+i_pnt; bk..., l0=4)
+            Segment(13+i_seg, set, 13+i_pnt, 14+i_pnt; bk..., l0=1)
+            Segment(14+i_seg, set, 13+i_pnt, 15+i_pnt; bk..., l0=1)
+            Segment(15+i_seg, set, 14+i_pnt, 16+i_pnt; bk..., l0=2)
+            Segment(16+i_seg, set, 15+i_pnt, 16+i_pnt; bk..., l0=2)
+            Segment(17+i_seg, set, 15+i_pnt, 17+i_pnt; bk..., l0=2)
         ]
         pulleys_new = [
-            Pulley(1+i_pul, 11+i_seg, 12+i_seg, dynamics_type)
-            Pulley(2+i_pul, 14+i_seg, 15+i_seg, dynamics_type)
+            Pulley(1+i_pul, 13+i_seg, 14+i_seg, dynamics_type)
+            Pulley(2+i_pul, 16+i_seg, 17+i_seg, dynamics_type)
         ]
         append!(points, points_new)
         append!(twist_surfaces, twist_surfaces_new)
@@ -225,7 +231,7 @@ function create_4_attach_ram_sys_struct(set::Settings)
         i_pnt = length(points)
         i_seg = length(segments)
         i_pul = length(pulleys)
-        i_grp = length(twist_surfaces)
+        i_surface = length(twist_surfaces)
 
         points_new = [
             Point(1+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[1]), WING)
@@ -238,8 +244,8 @@ function create_4_attach_ram_sys_struct(set::Settings)
             Point(8+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[4]), WING)
         ]
         twist_surfaces_new = [
-            TwistSurface(1+i_grp, [1+i_pnt, 2+i_pnt, 3+i_pnt, 4+i_pnt], DYNAMIC, set.bridle_fracs[2])
-            TwistSurface(2+i_grp, [5+i_pnt, 6+i_pnt, 7+i_pnt, 8+i_pnt], DYNAMIC, set.bridle_fracs[2])
+            TwistSurface(1+i_surface, [1+i_pnt, 2+i_pnt, 3+i_pnt, 4+i_pnt], DYNAMIC, set.bridle_fracs[2])
+            TwistSurface(2+i_surface, [5+i_pnt, 6+i_pnt, 7+i_pnt, 8+i_pnt], DYNAMIC, set.bridle_fracs[2])
         ]
 
         body_frame_damping = 1.0
