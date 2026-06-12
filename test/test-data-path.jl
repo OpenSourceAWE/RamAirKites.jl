@@ -3,6 +3,13 @@
 
 using Test
 using RamAirKite
+using Pkg
+
+if !isnothing(Pkg.project().name)
+    @info "Activating test environment"
+    using TestEnv
+    TestEnv.activate()
+end
 
 @testset "Data Path" begin
     path = ram_air_data_path()
@@ -11,3 +18,4 @@ using RamAirKite
     @test isfile(joinpath(path, "settings.yaml"))
     @test isfile(joinpath(path, "vsm_settings.yaml"))
 end
+nothing

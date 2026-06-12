@@ -2,10 +2,11 @@
 # SPDX-License-Identifier: MPL-2.0
 
 using Pkg
-if Base.active_project() != joinpath(@__DIR__, "Project.toml")
-    Pkg.activate(joinpath(@__DIR__))
+
+if !isnothing(Pkg.project().name)
+    using TestEnv
+    TestEnv.activate()
 end
-Pkg.instantiate()
 
 using Timers
 tic()
