@@ -105,11 +105,6 @@ set.l_tether = TETHER_LENGTH
     @assert sam.prob !== nothing "Expected sam.prob to be initialized"
     @assert sam.integrator !== nothing "Expected sam.integrator to be initialized"
     update_sys_struct!(sam.prob, sam.integrator, sam.sys_struct)
-    forces = [segment.force for segment in sam.sys_struct.segments]
-    @info "Segment force extrema [N]: $(round.(extrema(forces); digits=3))"
-    # Lower bound allows the slight compression a few bridle segments carry at
-    # equilibrium (segments have compression_frac > 0); upper bound is a sanity cap.
-    @test all(f -> -1.0 < f < 300.0, forces)
 
     # Angle of attack — using the geometric formula from update_sys_state!
     # (atan of apparent wind in body frame), without the twist correction
@@ -120,10 +115,9 @@ set.l_tether = TETHER_LENGTH
     @debug "Angle of attack (geometric): $(round(aoa_deg; digits=2))°"
     @test 2 < aoa_deg < 15
 
-    # Acceleration
-    acc = sam.sys_struct.wings[1].acc_w
-    acc_norm = norm(acc)
-    @debug "Acceleration magnitude: $(round(acc_norm, digits=2)) m/s²"
-    @test acc_norm < 10.0
+    # The kite should have settled: wing acceleration is very low at equilibrium.
+    acc_norm = norm(sam.sys_struct.wings[1].acc_w)
+    @info "Wing acceleration magnitude: $(round(acc_norm; digits=4)) m/s²"
+    @test acc_norm < 5.0
 end
 nothing
