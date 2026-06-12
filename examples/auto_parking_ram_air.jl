@@ -10,7 +10,7 @@ controller tracks a zero heading setpoint (loitering), while inner control
 loops convert the steering setpoint into a torque command via cascaded
 position and speed PIDs on the delta-length of the steering lines. The
 simulation uses the "ram" physical model by default, which includes a
-bridle system and four wing segment groups.
+bridle system and four wing segment twist surfaces.
 """
 
 using Pkg
@@ -93,8 +93,8 @@ end
 for segment in sam.sys_struct.segments
     segment.compression_frac = 0.01
 end
-for group in sam.sys_struct.groups
-    group.moment_frac = 0.0
+for twist_surface in sam.sys_struct.twist_surfaces
+    twist_surface.moment_frac = 0.0
 end
 
 depower = 0.000
@@ -123,8 +123,8 @@ sys_state.time = 0.0
 
 steady_torque = calc_steady_torque(sam)
 
-for group in sam.sys_struct.groups
-    group.damping = 200.0
+for twist_surface in sam.sys_struct.twist_surfaces
+    twist_surface.damping = 200.0
 end
 
 heading_pid = DiscretePID(; K=HEADING_P, Ti=HEADING_I, Td=HEADING_D, Ts=dt, umin=(-MAX_STEERING), umax=MAX_STEERING)

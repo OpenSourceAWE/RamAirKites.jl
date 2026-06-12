@@ -27,8 +27,8 @@ end
 for segment in sys_struct.segments
     segment.compression_frac = 0.01
 end
-for group in sys_struct.groups
-    group.moment_frac = 0.0
+for twist_surface in sys_struct.twist_surfaces
+    twist_surface.moment_frac = 0.0
 end
 
 sam = SymbolicAWEModel(set, sys_struct)
@@ -52,8 +52,8 @@ sys_state.time = 0.0
 
 steady_torque = calc_steady_torque(sam)
 
-for group in sam.sys_struct.groups
-    group.damping = 200.0
+for twist_surface in sam.sys_struct.twist_surfaces
+    twist_surface.damping = 200.0
 end
 
 heading_pid = DiscretePID(; K=0.7, Ti=1.5, Td=0.43, Ts=dt,

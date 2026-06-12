@@ -73,7 +73,7 @@ end
 
 Create a `SystemStructure` for the primary "ram" model with a stability-enhancing bridle.
 
-The model features 4 deformable groups (3 deforming points + 1 static point each),
+The model features 4 deformable twist_surfaces (3 deforming points + 1 static point each),
 a complex pulley bridle system, 4 main tethers, and 3 winches.
 
 # Arguments
@@ -84,7 +84,7 @@ function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)])
     vsm_set = VortexStepMethod.VSMSettings(vsm_set_path; data_prefix=false)
     vsm_wing = create_vsm_wing(set, vsm_set; prn=false)
     points = Point[]
-    groups = Group[]
+    twist_surfaces = TwistSurface[]
     segments = Segment[]
     pulleys = Pulley[]
     tethers = Tether[]
@@ -97,11 +97,11 @@ function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)])
     dynamics_type = set.quasi_static ? QUASI_STATIC : DYNAMIC
     z = vsm_wing.R_cad_body[:, 3]
 
-    function create_bridle(bridle_top, gammas, points, groups, segments, pulleys, attach_points)
+    function create_bridle(bridle_top, gammas, points, twist_surfaces, segments, pulleys, attach_points)
         i_pnt = length(points)
         i_seg = length(segments)
         i_pul = length(pulleys)
-        i_grp = length(groups)
+        i_grp = length(twist_surfaces)
 
         points_new = [
             Point(1+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[1]), WING)
@@ -111,9 +111,9 @@ function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)])
             Point(5+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[3]), WING)
             Point(6+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[4]), WING)
         ]
-        groups_new = [
-            Group(1+i_grp, [1+i_pnt, 2+i_pnt, 3+i_pnt], DYNAMIC, 0.25)
-            Group(2+i_grp, [4+i_pnt, 5+i_pnt, 6+i_pnt], DYNAMIC, 0.25)
+        twist_surfaces_new = [
+            TwistSurface(1+i_grp, [1+i_pnt, 2+i_pnt, 3+i_pnt], DYNAMIC, 0.25)
+            TwistSurface(2+i_grp, [4+i_pnt, 5+i_pnt, 6+i_pnt], DYNAMIC, 0.25)
         ]
 
         body_frame_damping = 1.0
@@ -152,7 +152,7 @@ function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)])
             Pulley(2+i_pul, 14+i_seg, 15+i_seg, dynamics_type)
         ]
         append!(points, points_new)
-        append!(groups, groups_new)
+        append!(twist_surfaces, twist_surfaces_new)
         append!(segments, segments_new)
         append!(pulleys, pulleys_new)
         push!(attach_points, points[end-1])
@@ -161,8 +161,8 @@ function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)])
     end
 
     gammas = [-3/4, -1/4, 1/4, 3/4] * vsm_wing.gamma_tip
-    create_bridle(bridle_top_left, gammas[[1, 2]], points, groups, segments, pulleys, attach_points)
-    create_bridle(bridle_top_right, gammas[[3, 4]], points, groups, segments, pulleys, attach_points)
+    create_bridle(bridle_top_left, gammas[[1, 2]], points, twist_surfaces, segments, pulleys, attach_points)
+    create_bridle(bridle_top_right, gammas[[3, 4]], points, twist_surfaces, segments, pulleys, attach_points)
 
     points, tethers, power_left_anchor =
         add_tether!(points, tethers, :power_left, set, attach_points[1];
@@ -189,7 +189,7 @@ function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)])
     transforms = [Transform(1, deg2rad(float(set.elevation)), deg2rad(float(set.azimuth)), deg2rad(float(set.heading));
                              base_pos=zeros(3), base_point=steering_right_anchor, wing=1)]
 
-    return SystemStructure("ram", set; points, groups, segments, pulleys, tethers, winches, wings, transforms)
+    return SystemStructure("ram", set; points, twist_surfaces, segments, pulleys, tethers, winches, wings, transforms)
 end
 
 """
@@ -208,7 +208,7 @@ function create_4_attach_ram_sys_struct(set::Settings)
     vsm_set = VortexStepMethod.VSMSettings(vsm_set_path; data_prefix=false)
     vsm_wing = create_vsm_wing(set, vsm_set; prn=false)
     points = Point[]
-    groups = Group[]
+    twist_surfaces = TwistSurface[]
     segments = Segment[]
     pulleys = Pulley[]
     tethers = Tether[]
@@ -221,11 +221,11 @@ function create_4_attach_ram_sys_struct(set::Settings)
     dynamics_type = set.quasi_static ? QUASI_STATIC : DYNAMIC
     z = vsm_wing.R_cad_body[:, 3]
 
-    function create_bridle(bridle_top, gammas, points, groups, segments, pulleys, attach_points)
+    function create_bridle(bridle_top, gammas, points, twist_surfaces, segments, pulleys, attach_points)
         i_pnt = length(points)
         i_seg = length(segments)
         i_pul = length(pulleys)
-        i_grp = length(groups)
+        i_grp = length(twist_surfaces)
 
         points_new = [
             Point(1+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[1]), WING)
@@ -237,9 +237,9 @@ function create_4_attach_ram_sys_struct(set::Settings)
             Point(7+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[3]), WING)
             Point(8+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[4]), WING)
         ]
-        groups_new = [
-            Group(1+i_grp, [1+i_pnt, 2+i_pnt, 3+i_pnt, 4+i_pnt], DYNAMIC, set.bridle_fracs[2])
-            Group(2+i_grp, [5+i_pnt, 6+i_pnt, 7+i_pnt, 8+i_pnt], DYNAMIC, set.bridle_fracs[2])
+        twist_surfaces_new = [
+            TwistSurface(1+i_grp, [1+i_pnt, 2+i_pnt, 3+i_pnt, 4+i_pnt], DYNAMIC, set.bridle_fracs[2])
+            TwistSurface(2+i_grp, [5+i_pnt, 6+i_pnt, 7+i_pnt, 8+i_pnt], DYNAMIC, set.bridle_fracs[2])
         ]
 
         body_frame_damping = 1.0
@@ -280,7 +280,7 @@ function create_4_attach_ram_sys_struct(set::Settings)
             Pulley(2+i_pul, 16+i_seg, 17+i_seg, dynamics_type)
         ]
         append!(points, points_new)
-        append!(groups, groups_new)
+        append!(twist_surfaces, twist_surfaces_new)
         append!(segments, segments_new)
         append!(pulleys, pulleys_new)
         push!(attach_points, points[end-1])
@@ -289,8 +289,8 @@ function create_4_attach_ram_sys_struct(set::Settings)
     end
 
     gammas = [-3/4, -1/4, 1/4, 3/4] * vsm_wing.gamma_tip
-    create_bridle(bridle_top_left, gammas[[1, 2]], points, groups, segments, pulleys, attach_points)
-    create_bridle(bridle_top_right, gammas[[3, 4]], points, groups, segments, pulleys, attach_points)
+    create_bridle(bridle_top_left, gammas[[1, 2]], points, twist_surfaces, segments, pulleys, attach_points)
+    create_bridle(bridle_top_right, gammas[[3, 4]], points, twist_surfaces, segments, pulleys, attach_points)
 
     points, tethers, power_left_anchor =
         add_tether!(points, tethers, :power_left, set, attach_points[1];
@@ -317,7 +317,7 @@ function create_4_attach_ram_sys_struct(set::Settings)
     transforms = [Transform(1, deg2rad(float(set.elevation)), deg2rad(float(set.azimuth)), deg2rad(float(set.heading));
                              base_pos=zeros(3), base_point=steering_right_anchor, wing=1)]
 
-    return SystemStructure("4_attach_ram", set; points, groups, segments, pulleys, tethers, winches, wings, transforms)
+    return SystemStructure("4_attach_ram", set; points, twist_surfaces, segments, pulleys, tethers, winches, wings, transforms)
 end
 
 """
@@ -354,9 +354,9 @@ function create_simple_ram_sys_struct(set::Settings;
         Point(9, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[1]), WING)
         Point(10, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[1]), WING)
     ]
-    groups = [
-        Group(1, [9, 3], DYNAMIC, 0.25)
-        Group(2, [10, 4], DYNAMIC, 0.25)
+    twist_surfaces = [
+        TwistSurface(1, [9, 3], DYNAMIC, 0.25)
+        TwistSurface(2, [10, 4], DYNAMIC, 0.25)
     ]
     segments = [
         Segment(1, set, 1, 5; unit_stiffness=unit_stiffness[1], unit_damping=unit_damping[1], diameter_mm=set.power_tether_diameter)
@@ -384,7 +384,7 @@ function create_simple_ram_sys_struct(set::Settings;
     ]
 
     return SystemStructure("simple_ram", set;
-        points, groups, segments, tethers, winches, wings, transforms)
+        points, twist_surfaces, segments, tethers, winches, wings, transforms)
 end
 
 """

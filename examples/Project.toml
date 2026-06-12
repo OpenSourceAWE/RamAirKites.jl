@@ -13,3 +13,4 @@ VortexStepMethod = "ed3cd733-9f0f-46a9-93e0-89b8d4998dd9"
 
 [sources]
 RamAirKite = {path = ".."}
+SymbolicAWEModels = {path = "../../SymbolicAWEModels.jl"}
