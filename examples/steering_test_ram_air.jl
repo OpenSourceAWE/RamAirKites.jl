@@ -27,16 +27,17 @@ toc()
 
 # ==================== USER PARAMETERS ==================== #
 
-PHYSICAL_MODEL = "ram"      # Options: "ram", "simple_ram", "4_attach_ram"
+PHYSICAL_MODEL = "ram"       # Options: "ram", "simple_ram", "4_attach_ram"
 SIM_TIME = 20.0              # Total simulation time [s]
 DT = 0.02                    # Time step [s]
-V_WIND = 12.51                # Wind speed [m/s]
+INITIAL_STEERING = -0.015    # Initial steering line length difference [m]
+V_WIND = 12.51               # Wind speed [m/s]
 UPWIND_DIR = -90.0           # Upwind direction [deg]
 TETHER_LENGTH = 100.0        # Tether length [m]
-ELEVATION = 74             # Initial elevation angle [deg]
+ELEVATION = 74               # Initial elevation angle [deg]
 VSM_INTERVAL = 3             # VSM update interval (steps)
-OFFSET_DEG = 5.0             # Heading offset for direction reversal [deg]
-STEERING_SEQ = [0.1, -0.2, 0.3, -0.4] .* 0.2  # Steering setpoint sequence [m]
+OFFSET_DEG = 4.0             # Heading offset for direction reversal [deg]
+STEERING_SEQ = [0.1, -0.2, 0.3, -0.4, 0.5, -0.6] .* 0.2  # Steering setpoint sequence [m]
 
 # Cascaded position → speed → torque PID parameters
 POSITION_P = 10.0            # Position PID proportional gain
@@ -127,7 +128,7 @@ function simulate(sam, logger, steps; plot=false)
     prev_sys_heading = 0.0
     seq_idx = 1
     # Start with zero steering; sequence activates at t >= 10
-    steering_setpoint = 0.0
+    steering_setpoint = INITIAL_STEERING
     steering_active = false
 
     for i in 1:steps
@@ -188,6 +189,8 @@ function simulate(sam, logger, steps; plot=false)
 
         # Store actual line length difference (not setpoint) in var_01 for analysis
         sys_state.var_01 = l_diff
+        # Store steering setpoint in var_02 for analysis
+        sys_state.var_02 = steering_setpoint
 
         log!(logger, sys_state)
 
@@ -336,8 +339,9 @@ end
 # plot_turnrate_law(c1, c2, time, v_app, psi, beta, psi_dot, steering)
 lg = load_log("tmp_run")
 sl = lg.syslog
-steering = sl.var_01 
-p=plotx(sl.time, rad2deg.(sl.elevation), rad2deg.(sl.azimuth), rad2deg.(sl.heading), steering; ylabels=["elevation [°]", "azimuth [°]", "heading [°]", "steering [m]"], fig="elevation and azimuth")
+steering = sl.var_01
+steering_setpoint_logged = sl.var_02
+p=plotx(sl.time, rad2deg.(sl.elevation), rad2deg.(sl.azimuth), rad2deg.(sl.heading), steering, steering_setpoint_logged; ylabels=["elevation [°]", "azimuth [°]", "heading [°]", "steering [m]", "setpoint [m]"], fig="elevation and azimuth")
 display(p)
 
 @info "Done!"
