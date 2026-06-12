@@ -64,8 +64,8 @@ end
 
 Copy the dynamic state from a detailed `SystemStructure` to a simplified one.
 
-Maps the state of a complex model (e.g., "ram" with 4 groups and bridle pulleys)
-to a simpler model (e.g., "simple_ram" with 2 groups and direct connections).
+Maps the state of a complex model (e.g., "ram" with 4 twist surfaces and bridle pulleys)
+to a simpler model (e.g., "simple_ram" with 2 twist surfaces and direct connections).
 
 # Arguments
 - `sys::SystemStructure`: The source `ram` model structure.
@@ -94,27 +94,27 @@ function copy_to_simple!(sys::SystemStructure, ssys::SystemStructure)
     swing.vel_w .= wing.vel_w
     swing.ω_b .= wing.ω_b
     swing.Q_b_to_w .= wing.Q_b_to_w
-    # update non-group pos
+    # update non-twist-surface pos
     ssys.points[1].pos_w .= wing.pos_w + wing.R_b_to_w * ssys.points[1].pos_b
     ssys.points[2].pos_w .= wing.pos_w + wing.R_b_to_w * ssys.points[2].pos_b
 
-    # copy twist (average the two groups on each side)
-    (length(sys.groups) != 4) && error("Sys should have 4 groups.")
-    (length(ssys.groups) != 2) && error("Simple sys should have 2 groups.")
-    ssys.groups[1].twist = (sys.groups[1].twist + sys.groups[2].twist) / 2
-    ssys.groups[2].twist = (sys.groups[3].twist + sys.groups[4].twist) / 2
-    ssys.groups[1].twist_ω = (sys.groups[1].twist_ω + sys.groups[2].twist_ω) / 2
-    ssys.groups[2].twist_ω = (sys.groups[3].twist_ω + sys.groups[4].twist_ω) / 2
+    # copy twist (average the two twist surfaces on each side)
+    (length(sys.twist_surfaces) != 4) && error("Sys should have 4 twist surfaces.")
+    (length(ssys.twist_surfaces) != 2) && error("Simple sys should have 2 twist surfaces.")
+    ssys.twist_surfaces[1].twist = (sys.twist_surfaces[1].twist + sys.twist_surfaces[2].twist) / 2
+    ssys.twist_surfaces[2].twist = (sys.twist_surfaces[3].twist + sys.twist_surfaces[4].twist) / 2
+    ssys.twist_surfaces[1].twist_ω = (sys.twist_surfaces[1].twist_ω + sys.twist_surfaces[2].twist_ω) / 2
+    ssys.twist_surfaces[2].twist_ω = (sys.twist_surfaces[3].twist_ω + sys.twist_surfaces[4].twist_ω) / 2
 
     # match moment by changing moment frac
-    moment = [group.tether_moment for group in sys.groups]
-    moment_frac = sys.groups[1].moment_frac
+    moment = [ts.tether_moment for ts in sys.twist_surfaces]
+    moment_frac = sys.twist_surfaces[1].moment_frac
     moment = [mean(moment[1:2]), mean(moment[3:4])]
     steering_force = [norm(sys.winches[2].force), norm(sys.winches[3].force)]
 
-    # Pick the group point that is actually connected to a simple-model tether.
-    function tether_attachment_point_idx(ssys::SystemStructure, sgroup::Group)
-        for point_idx in sgroup.point_idxs
+    # Pick the twist surface point that is actually connected to a simple-model tether.
+    function tether_attachment_point_idx(ssys::SystemStructure, simple_surface::TwistSurface)
+        for point_idx in simple_surface.point_idxs
             for tether in ssys.tethers
                 segment = ssys.segments[tether.segment_idxs[1]]
                 if point_idx == segment.point_idxs[1]
@@ -122,24 +122,24 @@ function copy_to_simple!(sys::SystemStructure, ssys::SystemStructure)
                 end
             end
         end
-        error("Could not find tether attachment point for simple group $(sgroup.idx).")
+        error("Could not find tether attachment point for simple twist surface $(simple_surface.idx).")
     end
 
-    for sgroup in ssys.groups
-        x_airf = normalize(sgroup.chord)
-        init_z_airf = x_airf × sgroup.y_airf
-        z_airf = x_airf * sin(sgroup.twist) + init_z_airf * cos(sgroup.twist)
-        force = steering_force[sgroup.idx] * normalize(swing.pos_w) ⋅ (swing.R_b_to_w * z_airf)
-        r = moment[sgroup.idx] / force
-        spoint_idx = tether_attachment_point_idx(ssys, sgroup)
+    for simple_surface in ssys.twist_surfaces
+        x_airf = normalize(simple_surface.chord)
+        init_z_airf = x_airf × simple_surface.y_airf
+        z_airf = x_airf * sin(simple_surface.twist) + init_z_airf * cos(simple_surface.twist)
+        force = steering_force[simple_surface.idx] * normalize(swing.pos_w) ⋅ (swing.R_b_to_w * z_airf)
+        r = moment[simple_surface.idx] / force
+        spoint_idx = tether_attachment_point_idx(ssys, simple_surface)
         spoint = ssys.points[spoint_idx]
-        spoint.pos_b .= sgroup.le_pos + sgroup.chord * (r / norm(sgroup.chord) + moment_frac)
+        spoint.pos_b .= simple_surface.le_pos + simple_surface.chord * (r / norm(simple_surface.chord) + moment_frac)
 
         # update pos_w for correct tether len
-        chord_b = spoint.pos_b .- sgroup.le_pos
-        normal = chord_b × sgroup.y_airf
-        pos_b = sgroup.le_pos + cos(sgroup.twist) * chord_b -
-                sin(sgroup.twist) * normal
+        chord_b = spoint.pos_b .- simple_surface.le_pos
+        normal = chord_b × simple_surface.y_airf
+        pos_b = simple_surface.le_pos + cos(simple_surface.twist) * chord_b -
+                sin(simple_surface.twist) * normal
         spoint.pos_w .= swing.pos_w + swing.R_b_to_w * pos_b
     end
 
