@@ -223,7 +223,7 @@ p1 = mcp.plotx(
         L"\mathrm{elevation}~[°]",
         L"F_{\mathrm{a},x}~[\mathrm{N}]",
         L"\alpha~[°]",
-        L"\psi,\chi~[°]",
+        L"\psi,~\chi~[°]",
         L"F_{\mathrm{t}}~[\mathrm{N}]",
     ],
     legendsize=24,
