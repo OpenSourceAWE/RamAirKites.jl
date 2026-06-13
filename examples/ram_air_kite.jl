@@ -228,8 +228,7 @@ p1 = mcp.plotx(
     ],
     legendsize=24,
     labels=[
-        [L"v_{\mathrm{w},1}", L"v_{\mathrm{w},2}", L"v_{\mathrm{w},3}"],
-        nothing,
+        [L"v_{\mathrm{reelout},1}", L"v_{\mathrm{reelout},2}", L"v_{\mathrm{reelout},3}"],
         nothing,
         nothing,
         [L"\psi", L"\chi", L"\psi_{\mathrm{ref}}"],
