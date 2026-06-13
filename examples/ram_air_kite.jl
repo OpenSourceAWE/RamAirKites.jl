@@ -239,7 +239,7 @@ p1 = mcp.plotx(
 display(p1)
 sleep(0.1)  # Allow Makie to render before proceeding
 
-# Plot heading setpoint vs actual heading using Ma
+# Plot heading setpoint vs actual heading using MakieControlPlots
 p2 = nothing
 if PLOT_HEADING
     sl = syslog.syslog
