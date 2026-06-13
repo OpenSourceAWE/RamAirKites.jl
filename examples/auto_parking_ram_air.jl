@@ -48,9 +48,9 @@ PROFILE_LAW = 3              # Wind profile law (3 = EXPLOG)
 REMAKE_CACHE = false         # Force rebuild of compiled model cache
 VSM_INTERVAL = 7             # VSM update interval
 MAX_STEERING = 1.5           # Steering limit [m]
-HEADING_P = 0.7              # Heading PID proportional gain
-HEADING_I = 1.5         # Heading PID integral time (false = off)
-HEADING_D = 0.43             # Heading PID derivative time
+HEADING_P = 1.0              # Heading PID proportional gain
+HEADING_I = 1.7         # Heading PID integral time (false = off)
+HEADING_D = 0.4             # Heading PID derivative time
 
 # Cascaded position + speed controller for steering lines
 POSITION_P = 8.0             # Position PID proportional gain
