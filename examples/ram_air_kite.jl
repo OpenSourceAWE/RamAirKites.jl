@@ -45,9 +45,9 @@ VSM_INTERVAL = 7            # VSM update interval
 MAX_HEADING = 20.0          # Heading setpoint amplitude [deg]
 HEADING_PERIOD = 5.0        # Heading setpoint period [s]
 MAX_STEERING = 1.5           # Steering limit [m] (position setpoint)
-HEADING_P = 0.7              # Heading PID proportional gain
-HEADING_I = 1.5              # Heading PID integral time (false = off)
-HEADING_D = 0.43             # Heading PID derivative time
+HEADING_P = 0.6              # Heading PID proportional gain
+HEADING_I = 4.0              # Heading PID integral time (false = off)
+HEADING_D = 0.33             # Heading PID derivative time
 
 # Cascaded position + speed controller for steering lines
 POSITION_P = 8.0             # Position PID proportional gain
@@ -230,7 +230,7 @@ if RECORD_VIDEO
     @info "Recording video to $video_path (this may take a while)..."
     SymbolicAWEModels.record(syslog, sam.sys_struct, video_path; framerate=Int(round(1 / DT)))
 end
-scene = SymbolicAWEModels.replay(sub_log, sam.sys_struct; replay_speed=2.0)
-display(GLMakie.Screen(), scene)
+# scene = SymbolicAWEModels.replay(sub_log, sam.sys_struct; replay_speed=2.0)
+# display(GLMakie.Screen(), scene)
 
 
