@@ -210,7 +210,7 @@ time_vec = sl.time[1:length(heading_setpoint)]
 p = mcp.plotx(
     time_vec,
     [getindex.(sl.v_reelout, 1), getindex.(sl.v_reelout, 2), getindex.(sl.v_reelout, 3)],
-    getindex.(sl.l_tether, 1),
+    rad2deg.(sl.elevation),
     getindex.(sl.aero_force_b, 1),
     rad2deg.(sl.AoA),
     [rad2deg.(sl.heading), rad2deg.(sl.course), rad2deg.(heading_setpoint)],
@@ -219,7 +219,7 @@ p = mcp.plotx(
     ysize=24,
     ylabels=[
         L"v_{\mathrm{w}}~[\mathrm{m/s}]",
-        L"l_{\mathrm{t}}~[\mathrm{m}]",
+        L"\mathrm{elevation}~[°]",
         L"F_{\mathrm{a},x}~[\mathrm{N}]",
         L"\alpha~[°]",
         L"\psi,\chi~[°]",
