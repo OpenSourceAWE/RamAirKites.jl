@@ -206,7 +206,7 @@ if PLOT
             L"\mathrm{heading}~[°]",
             L"\Delta l_{\mathrm{set}}~[\mathrm{m}]",
             L"\mathrm{AoA}~[°]",
-            L"v_{\mathrm{a}}~[\mathrm{ms^{-1}}]",
+            L"v_{\mathrm{a}}~[\mathrm{m/s}]",
             L"\mathrm{aeroforce}~[\mathrm{N}]",
         ],
         ysize=18,
