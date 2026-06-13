@@ -199,29 +199,29 @@ if PLOT
         rad2deg.(sl.AoA),
         sl.v_app,
         aero_force_norm;
-        xlabel=L"\mathrm{Time}~[s]",
+        xlabel=L"\mathrm{Time}~[\mathrm{s}]",
         ylabels=[
             L"\mathrm{elevation}~[°]",
             L"\mathrm{azimuth}~[°]",
             L"\mathrm{heading}~[°]",
-            L"\Delta l_{\mathrm{set}}~[m]",
+            L"\Delta l_{\mathrm{set}}~[\mathrm{m}]",
             L"\mathrm{AoA}~[°]",
-            L"v_a~[\mathrm{ms^{-1}}]",
-            L"\mathrm{aeroforce}~[N]",
+            L"v_{\mathrm{a}}~[\mathrm{ms^{-1}}]",
+            L"\mathrm{aeroforce}~[\mathrm{N}]",
         ],
         ysize=18,
         fig="Ram air kite",
     )
     display(p)
 
-    delta_labels = [L"\Delta l_{\mathrm{set}}~[m]", L"\Delta l~[m]"]
+    delta_labels = [L"\Delta l_{\mathrm{set}}~[\mathrm{m}]", L"\Delta l~[\mathrm{m}]"]
     all_labels = [delta_labels, nothing]
     p2 = plotx(
         sl.time,
         [dl_setpoint_history, l_diff],
         steering_torque_history;
-        xlabel=L"\mathrm{Time}~[s]",
-        ylabels=[L"\Delta l~[m]", L"\mathrm{torque}~[Nm]"],
+        xlabel=L"\mathrm{Time}~[\mathrm{s}]",
+        ylabels=[L"\Delta l~[\mathrm{m}]", L"\mathrm{torque}~[\mathrm{Nm}]"],
         labels=all_labels,
         ysize=18,
         fig="Delta-l setpoint vs actual",
