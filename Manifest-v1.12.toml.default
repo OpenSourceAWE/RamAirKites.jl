@@ -2,7 +2,7 @@
 
 julia_version = "1.12.6"
 manifest_format = "2.0"
-project_hash = "515f69e606c6e498c46f54beb5c2c04615ab73d6"
+project_hash = "ad84878eaede2d90169b06083b732af90893f292"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "bbc22a9a08a0ef6460041086d8a7b27940ed4ffd"
@@ -1678,9 +1678,9 @@ version = "0.24.11"
 
 [[deps.MakieControlPlots]]
 deps = ["CairoMakie", "GLMakie", "JLD2", "LaTeXStrings", "Makie", "PrecompileTools", "Printf", "StaticArraysCore"]
-git-tree-sha1 = "f32dd450715d2ebbdb6144003e96613feb3bc52a"
+git-tree-sha1 = "1b5f89c3d2b77ffd59f788ab91e9ad91e408a675"
 uuid = "6d616b69-6563-4f6e-8472-6f6c706c6f74"
-version = "0.1.1"
+version = "0.1.2"
 weakdeps = ["ControlSystemsBase"]
 
     [deps.MakieControlPlots.extensions]
@@ -2902,9 +2902,9 @@ version = "0.2.8"
 
 [[deps.SymbolicAWEModels]]
 deps = ["AtmosphericModels", "CodecZlib", "ControlSystemsBase", "DataInterpolations", "Dates", "DocStringExtensions", "ForwardDiff", "KiteUtils", "LaTeXStrings", "LinearAlgebra", "Logging", "ModelingToolkit", "NonlinearSolve", "NonlinearSolveQuasiNewton", "OrdinaryDiffEqBDF", "OrdinaryDiffEqCore", "OrdinaryDiffEqNonlinearSolve", "Parameters", "Pkg", "PrecompileTools", "Printf", "RecipesBase", "SHA", "Serialization", "StaticArrays", "Statistics", "SteadyStateDiffEq", "Suppressor", "SymbolicIndexingInterface", "SymbolicUtils", "Symbolics", "TOML", "Tar", "Timers", "UnPack", "VortexStepMethod", "YAML"]
-git-tree-sha1 = "9f0a4acc384a76cdf9b3a6b28359d7a441689d2b"
+git-tree-sha1 = "e9cff0d4583cda1b4fa9b5da9489836d27a68bac"
 uuid = "9c9a347c-5289-41db-a9b9-25ccc76c3360"
-version = "0.11.1"
+version = "0.12.0"
 weakdeps = ["GeometryBasics", "Makie"]
 
     [deps.SymbolicAWEModels.extensions]
@@ -3125,9 +3125,9 @@ version = "1.28.0"
 
 [[deps.VortexStepMethod]]
 deps = ["Colors", "DefaultApplication", "DelimitedFiles", "DifferentiationInterface", "FiniteDiff", "ForwardDiff", "Interpolations", "LaTeXStrings", "LinearAlgebra", "Logging", "Measures", "NonlinearSolve", "Parameters", "Pkg", "PreallocationTools", "PrecompileTools", "RecursiveArrayTools", "SciMLBase", "Serialization", "StaticArrays", "Statistics", "StructMapping", "Timers", "Xfoil", "YAML"]
-git-tree-sha1 = "315441a39c8fa3eaa784c4801c3ea15446e8e561"
+git-tree-sha1 = "27cbec6a87e46293585c643a7bf6db9876bac2d7"
 uuid = "ed3cd733-9f0f-46a9-93e0-89b8d4998dd9"
-version = "3.3.5"
+version = "3.3.6"
 
     [deps.VortexStepMethod.extensions]
     VortexStepMethodControlPlotsExt = ["ControlPlots", "PythonCall"]
