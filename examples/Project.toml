@@ -10,5 +10,8 @@ SymbolicAWEModels = "9c9a347c-5289-41db-a9b9-25ccc76c3360"
 Timers = "21f18d07-b854-4dab-86f0-c15a3821819a"
 VortexStepMethod = "ed3cd733-9f0f-46a9-93e0-89b8d4998dd9"
 
+[compat]
+MakieControlPlots = "0.1.2"
+
 [sources]
 RamAirKite = {path = ".."}
