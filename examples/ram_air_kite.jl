@@ -246,7 +246,7 @@ if PLOT_HEADING
     sl = syslog.syslog
     time_vec = sl.time[1:length(heading_setpoint)]
     p2 = mcp.plot(time_vec, [rad2deg.(heading_setpoint), rad2deg.(sl.heading[1:length(heading_setpoint)])];
-            xlabel=L"\mathrm{Time}~[s]",
+            xlabel=L"\mathrm{Time}~[\mathrm{s}]",
             ylabel=L"\mathrm{Heading}~[°]",
             labels=["Setpoint", "Actual"],
             legendsize=14,
