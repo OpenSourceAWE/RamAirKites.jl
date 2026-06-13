@@ -46,9 +46,9 @@ VSM_INTERVAL = 7            # VSM update interval
 MAX_HEADING = 20.0          # Heading setpoint amplitude [deg]
 HEADING_PERIOD = 5.0        # Heading setpoint period [s]
 MAX_STEERING = 1.5          # Steering limit [m] (position setpoint)
-HEADING_P = 0.6             # Heading PID proportional gain
-HEADING_I = 4.0             # Heading PID integral time (false = off)
-HEADING_D = 0.33            # Heading PID derivative time
+HEADING_P = 0.8             # Heading PID proportional gain
+HEADING_I = 2.85            # Heading PID integral time (false = off)
+HEADING_D = 0.365           # Heading PID derivative time
 
 # Cascaded position + speed controller for steering lines
 POSITION_P = 8.0             # Position PID proportional gain

@@ -48,9 +48,9 @@ PROFILE_LAW = 3              # Wind profile law (3 = EXPLOG)
 REMAKE_CACHE = false         # Force rebuild of compiled model cache
 VSM_INTERVAL = 7             # VSM update interval
 MAX_STEERING = 1.5           # Steering limit [m]
-HEADING_P = 1.0              # Heading PID proportional gain
-HEADING_I = 1.7         # Heading PID integral time (false = off)
-HEADING_D = 0.4             # Heading PID derivative time
+HEADING_P = 0.8              # Heading PID proportional gain
+HEADING_I = 2.85         # Heading PID integral time (false = off)
+HEADING_D = 0.365             # Heading PID derivative time
 
 # Cascaded position + speed controller for steering lines
 POSITION_P = 8.0             # Position PID proportional gain
@@ -235,3 +235,8 @@ nothing
 
 # Interactive replay
 # replay(syslog, sam.sys_struct)
+
+# RMS error, 13. June 2026: 0.39 ° 
+# PID gains: HEADING_P = 0.8, HEADING_I = 2.85, HEADING_D = 0.365
+# speed PID: POSITION_P = 8.0, POSITION_I = 2.0, POSITION_D = 0.0005, POSITION_UMIN = -1.2, POSITION_UMAX = 1.2
+# torque PID: SPEED_P = 12, SPEED_I = 0.08, SPEED_D = 0.0, SPEED_TAU = 0.05, TORQUE_UMIN = -40.0, TORQUE_UMAX = 40.0
