@@ -33,7 +33,8 @@ toc()
 PHYSICAL_MODEL = "ram"      # Options: "ram", "simple_ram", "4_attach_ram"
 SIM_TIME = 15.0             # Total simulation time [s]
 RECORD_VIDEO = false        # Whether to record a video of the simulation (can be slow)
-REPLAY_LOG = true          # Whether to replay the logged simulation data in an interactive Makie scene
+REPLAY_LOG = true           # Whether to replay the logged simulation data in an interactive Makie scene
+PLOT_HEADING = true         # Whether to plot heading setpoint vs actual heading at the end
 DT = 0.01                   # Time step [s] (must be small for cascaded control)
 V_WIND = 12.51              # Wind speed [m/s]
 UPWIND_DIR = -90.0          # Upwind direction [deg]
@@ -207,7 +208,7 @@ syslog = load_log("tmp_run")
 # Plot results using MakieControlPlots
 sl = syslog.syslog
 time_vec = sl.time[1:length(heading_setpoint)]
-p = mcp.plotx(
+p1 = mcp.plotx(
     time_vec,
     [getindex.(sl.v_reelout, 1), getindex.(sl.v_reelout, 2), getindex.(sl.v_reelout, 3)],
     rad2deg.(sl.elevation),
@@ -236,7 +237,22 @@ p = mcp.plotx(
     ],
     fig="Ram air kite",
 )
-display(p)
+display(p1)
+sleep(0.1)  # Allow Makie to render before proceeding
+
+# Plot heading setpoint vs actual heading using Ma
+p2 = nothing
+if PLOT_HEADING
+    sl = syslog.syslog
+    time_vec = sl.time[1:length(heading_setpoint)]
+    p2 = mcp.plot(time_vec, [rad2deg.(heading_setpoint), rad2deg.(sl.heading[1:length(heading_setpoint)])];
+            xlabel=L"\mathrm{Time}~[s]",
+            ylabel=L"\mathrm{Heading}~[°]",
+            labels=["Setpoint", "Actual"],
+            legendsize=14,
+            ysize=18, fig="Heading setpoint vs actual")
+    display(p2)
+end
 sleep(0.1)  # Allow Makie to render before recording video
 
 if RECORD_VIDEO
@@ -255,5 +271,3 @@ if REPLAY_LOG
     scene = SymbolicAWEModels.replay(sub_log, sam.sys_struct; replay_speed=2.0)
     display(GLMakie.Screen(), scene)
 end
-
-
