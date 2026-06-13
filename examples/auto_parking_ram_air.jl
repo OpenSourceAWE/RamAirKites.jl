@@ -42,7 +42,7 @@ DT = 0.01                    # Time step [s]
 V_WIND = 12.51               # Wind speed [m/s]
 UPWIND_DIR = -90.0           # Upwind direction [deg]
 TETHER_LENGTH = 50.0         # Tether length [m]
-ELEVATION = 74.0             # Initial elevation angle [deg]
+ELEVATION = 76.5             # Initial elevation angle [deg]
 AERO_Z_OFFSET = 1.0          # Body-frame z-offset for VSM panels [m]
 PROFILE_LAW = 3              # Wind profile law (3 = EXPLOG)
 REMAKE_CACHE = false         # Force rebuild of compiled model cache
@@ -53,15 +53,15 @@ HEADING_I = 1.5         # Heading PID integral time (false = off)
 HEADING_D = 0.43             # Heading PID derivative time
 
 # Cascaded position + speed controller for steering lines
-POSITION_P = 5.0             # Position PID proportional gain
+POSITION_P = 8.0             # Position PID proportional gain
 POSITION_I = 2.0             # Position PID integral time [s]
 POSITION_D = 0.0005             # Position PID derivative time (0 = off)
 POSITION_UMIN = -1.2         # Minimum speed setpoint [m/s]
 POSITION_UMAX = 1.2          # Maximum speed setpoint [m/s]
-SPEED_P = 14                # Speed PID proportional gain
+SPEED_P = 12                # Speed PID proportional gain
 SPEED_I = 0.08                # Speed PID integral time [s]
 SPEED_D = 0.0                # Speed PID derivative time (0 = off)
-SPEED_TAU = 0.16             # Low-pass filter time constant for speed [s]
+SPEED_TAU = 0.05             # Low-pass filter time constant for speed [s]
 TORQUE_UMIN = -40.0          # Minimum torque output [Nm]
 TORQUE_UMAX = 40.0           # Maximum torque output [Nm]
 
@@ -107,7 +107,7 @@ sys_struct.tethers[:steering_right].init_stretch_frac = 1.0 + depower
 @info "Initializing model..."
 init!(sam; remake=REMAKE_CACHE)
 
-find_steady_state!(sam; dt=0.05, vsm_interval=0)
+find_steady_state!(sam; dt=0.05, vsm_interval=7)
 toc("Steady state found after: ")
 
 # Plot initial configuration
