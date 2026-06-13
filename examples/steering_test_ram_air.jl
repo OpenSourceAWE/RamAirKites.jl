@@ -36,15 +36,15 @@ UPWIND_DIR = -90.0           # Upwind direction [deg]
 TETHER_LENGTH = 50.0         # Tether length [m]
 ELEVATION = 76.5             # Initial elevation angle [deg]
 VSM_INTERVAL = 7             # VSM update interval (steps)
-OFFSET_DEG = 4.0             # Heading offset for direction reversal [deg]
-STEERING_SEQ = [0.1, -0.2, 0.3, -0.4, 0.5, -0.6, 0.7, -0.8, 0.9, -0.9, 1.0, -1.0] .* 0.3  # Steering setpoint sequence [m]
+OFFSET_DEG = 5.0             # Heading offset for direction reversal [deg]
+STEERING_SEQ = [0.1, -0.15, 0.25, -0.4, 0.5, -0.6, 0.7, -0.8, 0.9, -0.9, 1.1, -1.1] .* 0.3  # Steering setpoint sequence [m]
 
 # Cascaded position → speed → torque PID parameters
 POSITION_P = 8.0             # Position PID proportional gain
 POSITION_I = 2.0             # Position PID integral time [s]
 POSITION_D = 0.0005          # Position PID derivative time (0 = off)
-POSITION_UMIN = -1.2         # Minimum speed setpoint [m/s]
-POSITION_UMAX = 1.2          # Maximum speed setpoint [m/s]
+POSITION_UMIN = -1.2*0.5         # Minimum speed setpoint [m/s]
+POSITION_UMAX = 1.2*0.5          # Maximum speed setpoint [m/s]
 SPEED_P = 12                 # Speed PID proportional gain
 SPEED_I = 0.08               # Speed PID integral time [s]
 SPEED_D = 0.0                # Speed PID derivative time (0 = off)
