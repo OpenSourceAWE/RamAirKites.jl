@@ -33,22 +33,22 @@ DT = 0.02                    # Time step [s]
 INITIAL_STEERING = -0.012    # Initial steering line length difference [m]
 V_WIND = 12.51               # Wind speed [m/s]
 UPWIND_DIR = -90.0           # Upwind direction [deg]
-TETHER_LENGTH = 50.0        # Tether length [m]
-ELEVATION = 74               # Initial elevation angle [deg]
-VSM_INTERVAL = 3             # VSM update interval (steps)
+TETHER_LENGTH = 50.0         # Tether length [m]
+ELEVATION = 76.5             # Initial elevation angle [deg]
+VSM_INTERVAL = 7             # VSM update interval (steps)
 OFFSET_DEG = 4.0             # Heading offset for direction reversal [deg]
 STEERING_SEQ = [0.1, -0.2, 0.3, -0.4, 0.5, -0.6, 0.7, -0.8, 0.9, -0.9, 1.0, -1.0] .* 0.3  # Steering setpoint sequence [m]
 
 # Cascaded position → speed → torque PID parameters
-POSITION_P = 10.0            # Position PID proportional gain
+POSITION_P = 8.0             # Position PID proportional gain
 POSITION_I = 2.0             # Position PID integral time [s]
 POSITION_D = 0.0005          # Position PID derivative time (0 = off)
-POSITION_UMIN = -1.2*0.2         # Minimum speed setpoint [m/s]
-POSITION_UMAX = 1.2*0.2          # Maximum speed setpoint [m/s]
-SPEED_P = 14                 # Speed PID proportional gain
+POSITION_UMIN = -1.2         # Minimum speed setpoint [m/s]
+POSITION_UMAX = 1.2          # Maximum speed setpoint [m/s]
+SPEED_P = 12                 # Speed PID proportional gain
 SPEED_I = 0.08               # Speed PID integral time [s]
 SPEED_D = 0.0                # Speed PID derivative time (0 = off)
-SPEED_TAU = 0.16             # Low-pass filter time constant for speed [s]
+SPEED_TAU = 0.05             # Low-pass filter time constant for speed [s]
 TORQUE_UMIN = -40.0          # Minimum torque output [Nm]
 TORQUE_UMAX = 40.0           # Maximum torque output [Nm]
 
@@ -76,6 +76,7 @@ sam = SymbolicAWEModel(set, sys_struct)
 
 # edit sys_struct before init!
 sys_struct.transforms[1].elevation = deg2rad(ELEVATION)
+sys_struct.wings[1].aero_z_offset = 1.0
 sys_struct.winches[:power_winch].brake = true
 
 for point in sam.sys_struct.points
@@ -84,19 +85,19 @@ end
 for segment in sam.sys_struct.segments
     segment.compression_frac = 0.01
 end
-for group in sam.sys_struct.groups
-    group.moment_frac = 0.0
+for twist_surface in sam.sys_struct.twist_surfaces
+    twist_surface.moment_frac = 0.0
 end
 
-depower = 0.0
-sys_struct.tethers[:steering_left].init_stretch_frac = 1.0 - depower
-sys_struct.tethers[:steering_right].init_stretch_frac = 1.0 - depower
+depower = 0.01
+sys_struct.tethers[:steering_left].init_stretch_frac = 1.0 + depower
+sys_struct.tethers[:steering_right].init_stretch_frac = 1.0 + depower
 
 # 3. init
 @info "Initializing model..."
 init!(sam; remake=false)
 
-find_steady_state!(sam; dt=0.05, vsm_interval=0)
+find_steady_state!(sam; dt=0.05, vsm_interval=7)
 
 # Logger setup
 logger = Logger(sam, steps + 1)
@@ -105,8 +106,8 @@ sys_state.time = 0.0
 steady_torque = calc_steady_torque(sam)
 torque_damp = 0.9
 
-for group in sam.sys_struct.groups
-    group.damping = 200.0
+for twist_surface in sam.sys_struct.twist_surfaces
+    twist_surface.damping = 200.0
 end
 
 # Setup cascaded position→speed→torque PIDs
