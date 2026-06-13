@@ -23,5 +23,4 @@ RamAirKiteMakieExt = "GLMakie"
 
 [compat]
 SymbolicAWEModels = "0.12"
-KitePodModels = "0.4.0"
 julia = "1.11, 1.12"
