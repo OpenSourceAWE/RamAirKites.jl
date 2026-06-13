@@ -1390,12 +1390,6 @@ git-tree-sha1 = "9eda8292dd3268b3b7ec9df21bbfac24e177ec52"
 uuid = "5ab0869b-81aa-558d-bb23-cbf5423bbe9b"
 version = "0.6.12"
 
-[[deps.KitePodModels]]
-deps = ["DocStringExtensions", "KiteUtils", "Reexport"]
-git-tree-sha1 = "57f6f71a75d2d26f199a64c03a03796139c540f4"
-uuid = "9de5dc81-f971-414a-927b-652b2f41c539"
-version = "0.4.0"
-
 [[deps.KiteUtils]]
 deps = ["Arrow", "CSV", "DocStringExtensions", "LinearAlgebra", "OrderedCollections", "Parameters", "Parsers", "Pkg", "PrecompileTools", "RecursiveArrayTools", "ReferenceFrameRotations", "Rotations", "StaticArrays", "StructArrays", "StructTypes", "YAML"]
 git-tree-sha1 = "edd32b16440b162db774dc42604f7faa921541e6"
@@ -2308,7 +2302,7 @@ uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 version = "1.11.0"
 
 [[deps.RamAirKite]]
-deps = ["KitePodModels", "KiteUtils", "LinearAlgebra", "Statistics", "SymbolicAWEModels", "UnPack", "VortexStepMethod"]
+deps = ["KiteUtils", "LinearAlgebra", "Statistics", "SymbolicAWEModels", "UnPack", "VortexStepMethod"]
 path = ".."
 uuid = "7ebed07a-3d9a-4117-97d2-0a397f5b89df"
 version = "0.1.0"
