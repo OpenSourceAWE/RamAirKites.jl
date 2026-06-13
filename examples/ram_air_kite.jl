@@ -219,7 +219,7 @@ p1 = mcp.plotx(
     xlabel=L"\mathrm{Time}~[\mathrm{s}]",
     ysize=24,
     ylabels=[
-        L"v_{\mathrm{w}}~[\mathrm{m/s}]",
+        L"v_{\mathrm{reelout}}~[\mathrm{m/s}]",
         L"\mathrm{elevation}~[°]",
         L"F_{\mathrm{a},x}~[\mathrm{N}]",
         L"\alpha~[°]",
