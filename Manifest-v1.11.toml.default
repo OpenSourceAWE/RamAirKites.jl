@@ -2,7 +2,7 @@
 
 julia_version = "1.11.9"
 manifest_format = "2.0"
-project_hash = "219f67960c6bbcfa2c17fb5555bf6a777743749e"
+project_hash = "09cf41d14086f088bfcc1e9f3ebd81534c7f32b5"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "bbc22a9a08a0ef6460041086d8a7b27940ed4ffd"
@@ -1390,6 +1390,12 @@ git-tree-sha1 = "9eda8292dd3268b3b7ec9df21bbfac24e177ec52"
 uuid = "5ab0869b-81aa-558d-bb23-cbf5423bbe9b"
 version = "0.6.12"
 
+[[deps.KitePodModels]]
+deps = ["DocStringExtensions", "KiteUtils", "Reexport"]
+git-tree-sha1 = "57f6f71a75d2d26f199a64c03a03796139c540f4"
+uuid = "9de5dc81-f971-414a-927b-652b2f41c539"
+version = "0.4.0"
+
 [[deps.KiteUtils]]
 deps = ["Arrow", "CSV", "DocStringExtensions", "LinearAlgebra", "OrderedCollections", "Parameters", "Parsers", "Pkg", "PrecompileTools", "RecursiveArrayTools", "ReferenceFrameRotations", "Rotations", "StaticArrays", "StructArrays", "StructTypes", "YAML"]
 git-tree-sha1 = "edd32b16440b162db774dc42604f7faa921541e6"
@@ -2302,7 +2308,7 @@ uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 version = "1.11.0"
 
 [[deps.RamAirKite]]
-deps = ["KiteUtils", "LinearAlgebra", "Statistics", "SymbolicAWEModels", "UnPack", "VortexStepMethod"]
+deps = ["KitePodModels", "KiteUtils", "LinearAlgebra", "Statistics", "SymbolicAWEModels", "UnPack", "VortexStepMethod"]
 path = ".."
 uuid = "7ebed07a-3d9a-4117-97d2-0a397f5b89df"
 version = "0.1.0"
