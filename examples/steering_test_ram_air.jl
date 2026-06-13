@@ -129,7 +129,7 @@ function simulate(sam, logger, steps; plot=false)
     # Previous sys_state heading for rate calculation
     prev_sys_heading = 0.0
     seq_idx = 1
-    # Start with zero steering; sequence activates at t >= 10
+    # Start with zero steering; sequence activates at t >= 2.0
     steering_setpoint = INITIAL_STEERING
     steering_setpoint_applied = steering_setpoint  # for rate limiter
     steering_active = false
@@ -137,7 +137,7 @@ function simulate(sam, logger, steps; plot=false)
     for i in 1:steps
         t = i * dt - dt
 
-        # After 10 seconds, start steering
+        # After 2 seconds, start steering
         if !steering_active && t >= 2.0
             steering_active = true
             steering_setpoint = abs(STEERING_SEQ[seq_idx])
