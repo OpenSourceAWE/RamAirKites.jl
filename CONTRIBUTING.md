@@ -12,3 +12,6 @@ The dev branch can then be used to do extensive testing, updating of the example
 controller parameters.
 
 When all works well, create a pull request for the main branch.
+
+- The main branch contains stable (perhaps outdated) models. All examples and controllers work well with these models
+- The dev branch contains new models, not yet tested with the examples, and not yet with tuned controller settings
