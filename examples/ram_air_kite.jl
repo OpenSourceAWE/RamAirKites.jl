@@ -47,9 +47,9 @@ VSM_INTERVAL = 7            # VSM update interval
 MAX_HEADING = 20.0          # Heading setpoint amplitude [deg]
 HEADING_PERIOD = 5.0        # Heading setpoint period [s]
 MAX_STEERING = 1.5          # Steering limit [m] (position setpoint)
-HEADING_P = 0.8             # Heading PID proportional gain
-HEADING_I = 2.85            # Heading PID integral time (false = off)
-HEADING_D = 0.365           # Heading PID derivative time
+HEADING_P = 0.6             # Heading PID proportional gain
+HEADING_I = 4.0             # Heading PID integral time (false = off)
+HEADING_D = 0.33            # Heading PID derivative time
 
 # Cascaded position + speed controller for steering lines
 POSITION_P = 8.0             # Position PID proportional gain
@@ -211,12 +211,12 @@ time_vec = sl.time[1:length(heading_setpoint)]
 p1 = mcp.plotx(
     time_vec,
     [getindex.(sl.v_reelout, 1), getindex.(sl.v_reelout, 2), getindex.(sl.v_reelout, 3)],
-    rad2deg.(sl.elevation),
+    getindex.(sl.l_tether, 1),
     getindex.(sl.aero_force_b, 1),
     rad2deg.(sl.AoA),
     [rad2deg.(sl.heading), rad2deg.(sl.course), rad2deg.(heading_setpoint)],
     [getindex.(sl.winch_force, 1), getindex.(sl.winch_force, 2), getindex.(sl.winch_force, 3)];
-    xlabel=L"\mathrm{Time}~[\mathrm{s}]",
+    xlabel=L"\mathrm{Time}~[s]",
     ysize=24,
     ylabels=[
         L"v_{\mathrm{ro}}~[\mathrm{m/s}]",
@@ -245,7 +245,7 @@ if PLOT_HEADING
     sl = syslog.syslog
     time_vec = sl.time[1:length(heading_setpoint)]
     p2 = mcp.plot(time_vec, [rad2deg.(heading_setpoint), rad2deg.(sl.heading[1:length(heading_setpoint)])];
-            xlabel=L"\mathrm{Time}~[\mathrm{s}]",
+            xlabel=L"\mathrm{Time}~[s]",
             ylabel=L"\mathrm{Heading}~[°]",
             labels=["Setpoint", "Actual"],
             legendsize=14,
