@@ -36,7 +36,7 @@ RECORD_VIDEO = false         # Whether to record a video of the simulation (can 
 DT = 0.01                   # Time step [s] (must be small for cascaded control)
 V_WIND = 12.51             # Wind speed [m/s]
 UPWIND_DIR = -90.0          # Upwind direction [deg]
-TETHER_LENGTH = 25.0        # Tether length [m]
+TETHER_LENGTH = 50.0        # Tether length [m]
 ELEVATION = 76.5            # Initial elevation angle [deg]
 AERO_Z_OFFSET = 1.0         # Body-frame z-offset for VSM panels [m]
 PROFILE_LAW = 3             # Wind profile law (3 = EXPLOG)
@@ -203,19 +203,37 @@ mkpath(get_data_path())
 save_log(logger, "tmp_run")
 syslog = load_log("tmp_run")
 
-# Plot results and show replay
-fig = Makie.plot(sam.sys_struct, syslog;
-           plot_heading=true, plot_tether=true, setpoints=Dict(:heading => heading_setpoint))
-display(GLMakie.Screen(), fig)
-
-# Plot heading setpoint vs actual heading using MakieControlPlots
+# Plot results using MakieControlPlots
 sl = syslog.syslog
 time_vec = sl.time[1:length(heading_setpoint)]
-p = mcp.plot(time_vec, [rad2deg.(heading_setpoint), rad2deg.(sl.heading[1:length(heading_setpoint)])];
-          xlabel=L"\mathrm{Time}~[s]",
-          ylabel=L"\mathrm{Heading}~[°]",
-          labels=["Setpoint", "Actual"],
-          ysize=18, fig="Heading setpoint vs actual")
+p = mcp.plotx(
+    time_vec,
+    [getindex.(sl.v_reelout[1:length(time_vec)], 1), getindex.(sl.v_reelout[1:length(time_vec)], 2), getindex.(sl.v_reelout[1:length(time_vec)], 3)],
+    getindex.(sl.l_tether[1:length(time_vec)], 1),
+    getindex.(sl.aero_force_b[1:length(time_vec)], 1),
+    rad2deg.(sl.AoA[1:length(time_vec)]),
+    [rad2deg.(sl.heading[1:length(time_vec)]), rad2deg.(sl.course[1:length(time_vec)]), rad2deg.(heading_setpoint[1:length(time_vec)])],
+    [getindex.(sl.winch_force[1:length(time_vec)], 1), getindex.(sl.winch_force[1:length(time_vec)], 2), getindex.(sl.winch_force[1:length(time_vec)], 3)];
+    xlabel=L"\mathrm{Time}~[s]",
+    ylabels=[
+        L"v_{w}~[m/s]",
+        L"l_{t}~[m]",
+        L"F_{a,x}~[N]",
+        L"\alpha~[°]",
+        L"\psi,\chi~[°]",
+        L"F_{t}~[N]",
+    ],
+    labels=[
+        [L"v_{w,1}", L"v_{w,2}", L"v_{w,3}"],
+        nothing,
+        nothing,
+        nothing,
+        [L"\psi", L"\chi", L"\psi_{\mathrm{ref}}"],
+        [L"F_{t,1}", L"F_{t,2}", L"F_{t,3}"],
+    ],
+    ysize=18,
+    fig="Ram air kite",
+)
 display(p)
 
 # Interactive replay with frame skipping for faster playback
