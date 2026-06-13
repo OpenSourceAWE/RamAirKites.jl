@@ -3,6 +3,10 @@
 Contributions to this project are welcome. In particular we are looking for test cases and flight test data for
 model validation.
 
+## Plotting
+
+For 2D plots, please use the MakieControlPlots package. If this is not sufficient, try to use GLMakie or CairoMakie directly.
+
 ## Modifying existing models
 
 When modifying an existing model, submit your pull request to the **dev** branch.
