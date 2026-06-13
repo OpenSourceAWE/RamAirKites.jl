@@ -28,10 +28,11 @@ toc()
 # ==================== USER PARAMETERS ==================== #
 
 PHYSICAL_MODEL = "ram"       # Options: "ram", "simple_ram", "4_attach_ram"
-SIM_TIME = 20.0              # Total simulation time [s]
+SIM_TIME = 25.0              # Total simulation time [s]
 DT = 0.02                    # Time step [s]
 INITIAL_STEERING = -0.012    # Initial steering line length difference [m]
 V_WIND = 12.51               # Wind speed [m/s]
+RATE_LIMIT = 0.15            # Limit on set_steering signal [m/s]
 UPWIND_DIR = -90.0           # Upwind direction [deg]
 TETHER_LENGTH = 50.0         # Tether length [m]
 ELEVATION = 76.5             # Initial elevation angle [deg]
@@ -130,6 +131,7 @@ function simulate(sam, logger, steps; plot=false)
     seq_idx = 1
     # Start with zero steering; sequence activates at t >= 10
     steering_setpoint = INITIAL_STEERING
+    steering_setpoint_applied = steering_setpoint  # for rate limiter
     steering_active = false
 
     for i in 1:steps
@@ -165,11 +167,17 @@ function simulate(sam, logger, steps; plot=false)
             # else: heading within OFFSET band — hold current steering_setpoint
         end
 
+        # --- Rate limit the steering setpoint ---
+        max_delta = RATE_LIMIT * dt
+        local target_change = steering_setpoint - steering_setpoint_applied
+        local clamped_change = clamp(target_change, -max_delta, max_delta)
+        steering_setpoint_applied = steering_setpoint_applied + clamped_change
+
         # --- Cascaded position→speed→torque ---
         local l_diff = sys_state.l_tether[3] - sys_state.l_tether[4]
         v_reelout_diff = sys_state.v_reelout[2] - sys_state.v_reelout[3]
         v_reelout_diff_filt[] = alpha * v_reelout_diff + (1 - alpha) * v_reelout_diff_filt[]
-        speed_setpoint = pos_pid(steering_setpoint, l_diff, 0.0)
+        speed_setpoint = pos_pid(steering_setpoint_applied, l_diff, 0.0)
         torque = speed_pid(speed_setpoint, v_reelout_diff_filt[], 0.0)
 
         set_values = [0.0, torque, -torque]
@@ -190,8 +198,8 @@ function simulate(sam, logger, steps; plot=false)
 
         # Store actual line length difference (not setpoint) in var_01 for analysis
         sys_state.var_01 = l_diff
-        # Store steering setpoint in var_02 for analysis
-        sys_state.var_02 = steering_setpoint
+        # Store steering setpoint (rate-limited) in var_02 for analysis
+        sys_state.var_02 = steering_setpoint_applied
 
         log!(logger, sys_state)
 
@@ -279,7 +287,7 @@ function plot_steering_vs_turn_rate()
 
     G = psi_dot ./ sl.v_app ./ delayed_steering  # °/s / (m/s) / m = °/m
     for (i, _) in enumerate(G)
-        if abs(delayed_steering[i]) < 0.05
+        if abs(delayed_steering[i]) < 0.075
             G[i] = NaN
         end
     end
