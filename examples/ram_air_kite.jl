@@ -219,7 +219,7 @@ p1 = mcp.plotx(
     xlabel=L"\mathrm{Time}~[\mathrm{s}]",
     ysize=24,
     ylabels=[
-        L"v_{\mathrm{w}}~[\mathrm{m/s}]",
+        L"v_{\mathrm{ro}}~[\mathrm{m/s}]",
         L"\mathrm{elevation}~[°]",
         L"F_{\mathrm{a},x}~[\mathrm{N}]",
         L"\alpha~[°]",
@@ -228,7 +228,7 @@ p1 = mcp.plotx(
     ],
     legendsize=24,
     labels=[
-        [L"v_{\mathrm{w},1}", L"v_{\mathrm{w},2}", L"v_{\mathrm{w},3}"],
+        [L"v_{\mathrm{ro},1}", L"v_{\mathrm{ro},2}", L"v_{\mathrm{ro},3}"],
         nothing,
         nothing,
         nothing,
