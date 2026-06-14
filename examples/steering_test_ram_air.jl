@@ -29,7 +29,7 @@ toc()
 
 PHYSICAL_MODEL = "ram"       # Options: "ram", "simple_ram", "4_attach_ram"
 SIM_TIME = 26.0              # Total simulation time [s]
-DT = 0.02                    # Time step [s]
+DT = 0.01                    # Time step [s]
 INITIAL_STEERING = -0.012    # Initial steering line length difference [m]
 MAX_STEERING = 0.3           # Maximum steering line length difference [m]
 V_WIND = 12.51               # Wind speed [m/s]
@@ -368,8 +368,8 @@ end
 
 # 50 m tether, 12.51 m/s wind, 76.5° elevation, 0.3 m max steering, 0.02 s timestep
 # Delay of turnrate: 0.46 s
-# Mean turnrate-law factor: 4.302 °/m ± 31.15 %
-# Mean turnrate-law factor: 0.0751 rad/m ± 31.15 %
+# Mean turnrate-law factor: 4.321 °/m ± 30.39 %
+# Mean turnrate-law factor: 0.0754 rad/m ± 30.39 %
 # Turn-rate law coefficients:
-#   c1 (steering gain): 0.078202
-#   c2 (pendulum stability): 9.050431
+#   c1 (steering gain): 0.078267
+#   c2 (pendulum stability): 8.381176
