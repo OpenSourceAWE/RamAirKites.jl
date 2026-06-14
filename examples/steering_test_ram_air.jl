@@ -359,18 +359,11 @@ display(p)
 
 @info "Done!"
 
-# 100 m tether
-# Delay of turnrate: 0.12 s
-# Mean turnrate-law factor: 12.581 °/m ± 97.21 %
-# Mean turnrate-law factor: 0.2196 rad/m ± 97.21 %
-# Turn-rate law coefficients:
-#   c1 (steering gain): 0.25957
-#   c2 (pendulum stability): 38.044747
-
 # 50 m tether
 # Delay of turnrate: 0.48 s
-# Mean turnrate-law factor: 45.013 °/m ± 27.92 %
-# Mean turnrate-law factor: 0.7856 rad/m ± 27.92 %
+# Delay of turnrate: 0.36 s
+# Mean turnrate-law factor: 13.978 °/m ± 32.13 %
+# Mean turnrate-law factor: 0.244 rad/m ± 32.13 %
 # Turn-rate law coefficients:
-#   c1 (steering gain): 0.7841
-#   c2 (pendulum stability): 8.551764
+#   c1 (steering gain): 0.262117
+#   c2 (pendulum stability): 13.630731
