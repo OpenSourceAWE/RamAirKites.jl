@@ -31,6 +31,7 @@ PHYSICAL_MODEL = "ram"       # Options: "ram", "simple_ram", "4_attach_ram"
 SIM_TIME = 26.0              # Total simulation time [s]
 DT = 0.02                    # Time step [s]
 INITIAL_STEERING = -0.012    # Initial steering line length difference [m]
+MAX_STEERING = 0.3           # Maximum steering line length difference [m]
 V_WIND = 12.51               # Wind speed [m/s]
 RATE_LIMIT = 0.15            # Limit on set_steering signal [m/s]
 UPWIND_DIR = -90.0           # Upwind direction [deg]
@@ -285,10 +286,11 @@ function plot_steering_vs_turn_rate()
     delta = delay(var_01, psi_dot ./ sl.v_app)
     println("Delay of turnrate: $(round(delta * dt, digits=3)) s")
     delayed_steering = shift_vector(var_01, delta)
+    rel_steering = delayed_steering / MAX_STEERING  # normalize to [-1, 1]
 
-    G = psi_dot ./ sl.v_app ./ delayed_steering  # °/s / (m/s) / m = °/m
+    G = psi_dot ./ sl.v_app ./ rel_steering  # °/s / (m/s) / (-) = °/m
     for (i, _) in enumerate(G)
-        if abs(delayed_steering[i]) < STEERING_LIMIT
+        if abs(rel_steering[i]) < STEERING_LIMIT / MAX_STEERING
             G[i] = NaN
         end
     end
@@ -299,16 +301,18 @@ function plot_steering_vs_turn_rate()
     println("Mean turnrate-law factor: $(round(deg2rad(G_mean), digits=4)) rad/m ± $(round(G_std / G_mean * 100, digits=2)) %")
 
     if PLOT
-        p1 = plot(sl.time, delayed_steering, sl.var_15 ./ sl.v_app;
-                  ylabels=["delayed_steering", "turnrate/v_app [°/m]"],
-                  ylims=[(-0.6, 0.6), (-G_mean * 0.6, G_mean * 0.6)],
+        turnrate_vapp = sl.var_15 ./ sl.v_app
+        ylim2 = maximum(abs.(turnrate_vapp)) * 1.1
+        p1 = plot(sl.time, rel_steering, turnrate_vapp;
+                  ylabels=["rel_steering [-]", "turnrate/v_app [°/m]"],
+                  ylims=[(-1.2, 1.2), (-ylim2, ylim2)],
                   fig="steering vs turnrate")
         p2 = plot(sl.time, G ./ G_mean; ylabel="G/G_mean [-]", fig="turnrate_law")
         display(p1)
         display(p2)
     end
 
-    return sl.time, sl.v_app, deg2rad.(psi), sl.elevation, deg2rad.(psi_dot), delayed_steering
+    return sl.time, sl.v_app, deg2rad.(psi), sl.elevation, deg2rad.(psi_dot), rel_steering
 end
 
 function calc_c1_c2(v_app, psi, beta, psi_dot, steering)
@@ -325,8 +329,8 @@ function plot_turnrate_law(c1, c2, time, v_app, psi, beta, psi_dot, steering)
     est_steering = psi_dot ./ (v_app * c1) .- c2 ./ (c1 .* v_app .^ 2) .* sin.(psi) .* cos.(beta)
     if PLOT
         p1 = plot(time, steering, est_steering;
-                  ylabels=["delayed_steering", "est_steering"],
-                  ylims=[(-0.6, 0.6), (-0.6, 0.6)],
+                  ylabels=["rel_steering [-]", "est_rel_steering [-]"],
+                  ylims=[(-1.2, 1.2), (-1.2, 1.2)],
                   fig="steering vs est_steering")
         display(p1)
     end
@@ -341,9 +345,9 @@ end
 
 time, v_app, psi, beta, psi_dot, steering = plot_steering_vs_turn_rate()
 
-# Subtract INITIAL_STEERING offset so c1/c2 and plots reflect
+# Subtract INITIAL_STEERING offset (in normalized units) so c1/c2 and plots reflect
 # steering deviation from the initial trim condition
-steering = steering .- INITIAL_STEERING
+steering = steering .- INITIAL_STEERING / MAX_STEERING
 
 c1, c2 = calc_c1_c2(v_app, psi, beta, psi_dot, steering)
 println("Turn-rate law coefficients:")
@@ -354,9 +358,9 @@ plot_turnrate_law(c1, c2, time, v_app, psi, beta, psi_dot, steering)
 if PLOT
     lg = load_log("tmp_run")
     sl = lg.syslog
-    steering = sl.var_01
-    steering_setpoint_logged = sl.var_02
-    p=plotx(sl.time, rad2deg.(sl.elevation), rad2deg.(sl.azimuth), rad2deg.(sl.heading), steering, steering_setpoint_logged; ylabels=["elevation [°]", "azimuth [°]", "heading [°]", "steering [m]", "setpoint [m]"], fig="elevation and azimuth")
+    steering = sl.var_01 ./ MAX_STEERING
+    steering_setpoint_logged = sl.var_02 ./ MAX_STEERING
+    p=plotx(sl.time, rad2deg.(sl.elevation), rad2deg.(sl.azimuth), rad2deg.(sl.heading), steering, steering_setpoint_logged; ylabels=["elevation [°]", "azimuth [°]", "heading [°]", "rel_steering [-]", "rel_setpoint [-]"], fig="elevation and azimuth")
     display(p)
 end
 
