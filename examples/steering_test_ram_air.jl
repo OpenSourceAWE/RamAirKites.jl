@@ -128,8 +128,7 @@ function simulate(sam, logger, steps; plot=false)
 
     heading = 0.0
     # Previous sys_state heading for rate calculation
-    prev_sys_heading = 0.0
-    seq_idx = 1
+    prev_sys_heading = sys_state.heading
     # Start with zero steering; sequence activates at t >= 2.0
     steering_setpoint = INITIAL_STEERING
     steering_setpoint_applied = steering_setpoint  # for rate limiter
