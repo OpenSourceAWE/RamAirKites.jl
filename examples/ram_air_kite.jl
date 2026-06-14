@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Bart van de Lint
+# Copyright (c) 2025 Bart van de Lint, Uwe Fechner
 # SPDX-License-Identifier: MPL-2.0
 
 """

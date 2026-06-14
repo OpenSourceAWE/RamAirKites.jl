@@ -13,7 +13,7 @@ set = Settings("system.yaml")
 set.physical_model = "ram"
 set.v_wind = 12.51
 set.upwind_dir = -90.0
-set.l_tether = 25.0
+set.l_tether = 50.0
 
 sys_struct = create_sys_struct(set)
 
@@ -31,10 +31,14 @@ for twist_surface in sys_struct.twist_surfaces
     twist_surface.moment_frac = 0.0
 end
 
+depower = 0.01
+sys_struct.tethers[:steering_left].init_stretch_frac = 1.0 + depower
+sys_struct.tethers[:steering_right].init_stretch_frac = 1.0 + depower
+
 sam = SymbolicAWEModel(set, sys_struct)
 
 init!(sam; remake=false)
-find_steady_state!(sam; dt=0.05, vsm_interval=0)
+find_steady_state!(sam; dt=0.05, vsm_interval=7)
 
 # Warm up plotting
 fig = Makie.plot(sam.sys_struct)
@@ -56,16 +60,16 @@ for twist_surface in sam.sys_struct.twist_surfaces
     twist_surface.damping = 200.0
 end
 
-heading_pid = DiscretePID(; K=0.7, Ti=1.5, Td=0.43, Ts=dt,
+heading_pid = DiscretePID(; K=0.8, Ti=2.85, Td=0.365, Ts=dt,
                           umin=-1.5, umax=1.5)
-pos_pid = DiscretePID(; K=10.0, Ti=2.0, Td=0.0005, Ts=dt,
+pos_pid = DiscretePID(; K=8.0, Ti=2.0, Td=0.0005, Ts=dt,
                        umin=-1.2, umax=1.2)
-speed_pid = DiscretePID(; K=14.0, Ti=0.08, Td=0.0, Ts=dt,
+speed_pid = DiscretePID(; K=12.0, Ti=0.08, Td=0.0, Ts=dt,
                          umin=-40.0, umax=40.0)
 
-l_diff_prev = Ref(sys_state.l_tether[3] - sys_state.l_tether[4])
 l_diff_speed_filt = Ref(0.0)
-alpha = dt / (dt + 0.16)  # low-pass filter coefficient
+SPEED_TAU = 0.05
+alpha = dt / (dt + SPEED_TAU)  # low-pass filter coefficient
 
 for step in 1:steps
     t = step * dt
@@ -75,9 +79,8 @@ for step in 1:steps
 
     # Cascaded position → speed → torque control
     local l_diff = sys_state.l_tether[3] - sys_state.l_tether[4]
-    l_diff_speed_raw = (l_diff - l_diff_prev[]) / dt
-    l_diff_prev[] = l_diff
-    l_diff_speed_filt[] = alpha * l_diff_speed_raw + (1 - alpha) * l_diff_speed_filt[]
+    v_reelout_diff = sys_state.v_reelout[2] - sys_state.v_reelout[3]
+    l_diff_speed_filt[] = alpha * v_reelout_diff + (1 - alpha) * l_diff_speed_filt[]
     speed_setpoint = pos_pid(steering, l_diff, 0.0)
     torque = speed_pid(speed_setpoint, l_diff_speed_filt[], 0.0)
     set_values = [0.0, torque, -torque]
