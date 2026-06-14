@@ -28,7 +28,7 @@ toc()
 # ==================== USER PARAMETERS ==================== #
 
 PHYSICAL_MODEL = "ram"       # Options: "ram", "simple_ram", "4_attach_ram"
-SIM_TIME = 25.0              # Total simulation time [s]
+SIM_TIME = 26.0              # Total simulation time [s]
 DT = 0.02                    # Time step [s]
 INITIAL_STEERING = -0.012    # Initial steering line length difference [m]
 V_WIND = 12.51               # Wind speed [m/s]
@@ -39,6 +39,7 @@ ELEVATION = 76.5             # Initial elevation angle [deg]
 VSM_INTERVAL = 7             # VSM update interval (steps)
 OFFSET_DEG = 5.0             # Heading offset for direction reversal [deg]
 STEERING_SEQ = [0.1, -0.15, 0.25, -0.4, 0.5, -0.6, 0.7, -0.8, 0.9, -0.9, 1.1, -1.1] .* 0.3  # Steering setpoint sequence [m]
+STEERING_LIMIT = 0.075       # Minimum steering setpoint for analysis [m] 
 
 # Cascaded position → speed → torque PID parameters
 POSITION_P = 8.0             # Position PID proportional gain
@@ -287,7 +288,7 @@ function plot_steering_vs_turn_rate()
 
     G = psi_dot ./ sl.v_app ./ delayed_steering  # °/s / (m/s) / m = °/m
     for (i, _) in enumerate(G)
-        if abs(delayed_steering[i]) < 0.075
+        if abs(delayed_steering[i]) < STEERING_LIMIT
             G[i] = NaN
         end
     end
@@ -360,10 +361,9 @@ display(p)
 @info "Done!"
 
 # 50 m tether
-# Delay of turnrate: 0.48 s
-# Delay of turnrate: 0.36 s
-# Mean turnrate-law factor: 13.978 °/m ± 32.13 %
-# Mean turnrate-law factor: 0.244 rad/m ± 32.13 %
+# Delay of turnrate: 0.46 s
+# Mean turnrate-law factor: 14.353 °/m ± 31.24 %
+# Mean turnrate-law factor: 0.2505 rad/m ± 31.24 %
 # Turn-rate law coefficients:
-#   c1 (steering gain): 0.262117
-#   c2 (pendulum stability): 13.630731
+#   c1 (steering gain): 0.26103
+#   c2 (pendulum stability): 9.035674
