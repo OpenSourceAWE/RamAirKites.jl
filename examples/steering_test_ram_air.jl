@@ -261,7 +261,7 @@ function delay(x, y, t_max=10)
     z = crosscor_simple(x, y, overlap - 1)
     delay_ = argmax(z)
     delay_ -= overlap
-    return delay_ - 1
+    return delay_
 end
 
 # Shift vector by `shift` positions to the right
