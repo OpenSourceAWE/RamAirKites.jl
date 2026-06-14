@@ -340,6 +340,10 @@ end
 
 time, v_app, psi, beta, psi_dot, steering = plot_steering_vs_turn_rate()
 
+# Subtract INITIAL_STEERING offset so c1/c2 and plots reflect
+# steering deviation from the initial trim condition
+steering = steering .- INITIAL_STEERING
+
 c1, c2 = calc_c1_c2(v_app, psi, beta, psi_dot, steering)
 println("Turn-rate law coefficients:")
 println("  c1 (steering gain): $(round(c1, digits=6))")
