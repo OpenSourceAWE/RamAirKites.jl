@@ -366,10 +366,10 @@ end
 
 @info "Done!"
 
-# 50 m tether
+# 50 m tether, 12.51 m/s wind, 76.5° elevation, 0.3 m max steering, 0.02 s timestep
 # Delay of turnrate: 0.46 s
-# Mean turnrate-law factor: 14.353 °/m ± 31.24 %
-# Mean turnrate-law factor: 0.2505 rad/m ± 31.24 %
+# Mean turnrate-law factor: 4.302 °/m ± 31.15 %
+# Mean turnrate-law factor: 0.0751 rad/m ± 31.15 %
 # Turn-rate law coefficients:
-#   c1 (steering gain): 0.26103
-#   c2 (pendulum stability): 9.035674
+#   c1 (steering gain): 0.078202
+#   c2 (pendulum stability): 9.050431
