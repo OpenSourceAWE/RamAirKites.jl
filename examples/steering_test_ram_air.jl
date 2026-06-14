@@ -340,7 +340,7 @@ end
 
 @info "Analyzing results..."
 if PLOT
-    using MakieControlPlots
+    using MakieControlPlots: plot, plotx
 end
 
 time, v_app, psi, beta, psi_dot, steering = plot_steering_vs_turn_rate()
