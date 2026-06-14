@@ -174,7 +174,7 @@ function simulate(sam, logger, steps; plot=false)
         local target_change = steering_setpoint - steering_setpoint_applied
         local clamped_change = clamp(target_change, -max_delta, max_delta)
         steering_setpoint_applied = steering_setpoint_applied + clamped_change
-
+        steering_setpoint_applied = clamp(steering_setpoint_applied, -MAX_STEERING, MAX_STEERING)
         # --- Cascaded position→speed→torque ---
         local l_diff = sys_state.l_tether[3] - sys_state.l_tether[4]
         v_reelout_diff = sys_state.v_reelout[2] - sys_state.v_reelout[3]
