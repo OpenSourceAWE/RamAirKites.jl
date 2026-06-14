@@ -136,7 +136,7 @@ function simulate(sam, logger, steps; plot=false)
     seq_idx = 1
 
     for i in 1:steps
-        t = i * dt - dt
+        t = i * dt
 
         # After 2 seconds, start steering
         if !steering_active && t >= 2.0
