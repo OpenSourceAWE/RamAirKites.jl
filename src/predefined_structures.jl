@@ -69,7 +69,7 @@ end
 # ==================== MODEL FACTORY FUNCTIONS ==================== #
 
 """
-    create_ram_sys_struct(set::Settings; d_winch_pos)
+    create_ram_sys_struct(set::Settings; d_winch_pos, prn)
 
 Create a `SystemStructure` for the primary "ram" model with a stability-enhancing bridle.
 
@@ -78,6 +78,10 @@ a complex pulley bridle system, 4 main tethers, and 3 winches.
 
 # Arguments
 - `set::Settings`: Configuration parameters from `KiteUtils.jl`.
+
+# Keywords
+- `d_winch_pos`: Winch position offsets. Default `[zeros(3), zeros(3)]`.
+- `prn=true`: If true, print info messages about auto-generated components.
 """
 function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)], prn=true)
     vsm_set_path = joinpath(get_data_path(), "vsm_settings.yaml")
@@ -199,7 +203,7 @@ function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)], 
 end
 
 """
-    create_4_attach_ram_sys_struct(set::Settings)
+    create_4_attach_ram_sys_struct(set::Settings; prn)
 
 Create a `SystemStructure` for a ram-air kite with a 4-point attachment bridle.
 
@@ -208,6 +212,9 @@ deforming with the wing group twist dynamics.
 
 # Arguments
 - `set::Settings`: Configuration parameters from `KiteUtils.jl`.
+
+# Keywords
+- `prn=true`: If true, print info messages about auto-generated components.
 """
 function create_4_attach_ram_sys_struct(set::Settings; prn=true)
     vsm_set_path = joinpath(get_data_path(), "vsm_settings.yaml")
@@ -327,7 +334,7 @@ function create_4_attach_ram_sys_struct(set::Settings; prn=true)
 end
 
 """
-    create_simple_ram_sys_struct(set::Settings; unit_stiffness, unit_damping)
+    create_simple_ram_sys_struct(set::Settings; unit_stiffness, unit_damping, prn)
 
 Create a simplified `SystemStructure` for a ram-air kite with direct tether connections.
 
@@ -335,6 +342,11 @@ Simplified bridle without pulley system. Each tether is a single segment.
 
 # Arguments
 - `set::Settings`: Configuration parameters.
+
+# Keywords
+- `unit_stiffness`: Per-tether unit stiffness values. Default `fill(NaN, 4)`.
+- `unit_damping`: Per-tether unit damping values. Default `fill(NaN, 4)`.
+- `prn=true`: If true, print info messages about auto-generated components.
 """
 function create_simple_ram_sys_struct(set::Settings;
                                       unit_stiffness=fill(NaN, 4),
@@ -395,7 +407,7 @@ function create_simple_ram_sys_struct(set::Settings;
 end
 
 """
-    create_tether_sys_struct(set::Settings; unit_stiffness, unit_damping)
+    create_tether_sys_struct(set::Settings; unit_stiffness, unit_damping, prn)
 
 Create a simplified `SystemStructure` for testing tether dynamics only.
 
@@ -404,6 +416,11 @@ No wing or bridle system.
 
 # Arguments
 - `set::Settings`: Configuration parameters.
+
+# Keywords
+- `unit_stiffness`: Per-tether unit stiffness values. Default `fill(NaN, 4)`.
+- `unit_damping`: Per-tether unit damping values. Default `fill(NaN, 4)`.
+- `prn=true`: If true, print info messages about auto-generated components.
 """
 function create_tether_sys_struct(set::Settings;
                                   unit_stiffness=fill(NaN, 4),
@@ -449,6 +466,13 @@ end
     create_sys_struct(set::Settings; kwargs...)
 
 Dispatcher that calls the appropriate factory function based on `set.physical_model`.
+
+# Arguments
+- `set::Settings`: Configuration parameters from `KiteUtils.jl`.
+
+# Keywords
+- `prn=true`: If true, print info messages about auto-generated components.
+- Additional keyword arguments are forwarded to the underlying factory function.
 """
 function create_sys_struct(set::Settings; kwargs...)
     model = set.physical_model
