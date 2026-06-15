@@ -231,7 +231,6 @@ p1 = mcp.plotx(
         [L"v_{\mathrm{ro},1}", L"v_{\mathrm{ro},2}", L"v_{\mathrm{ro},3}"],
         nothing,
         nothing,
-        nothing,
         [L"\psi", L"\chi", L"\psi_{\mathrm{ref}}"],
         [L"F_{\mathrm{t},1}", L"F_{\mathrm{t},2}", L"F_{\mathrm{t},3}"],
     ],
@@ -246,7 +245,7 @@ if PLOT_HEADING
     sl = syslog.syslog
     time_vec = sl.time[1:length(heading_setpoint)]
     p2 = mcp.plot(time_vec, [rad2deg.(heading_setpoint), rad2deg.(sl.heading[1:length(heading_setpoint)])];
-            xlabel=L"\mathrm{Time}~[s]",
+            xlabel=L"\mathrm{Time}~[\mathrm{s}]",
             ylabel=L"\mathrm{Heading}~[°]",
             labels=["Setpoint", "Actual"],
             legendsize=14,
