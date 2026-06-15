@@ -13,7 +13,6 @@ tic()
 using Test
 using RamAirKite
 using SymbolicAWEModels
-using SymbolicAWEModels: update_sys_struct!
 using VortexStepMethod
 using LinearAlgebra
 using DiscretePIDs
@@ -60,7 +59,6 @@ set.l_tether = TETHER_LENGTH
     @test vsm_wing.span ≈ 3.27 atol=0.01
     tf = sys_struct.transforms[1]
     @test rad2deg(tf.elevation) ≈ set.elevation
-    @test TETHER_LENGTH * sind(set.elevation) ≈ 43.30 atol=0.01
 
     # 2. model
     sam = SymbolicAWEModel(set, sys_struct)

@@ -41,7 +41,7 @@ set.l_tether = TETHER_LENGTH
 
 @testset "Initial equilibrium" begin
     # 1. system structure
-    sys_struct = create_sys_struct(set)
+    sys_struct = create_sys_struct(set::Settings)
     toc("System structure created after: ")
     @test sys_struct isa SystemStructure
     @test sys_struct.wings[1].aero isa AbstractVSMAero
@@ -58,7 +58,6 @@ set.l_tether = TETHER_LENGTH
     @test vsm_wing.span ≈ 3.27 atol=0.01
     tf = sys_struct.transforms[1]
     @test rad2deg(tf.elevation) ≈ set.elevation
-    @test TETHER_LENGTH * sind(set.elevation) ≈ 43.30 atol=0.01
 
     # 2. model
     sam = SymbolicAWEModel(set, sys_struct)

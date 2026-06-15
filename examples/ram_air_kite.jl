@@ -32,6 +32,7 @@ toc()
 # User changeable parameters
 PHYSICAL_MODEL = "ram"      # Options: "ram", "simple_ram", "4_attach_ram"
 SIM_TIME = 15.0             # Total simulation time [s]
+PRN = false                 # Whether to print detailed info during init
 RECORD_VIDEO = false        # Whether to record a video of the simulation (can be slow)
 REPLAY_LOG = true           # Whether to replay the logged simulation data in an interactive Makie scene
 PLOT_HEADING = true         # Whether to plot heading setpoint vs actual heading at the end
@@ -74,7 +75,7 @@ set.profile_law = PROFILE_LAW
 set.l_tether = TETHER_LENGTH
 
 # 1. system structure
-sys_struct = create_sys_struct(set)
+sys_struct = create_sys_struct(set; prn=PRN)
 
 # 2. model
 sam = SymbolicAWEModel(set, sys_struct)
@@ -104,9 +105,10 @@ sys_struct.tethers[:steering_right].init_stretch_frac = 1.0 + depower
 
 # 3. init
 @info "Initializing model..."
-init!(sam; remake=REMAKE_CACHE)
+init!(sam; remake=REMAKE_CACHE, prn=PRN)
 
 find_steady_state!(sam; dt=0.05, vsm_interval=7)
+toc("Steady state found after: ")
 
 depower_len = sys_struct.tethers[:steering_left].len - sys_struct.tethers[:power_left].len
 @info "Depowered by $(round(depower_len; digits=2)) m"
@@ -193,9 +195,9 @@ for step in 1:steps
     sys_state.time = t
     log!(logger, sys_state)
 
-    if step % 10 == 0
+    if step % 100 == 0
         now = time()
-        realtime_factor = (10 * dt) / (now - last_time)
+        realtime_factor = (100 * dt) / (now - last_time)
         global last_time = now
         @info "step $step / $steps, $(round(realtime_factor; digits=2)) times realtime"
     end
