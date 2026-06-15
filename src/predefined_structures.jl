@@ -79,7 +79,7 @@ a complex pulley bridle system, 4 main tethers, and 3 winches.
 # Arguments
 - `set::Settings`: Configuration parameters from `KiteUtils.jl`.
 """
-function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)])
+function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)], prn=true)
     vsm_set_path = joinpath(get_data_path(), "vsm_settings.yaml")
     vsm_set = VortexStepMethod.VSMSettings(vsm_set_path; data_prefix=false)
     vsm_wing = create_vsm_wing(set, vsm_set; prn=false)
@@ -195,7 +195,7 @@ function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)])
     transforms = [Transform(1, deg2rad(float(set.elevation)), deg2rad(float(set.azimuth)), deg2rad(float(set.heading));
                              base_pos=zeros(3), base_point=steering_right_anchor, wing=1)]
 
-    return SystemStructure("ram", set; points, twist_surfaces, segments, pulleys, tethers, winches, wings, transforms)
+    return SystemStructure("ram", set; points, twist_surfaces, segments, pulleys, tethers, winches, wings, transforms, prn)
 end
 
 """
@@ -209,7 +209,7 @@ deforming with the wing group twist dynamics.
 # Arguments
 - `set::Settings`: Configuration parameters from `KiteUtils.jl`.
 """
-function create_4_attach_ram_sys_struct(set::Settings)
+function create_4_attach_ram_sys_struct(set::Settings; prn=true)
     vsm_set_path = joinpath(get_data_path(), "vsm_settings.yaml")
     vsm_set = VortexStepMethod.VSMSettings(vsm_set_path; data_prefix=false)
     vsm_wing = create_vsm_wing(set, vsm_set; prn=false)
@@ -323,7 +323,7 @@ function create_4_attach_ram_sys_struct(set::Settings)
     transforms = [Transform(1, deg2rad(float(set.elevation)), deg2rad(float(set.azimuth)), deg2rad(float(set.heading));
                              base_pos=zeros(3), base_point=steering_right_anchor, wing=1)]
 
-    return SystemStructure("4_attach_ram", set; points, twist_surfaces, segments, pulleys, tethers, winches, wings, transforms)
+    return SystemStructure("4_attach_ram", set; points, twist_surfaces, segments, pulleys, tethers, winches, wings, transforms, prn)
 end
 
 """
@@ -338,7 +338,8 @@ Simplified bridle without pulley system. Each tether is a single segment.
 """
 function create_simple_ram_sys_struct(set::Settings;
                                       unit_stiffness=fill(NaN, 4),
-                                      unit_damping=fill(NaN, 4))
+                                      unit_damping=fill(NaN, 4),
+                                      prn=true)
     set.segments = 1
     vsm_set_path = joinpath(get_data_path(), "vsm_settings.yaml")
     vsm_set = VortexStepMethod.VSMSettings(vsm_set_path; data_prefix=false)
@@ -390,7 +391,7 @@ function create_simple_ram_sys_struct(set::Settings;
     ]
 
     return SystemStructure("simple_ram", set;
-        points, twist_surfaces, segments, tethers, winches, wings, transforms)
+        points, twist_surfaces, segments, tethers, winches, wings, transforms, prn)
 end
 
 """
@@ -406,7 +407,8 @@ No wing or bridle system.
 """
 function create_tether_sys_struct(set::Settings;
                                   unit_stiffness=fill(NaN, 4),
-                                  unit_damping=fill(NaN, 4))
+                                  unit_damping=fill(NaN, 4),
+                                  prn=true)
     points = [
         Point(:power_left, zeros(3), DYNAMIC; fix_sphere=true, transform=1)
         Point(:power_right, zeros(3), DYNAMIC; fix_sphere=true, transform=1)
@@ -440,7 +442,7 @@ function create_tether_sys_struct(set::Settings;
     transforms = [Transform(1, deg2rad(float(set.elevation)), deg2rad(float(set.azimuth)), deg2rad(float(set.heading));
                              base_pos=zeros(3), base_point=steering_right_anchor, rot_point=:power_left)]
 
-    return SystemStructure("tether", set; points, tethers, winches, transforms)
+    return SystemStructure("tether", set; points, tethers, winches, transforms, prn)
 end
 
 """
@@ -455,7 +457,7 @@ function create_sys_struct(set::Settings; kwargs...)
     elseif model == "simple_ram"
         return create_simple_ram_sys_struct(set; kwargs...)
     elseif model == "4_attach_ram"
-        return create_4_attach_ram_sys_struct(set)
+        return create_4_attach_ram_sys_struct(set; kwargs...)
     elseif model == "tether"
         return create_tether_sys_struct(set; kwargs...)
     else
