@@ -331,6 +331,7 @@ function plot_turnrate_law(c1, c2, time, v_app, psi, beta, psi_dot, steering)
         p1 = plot(time, steering, est_steering;
                   ylabels=["rel_steering [-]", "est_rel_steering [-]"],
                   ylims=[(-1.2, 1.2), (-1.2, 1.2)],
+                  legendsize=16,
                   fig="steering vs est_steering")
         display(p1)
     end
@@ -360,7 +361,7 @@ if PLOT
     sl = lg.syslog
     steering = sl.var_01 ./ MAX_STEERING
     steering_setpoint_logged = sl.var_02 ./ MAX_STEERING
-    p=plotx(sl.time, rad2deg.(sl.elevation), rad2deg.(sl.azimuth), rad2deg.(sl.heading), steering, steering_setpoint_logged; ylabels=["elevation [°]", "azimuth [°]", "heading [°]", "rel_steering [-]", "rel_setpoint [-]"], fig="elevation and azimuth")
+    p=plotx(sl.time, rad2deg.(sl.elevation), rad2deg.(sl.azimuth), rad2deg.(sl.heading), steering, steering_setpoint_logged; ylabels=["elevation [°]", "azimuth [°]", "heading [°]", "rel_steering [-]", "rel_setpoint [-]"], legendsize=12,fig="elevation and azimuth")
     display(p)
 end
 
