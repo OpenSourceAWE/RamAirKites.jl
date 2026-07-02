@@ -39,7 +39,6 @@ set.v_wind = V_WIND
 set.upwind_dir = UPWIND_DIR
 set.profile_law = PROFILE_LAW
 set.l_tether = TETHER_LENGTH
-
 @testset "Parking     " begin
     # 1. system structure
     sys_struct = create_sys_struct(set)

@@ -74,8 +74,18 @@ set.upwind_dir = UPWIND_DIR
 set.profile_law = PROFILE_LAW
 set.l_tether = TETHER_LENGTH
 
-# 1. system structure
-sys_struct = create_sys_struct(set; prn=PRN)
+# 1. system structure (loaded from exported YAML)
+import VortexStepMethod: VSMSettings
+
+sys_struct = if set.physical_model == "ram"
+    vsm_set_path = joinpath(get_data_path(), "vsm_settings.yaml")
+    vsm_set = VSMSettings(vsm_set_path; data_prefix=false)
+    load_sys_struct_from_yaml(
+        joinpath(get_data_path(), "ram_air_kite_export.yaml");
+        system_name="ram", set=set, vsm_set=vsm_set)
+else
+    create_sys_struct(set; prn=PRN)
+end
 
 # 2. model
 sam = SymbolicAWEModel(set, sys_struct)
