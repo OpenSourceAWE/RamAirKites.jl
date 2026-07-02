@@ -71,6 +71,45 @@ let
             @test tether.end_point_idx !== nothing
         end
 
+        # === Symbol-keyed lookup assertions ===
+        # NamedCollection on NamedTuple lookup (Symbol key)
+        @test sys_struct.winches[:power_winch] !== nothing
+        @test sys_struct.winches[:steering_left_winch] !== nothing
+        @test sys_struct.winches[:steering_right_winch] !== nothing
+
+        @test sys_struct.tethers[:power_left] !== nothing
+        @test sys_struct.tethers[:power_right] !== nothing
+        @test sys_struct.tethers[:steering_left] !== nothing
+        @test sys_struct.tethers[:steering_right] !== nothing
+
+        # Integer-keyed lookups
+        @test sys_struct.points[1] !== nothing
+        @test sys_struct.points[34] !== nothing
+        @test sys_struct.segments[1] !== nothing
+        @test sys_struct.segments[46] !== nothing
+        @test sys_struct.pulleys[1] !== nothing
+        @test sys_struct.pulleys[4] !== nothing
+        @test sys_struct.twist_surfaces[1] !== nothing
+        @test sys_struct.twist_surfaces[4] !== nothing
+        @test sys_struct.wings[1] !== nothing
+        @test sys_struct.transforms[1] !== nothing
+
+        # Symbol-keyed lookups for named points
+        @test sys_struct.points[:power_left_anchor] !== nothing
+        @test sys_struct.points[:steering_right_point_2] !== nothing
+
+        # Verify that Symbol keys from wings.point_idxs resolve correctly
+        for wing in sys_struct.wings
+            for ref in wing.twist_surface_refs
+                @test ref !== nothing
+                @test sys_struct.twist_surfaces[ref] !== nothing
+            end
+            for ref in wing.transform_ref
+                @test ref !== nothing
+                @test sys_struct.transforms[ref] !== nothing
+            end
+        end
+
         @info "YAML export load smoke test passed."
     end
 end
