@@ -75,9 +75,14 @@ set.sample_freq = Int(round(1 / dt))
 import VortexStepMethod: VSMSettings
 vsm_set_path = joinpath(get_data_path(), "vsm_settings.yaml")
 vsm_set = VSMSettings(vsm_set_path; data_prefix=false)
-sys_struct = load_sys_struct_from_yaml(
-    joinpath(get_data_path(), "ram_air_kite_export.yaml");
-    system_name="ram_air", set=set, vsm_set=vsm_set)
+
+sys_struct = if set.physical_model == "ram"
+    load_sys_struct_from_yaml(
+        joinpath(get_data_path(), "ram_air_kite_export.yaml");
+        system_name="ram", set=set, vsm_set=vsm_set)
+else
+    create_sys_struct(set)
+end
 
 # 2. model
 sam = SymbolicAWEModel(set, sys_struct)
