@@ -7,7 +7,7 @@ options = [
     "ram_air_kite = include(\"ram_air_kite.jl\")",
     "auto_parking_ram_air = include(\"auto_parking_ram_air.jl\")",
     "steering_test_ram_air = include(\"steering_test_ram_air.jl\")",
-    "show_bridle = include(\"show_bridle.jl\")",
+    "include(\"show_bridle.jl\")",
     "quit",
 ]
 
