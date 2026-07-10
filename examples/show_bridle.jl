@@ -55,7 +55,7 @@ end
 # ============================================================
 # Parse points, segments, and pulleys from the YAML export file
 # ============================================================
-println("\n--- Parsing YAML export: $(split(yaml_path, '/')[end]) ---")
+println("\n--- Parsing YAML export: $(basename(yaml_path)) ---")
 
 yaml_dict = YAML.load_file(yaml_path)
 
@@ -228,16 +228,13 @@ function show_bridle(df_points, df_segments; kite_obj_path=nothing, kite_obj_off
     end
 
     # View control buttons
-    btn_home = Button(gl[2, 1], label="HOME", tellwidth=false,
-                       width=80, height=30)
-    btn_front = Button(gl[2, 1], label="FRONT", tellwidth=false,
-                       width=80, height=30)
-    btn_side  = Button(gl[2, 1], label="SIDE", tellwidth=false,
-                       width=80, height=30)
     btn_layout = GridLayout(gl[2, 1])
-    btn_layout[1, 1] = btn_home
-    btn_layout[1, 2] = btn_front
-    btn_layout[1, 3] = btn_side
+    btn_home = Button(btn_layout[1, 1], label="HOME", tellwidth=false,
+                       width=80, height=30)
+    btn_front = Button(btn_layout[1, 2], label="FRONT", tellwidth=false,
+                       width=80, height=30)
+    btn_side  = Button(btn_layout[1, 3], label="SIDE", tellwidth=false,
+                       width=80, height=30)
 
     on(btn_home.clicks) do _
         ax.azimuth[] = init_azimuth
@@ -335,7 +332,7 @@ function show_bridle(df_points, df_segments; kite_obj_path=nothing, kite_obj_off
         end
     end
 
-    seg_list = []
+    seg_list = Tuple{String, Vector{Float64}, Vector{Float64}}[]
     for row in eachrow(df_segments)
         name = row.name
         if row.pulley_id > 0 && haskey(pulley_offset_dir, row.idx)
@@ -428,7 +425,7 @@ function show_bridle(df_points, df_segments; kite_obj_path=nothing, kite_obj_off
     scene = ax.scene
 
     # Hover handler: find closest point or segment (points have priority)
-    on(events(scene).mouseposition, priority=2) do mp
+    on(events(scene).mouseposition, priority=2) do _
         min_dist_pt = Inf
         closest_pt = -1
         min_dist_seg = Inf
