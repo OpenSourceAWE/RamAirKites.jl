@@ -280,7 +280,7 @@ function show_bridle(df_points, df_segments; kite_obj_path=nothing, kite_obj_off
         kite_verts, kite_faces = load_kite_mesh(kite_obj_path; offset=kite_obj_offset)
         mesh!(ax, kite_verts, kite_faces, color=(:lightgray, 0.25), shading=true, transparency=true)
     end
-# Color points by type: WING green, DYNAMIC blue
+    # Color points by type: WING green, DYNAMIC blue
     scatter_colors = [t == "WING" ? RGBAf(0, 0.8, 0, 1) : RGBAf(0, 0, 1, 1) for t in df_points.type]
     # scatter_sizes = [p ? 12 : 12 for p in df_points.pulley]
     scatter!(ax, points[:, 1], points[:, 2], points[:, 3], color=scatter_colors, markersize=8)
