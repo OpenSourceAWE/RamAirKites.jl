@@ -1,6 +1,8 @@
 [deps]
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DiscretePIDs = "c1363496-6848-4723-8758-079b737f6baf"
 GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
+GeometryBasics = "5c1252a2-5f33-56bf-86c9-59e7332b4326"
 KiteUtils = "90980105-b163-44e5-ba9f-8b1c83bb0533"
 LaTeXStrings = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 MakieControlPlots = "6d616b69-6563-4f6e-8472-6f6c706c6f74"
@@ -10,6 +12,7 @@ StructArrays = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
 SymbolicAWEModels = "9c9a347c-5289-41db-a9b9-25ccc76c3360"
 Timers = "21f18d07-b854-4dab-86f0-c15a3821819a"
 VortexStepMethod = "ed3cd733-9f0f-46a9-93e0-89b8d4998dd9"
+YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 
 [compat]
 MakieControlPlots = "0.1.2"
