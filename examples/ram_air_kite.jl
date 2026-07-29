@@ -117,7 +117,7 @@ sys_struct.tethers[:steering_right].init_stretch_frac = 1.0 + depower
 @info "Initializing model..."
 init!(sam; remake=REMAKE_CACHE, prn=PRN)
 
-find_steady_state!(sam; dt=0.05, vsm_interval=7)
+# find_steady_state!(sam; dt=0.05, vsm_interval=7)
 toc("Steady state found after: ")
 
 depower_len = sys_struct.tethers[:steering_left].len - sys_struct.tethers[:power_left].len

@@ -98,7 +98,7 @@ function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)], 
     bridle_top_left = [cad_to_body_frame(vsm_wing, set.top_bridle_points[i]) for i in eachindex(set.top_bridle_points)]
     bridle_top_right = [bridle_top_left[i] .* [1, -1, 1] for i in eachindex(set.top_bridle_points)]
 
-    dynamics_type = set.quasi_static ? QUASI_STATIC : DYNAMIC
+    dynamics_type = DYNAMIC
     z = vsm_wing.R_cad_body[:, 3]
 
     function create_bridle(bridle_top, gammas, points, twist_surfaces, segments, pulleys, attach_points)
@@ -108,14 +108,14 @@ function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)], 
         i_surface = length(twist_surfaces)
 
         points_new = [
-            Point(1+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[1]), WING)
-            Point(2+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[2]), WING)
-            Point(3+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[3]), WING)
-            Point(4+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[4]), WING)
-            Point(5+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[1]), WING)
-            Point(6+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[2]), WING)
-            Point(7+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[3]), WING)
-            Point(8+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[4]), WING)
+            Point(1+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[1]), BODY_STATIC; wing=1)
+            Point(2+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[2]), BODY_STATIC; wing=1)
+            Point(3+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[3]), BODY_STATIC; wing=1)
+            Point(4+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[4]), BODY_STATIC; wing=1)
+            Point(5+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[1]), BODY_STATIC; wing=1)
+            Point(6+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[2]), BODY_STATIC; wing=1)
+            Point(7+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[3]), BODY_STATIC; wing=1)
+            Point(8+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[4]), BODY_STATIC; wing=1)
         ]
         twist_surfaces_new = [
             TwistSurface(1+i_surface, [1+i_pnt, 2+i_pnt, 3+i_pnt, 4+i_pnt], DYNAMIC, 0.25)
@@ -231,7 +231,7 @@ function create_4_attach_ram_sys_struct(set::Settings; prn=true)
     bridle_top_left = [cad_to_body_frame(vsm_wing, set.top_bridle_points[i]) for i in eachindex(set.top_bridle_points)]
     bridle_top_right = [bridle_top_left[i] .* [1, -1, 1] for i in eachindex(set.top_bridle_points)]
 
-    dynamics_type = set.quasi_static ? QUASI_STATIC : DYNAMIC
+    dynamics_type = DYNAMIC
     z = vsm_wing.R_cad_body[:, 3]
 
     function create_bridle(bridle_top, gammas, points, twist_surfaces, segments, pulleys, attach_points)
@@ -241,14 +241,14 @@ function create_4_attach_ram_sys_struct(set::Settings; prn=true)
         i_surface = length(twist_surfaces)
 
         points_new = [
-            Point(1+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[1]), WING)
-            Point(2+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[2]), WING)
-            Point(3+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[3]), WING)
-            Point(4+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[4]), WING)
-            Point(5+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[1]), WING)
-            Point(6+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[2]), WING)
-            Point(7+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[3]), WING)
-            Point(8+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[4]), WING)
+            Point(1+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[1]), BODY_STATIC; wing=1)
+            Point(2+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[2]), BODY_STATIC; wing=1)
+            Point(3+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[3]), BODY_STATIC; wing=1)
+            Point(4+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[4]), BODY_STATIC; wing=1)
+            Point(5+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[1]), BODY_STATIC; wing=1)
+            Point(6+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[2]), BODY_STATIC; wing=1)
+            Point(7+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[3]), BODY_STATIC; wing=1)
+            Point(8+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[4]), BODY_STATIC; wing=1)
         ]
         twist_surfaces_new = [
             TwistSurface(1+i_surface, [1+i_pnt, 2+i_pnt, 3+i_pnt, 4+i_pnt], DYNAMIC, set.bridle_fracs[2])
@@ -362,16 +362,16 @@ function create_simple_ram_sys_struct(set::Settings;
     bridle_top_right = [bridle_top_left[i] .* [1, -1, 1] for i in eachindex(set.top_bridle_points)]
 
     points = [
-        Point(1, bridle_top_left[2], WING)
-        Point(2, bridle_top_right[2], WING)
-        Point(3, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[4]), WING)
-        Point(4, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[4]), WING)
+        Point(1, bridle_top_left[2], BODY_STATIC; wing=1)
+        Point(2, bridle_top_right[2], BODY_STATIC; wing=1)
+        Point(3, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[4]), BODY_STATIC; wing=1)
+        Point(4, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[4]), BODY_STATIC; wing=1)
         Point(5, [0, 0, -float(set.l_tether)], STATIC; transform=1)
         Point(6, [0, 0, -float(set.l_tether)], STATIC; transform=1)
         Point(7, [0, 0, -float(set.l_tether)], STATIC; transform=1)
         Point(8, [0, 0, -float(set.l_tether)], STATIC; transform=1)
-        Point(9, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[1]), WING)
-        Point(10, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[1]), WING)
+        Point(9, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[1]), BODY_STATIC; wing=1)
+        Point(10, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[1]), BODY_STATIC; wing=1)
     ]
     twist_surfaces = [
         TwistSurface(1, [9, 3], DYNAMIC, 0.25)
