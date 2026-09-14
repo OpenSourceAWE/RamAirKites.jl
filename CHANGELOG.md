@@ -17,8 +17,12 @@
   settings say otherwise, which gave the wing 41 struts against its 4 stations
   and a parked kite that no longer settled.
 - `data/ram_air_kite/ram_air_kite_export.yaml` replaces its `materials` block
-  with a `variables` mapping over the material columns, and a wing no longer
-  lists its `point_idxs`.
+  with a `variables` mapping over the material columns, a wing no longer lists
+  its `point_idxs`, and its bridle segments carry the `compression_frac` of 0.1
+  that `create_ram_sys_struct` builds.
+- The wing's airfoil polars are generated from `ram_air_kite_body.obj` and
+  cached under `data/ram_air_kite/obj_geometry/`; `ram_air_kite_foil.dat` and
+  the bundled `*_polar.csv` are no longer read.
 - Reworked the "ram" model bridle: removed the wing-fixed "loose point" so each
   of the 4 stations now uses 4 deforming aerodynamic attachment points
   (previously 3 deforming points plus 1 fixed point).
