@@ -25,7 +25,7 @@ export SymbolicAWEModel, SystemStructure, Logger, SysState
 export load_sys_struct_from_yaml, set_data_path, get_data_path
 export init!, next_step!, update_sys_state!, log!, save_log, load_log
 export find_steady_state!, sim_oscillate!
-export REFINE, QUATERNION, WING
+export REFINE, QUATERNION
 
 # Include submodules
 include("predefined_structures.jl")

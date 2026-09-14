@@ -98,8 +98,8 @@ end
 for segment in sam.sys_struct.segments
     segment.compression_frac = 0.01
 end
-for twist_surface in sam.sys_struct.twist_surfaces
-    twist_surface.moment_frac = 0.0
+for station in sam.sys_struct.stations
+    station.moment_frac = 0.0
 end
 
 depower = 0.01
@@ -119,8 +119,8 @@ sys_state.time = 0.0
 steady_torque = calc_steady_torque(sam)
 torque_damp = 0.9
 
-for twist_surface in sam.sys_struct.twist_surfaces
-    twist_surface.damping = 200.0
+for station in sam.sys_struct.stations
+    station.damping = 200.0
 end
 
 # Setup cascaded position→speed→torque PIDs

@@ -14,6 +14,7 @@ using Test
 using RamAirKite
 using SymbolicAWEModels
 using SymbolicAWEModels: Settings
+using LinearAlgebra: norm
 import VortexStepMethod: VSMSettings
 toc()
 
@@ -27,17 +28,14 @@ let
     set.profile_law = 3
     set.l_tether = 50.0
 
+    vsm_set_path = joinpath(get_data_path(), "vsm_settings.yaml")
+    vsm_set = VSMSettings(vsm_set_path; data_prefix=false)
+    sys_struct = load_sys_struct_from_yaml(
+        joinpath(get_data_path(), "ram_air_kite_export.yaml");
+        system_name="ram", set=set, vsm_set=vsm_set)
+    toc("YAML loaded after: ")
+
     @testset "YAML Load Smoke Test" begin
-        # Load VSM settings
-        vsm_set_path = joinpath(get_data_path(), "vsm_settings.yaml")
-        vsm_set = VSMSettings(vsm_set_path; data_prefix=false)
-
-        # Load system structure from exported YAML
-        sys_struct = load_sys_struct_from_yaml(
-            joinpath(get_data_path(), "ram_air_kite_export.yaml");
-            system_name="ram", set=set, vsm_set=vsm_set)
-
-        toc("YAML loaded after: ")
         @test sys_struct isa SystemStructure
         @test sys_struct.name == "ram"
 
@@ -46,7 +44,7 @@ let
         @test length(sys_struct.segments) > 0
         @test length(sys_struct.tethers) > 0
         @test length(sys_struct.wings) > 0
-        @test length(sys_struct.twist_surfaces) > 0
+        @test length(sys_struct.stations) > 0
 
         # Expected quantities from the exported model
         @test length(sys_struct.points) == 46
@@ -54,7 +52,7 @@ let
         @test length(sys_struct.tethers) == 4
         @test length(sys_struct.winches) == 3
         @test length(sys_struct.wings) == 1
-        @test length(sys_struct.twist_surfaces) == 4
+        @test length(sys_struct.stations) == 4
         @test length(sys_struct.pulleys) == 4
         @test length(sys_struct.transforms) == 1
 
@@ -89,8 +87,8 @@ let
         @test sys_struct.segments[46] !== nothing
         @test sys_struct.pulleys[1] !== nothing
         @test sys_struct.pulleys[4] !== nothing
-        @test sys_struct.twist_surfaces[1] !== nothing
-        @test sys_struct.twist_surfaces[4] !== nothing
+        @test sys_struct.stations[1] !== nothing
+        @test sys_struct.stations[4] !== nothing
         @test sys_struct.wings[1] !== nothing
         @test sys_struct.transforms[1] !== nothing
 
@@ -100,9 +98,9 @@ let
 
         # Verify that Symbol keys from wings.point_idxs resolve correctly
         for wing in sys_struct.wings
-            for ref in wing.twist_surface_refs
+            for ref in wing.station_refs
                 @test ref !== nothing
-                @test sys_struct.twist_surfaces[ref] !== nothing
+                @test sys_struct.stations[ref] !== nothing
             end
             for ref in wing.transform_ref
                 @test ref !== nothing
@@ -111,6 +109,15 @@ let
         end
 
         @info "YAML export load smoke test passed."
+    end
+
+    @testset "export places its points where the factory does" begin
+        factory = create_sys_struct(set)
+        @test length(factory.points) == length(sys_struct.points)
+        chord = norm(sys_struct.stations[1].chord)
+        offsets = [norm(factory.points[i].pos_cad - sys_struct.points[i].pos_cad)
+                   for i in eachindex(factory.points)]
+        @test maximum(offsets) < 0.1chord
     end
 end
 nothing

@@ -32,7 +32,8 @@ include("examples/ram_air_kite.jl")
 ```julia
 using RamAirKite
 using SymbolicAWEModels
-using GLMakie  # For visualization
+using GLMakie            # For visualization
+using MakieControlPlots  # Enables plot/replay/record on a SystemStructure
 
 # Configure settings
 set_data_path(ram_air_data_path())
@@ -125,7 +126,7 @@ julia --project=examples examples/ram_air_kite.jl
 - **SymbolicAWEModels.jl**: Core symbolic modeling
 - **VortexStepMethod.jl**: Aerodynamic calculations
 - **KiteUtils.jl**: Common types and utilities
-- **GLMakie.jl** (optional): Visualization
+- **GLMakie.jl** and **MakieControlPlots.jl** (optional): Visualization
 
 ## Data Files
 

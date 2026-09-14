@@ -13,7 +13,7 @@ using StaticArrays
 using Parameters, DiscretePIDs
 
 # --- Visualization ---
-using GLMakie, LaTeXStrings
+using GLMakie, LaTeXStrings, MakieControlPlots
 
 # --- Open Source AWE Packages ---
 using AtmosphericModels, KiteUtils, VortexStepMethod,
@@ -59,7 +59,7 @@ PackageCompiler.create_sysimage(
     [:Pkg, :LinearAlgebra, :Statistics, :Serialization, :Printf,
      :StaticArrays,
      :Parameters, :DiscretePIDs,
-     :GLMakie, :LaTeXStrings,
+     :GLMakie, :LaTeXStrings, :MakieControlPlots,
      :AtmosphericModels, :KiteUtils, :VortexStepMethod,
      :SymbolicAWEModels];
     sysimage_path="kps-image_tmp.so",
