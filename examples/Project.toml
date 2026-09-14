@@ -15,7 +15,7 @@ VortexStepMethod = "ed3cd733-9f0f-46a9-93e0-89b8d4998dd9"
 YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 
 [compat]
-MakieControlPlots = "0.1.2"
+MakieControlPlots = "0.1.5"
 
 [sources]
 RamAirKite = {path = ".."}

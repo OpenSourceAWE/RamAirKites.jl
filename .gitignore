@@ -8,6 +8,7 @@ Manifest.toml
 # Tool configs
 .mcp.json
 .claude/
+LocalPreferences.toml
 
 # Dotfiles (not part of project)
 .bash_profile
@@ -43,3 +44,4 @@ examples/*.bak2
 ram-air-kite.code-workspace
 bin/del_package
 *.arrow
+data/ram_air_kite/obj_geometry/
