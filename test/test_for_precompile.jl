@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 using GLMakie
+using MakieControlPlots
 using RamAirKite
 using RamAirKite: ram_air_data_path
 using KiteUtils: Settings, set_data_path
@@ -27,8 +28,8 @@ end
 for segment in sys_struct.segments
     segment.compression_frac = 0.01
 end
-for twist_surface in sys_struct.twist_surfaces
-    twist_surface.moment_frac = 0.0
+for station in sys_struct.stations
+    station.moment_frac = 0.0
 end
 
 depower = 0.01
@@ -41,7 +42,7 @@ init!(sam; remake=false)
 find_steady_state!(sam; dt=0.05, vsm_interval=7)
 
 # Warm up plotting
-fig = Makie.plot(sam.sys_struct)
+fig = MakieControlPlots.plot(sam.sys_struct)
 
 # Run a short simulation to precompile the hot loop
 dt = 0.05
@@ -56,8 +57,8 @@ sys_state.time = 0.0
 
 steady_torque = calc_steady_torque(sam)
 
-for twist_surface in sam.sys_struct.twist_surfaces
-    twist_surface.damping = 200.0
+for station in sam.sys_struct.stations
+    station.damping = 200.0
 end
 
 heading_pid = DiscretePID(; K=0.8, Ti=2.85, Td=0.365, Ts=dt,

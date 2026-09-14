@@ -100,26 +100,26 @@ if REMOVE_GS && haskey(yaml_dict, "tethers")
     println("Removed $(sum(tether_mask)) tether segments based on YAML tethers section")
 end
 
-# --- Twist surfaces (must be read before point filtering) ---
+# --- Stations (must be read before point filtering) ---
 # Point references are stable NAMES (not positional indices), so they survive
 # point removal/reordering upstream in import_bridle.jl / csv_to_yaml.jl.
-df_twist = nothing
-twist_surface_point_names = Set{String}()
-if haskey(yaml_dict, "twist_surfaces")
-    df_twist = yaml_section_to_df(yaml_dict["twist_surfaces"])
-    for row in eachrow(df_twist)
+df_stations = nothing
+station_point_names = Set{String}()
+if haskey(yaml_dict, "stations")
+    df_stations = yaml_section_to_df(yaml_dict["stations"])
+    for row in eachrow(df_stations)
         for ref in row.point_idxs
-            push!(twist_surface_point_names, string(ref))
+            push!(station_point_names, string(ref))
         end
     end
-    println("YAML twist_surfaces: $(nrow(df_twist)) entries")
+    println("YAML stations: $(nrow(df_stations)) entries")
 else
-    println("No twist_surfaces section in YAML")
+    println("No stations section in YAML")
 end
 
-# Keep only points referenced by remaining segments or twist surfaces.
+# Keep only points referenced by remaining segments or stations.
 used_point_names = Set(vcat(df_segments.point_i_str, df_segments.point_j_str))
-keep_mask = [n in used_point_names || n in twist_surface_point_names for n in df_points.name]
+keep_mask = [n in used_point_names || n in station_point_names for n in df_points.name]
 df_points = df_points[keep_mask, :]
 df_points.idx = 1:nrow(df_points)
 println("After filtering: $(nrow(df_points)) points, $(nrow(df_segments)) segments")
@@ -199,7 +199,7 @@ function load_kite_mesh(obj_path; offset=[0.0, 0.0, 0.0])
     return verts, faces
 end
 
-function show_bridle(df_points, df_segments; kite_obj_path=nothing, kite_obj_offset=[0.0, 0.0, 0.0], twist_surfaces=nothing, body_frames=nothing)
+function show_bridle(df_points, df_segments; kite_obj_path=nothing, kite_obj_offset=[0.0, 0.0, 0.0], stations=nothing, body_frames=nothing)
     # Extract point coordinates into a matrix
     points = reduce(hcat, df_points.pos)'
 
@@ -277,8 +277,8 @@ function show_bridle(df_points, df_segments; kite_obj_path=nothing, kite_obj_off
         kite_verts, kite_faces = load_kite_mesh(kite_obj_path; offset=kite_obj_offset)
         mesh!(ax, kite_verts, kite_faces, color=(:lightgray, 0.25), shading=true, transparency=true)
     end
-    # Color points by type: WING green, DYNAMIC blue
-    scatter_colors = [t == "WING" ? RGBAf(0, 0.8, 0, 1) : RGBAf(0, 0, 1, 1) for t in df_points.type]
+    # Color points by type: BODY_STATIC green, DYNAMIC blue
+    scatter_colors = [t == "BODY_STATIC" ? RGBAf(0, 0.8, 0, 1) : RGBAf(0, 0, 1, 1) for t in df_points.type]
     # scatter_sizes = [p ? 12 : 12 for p in df_points.pulley]
     scatter!(ax, points[:, 1], points[:, 2], points[:, 3], color=scatter_colors, markersize=8)
 
@@ -362,9 +362,9 @@ function show_bridle(df_points, df_segments; kite_obj_path=nothing, kite_obj_off
     end
     linesegments!(ax, seg_line_points, color=seg_colors, linewidth=2)
 
-    # --- Draw twist surfaces as black polylines ---
-    if twist_surfaces !== nothing
-        for (i, pts) in enumerate(twist_surfaces)
+    # --- Draw stations as black polylines ---
+    if stations !== nothing
+        for (i, pts) in enumerate(stations)
             if length(pts) == 2
                 # LE → TE: single chord line
                 lines!(ax, pts, color=:black, linewidth=3, linestyle=:solid)
@@ -516,18 +516,15 @@ function show_bridle(df_points, df_segments; kite_obj_path=nothing, kite_obj_off
 end
 
 if SHOW_3D
-    # OBJ offset: the ram_air_kite OBJ uses a different coordinate system
-    obj_offset = [-0.58, 0.0, 0.539]
-
-    # Resolve twist surfaces into point coordinate polylines
-    twist_surface_lines = Vector{Point3f}[]
-    if df_twist !== nothing
-        for row in eachrow(df_twist)
+    # Resolve stations into point coordinate polylines
+    station_lines = Vector{Point3f}[]
+    if df_stations !== nothing
+        for row in eachrow(df_stations)
             pt_refs = row.point_idxs
             pts = Point3f[]
             valid = true
             for ref in pt_refs
-                # Twist surface references are point NAMES (stable across edits)
+                # Station references are point NAMES (stable across edits)
                 pt_name = string(ref)
                 if haskey(name_to_idx, pt_name)
                     idx = name_to_idx[pt_name]
@@ -539,7 +536,7 @@ if SHOW_3D
                 push!(pts, Point3f(pos))
             end
             if valid && length(pts) >= 2
-                push!(twist_surface_lines, pts)
+                push!(station_lines, pts)
             end
         end
     end
@@ -556,6 +553,6 @@ if SHOW_3D
     end
 
     # Show bridle with kite mesh overlay
-    show_bridle(df_points, df_segments; kite_obj_path=obj_path, kite_obj_offset=obj_offset,
-                twist_surfaces=twist_surface_lines, body_frames)
+    show_bridle(df_points, df_segments; kite_obj_path=obj_path,
+                stations=station_lines, body_frames)
 end
