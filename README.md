@@ -134,9 +134,8 @@ The package includes bundled data files in `data/ram_air_kite/`:
 - `system.yaml` - System configuration
 - `settings.yaml` - Simulation settings
 - `vsm_settings.yaml` - Aerodynamic settings
-- `ram_air_kite_body.obj` - 3D CAD model
-- `ram_air_kite_foil.dat` - Airfoil shape
-- `*_polar.csv` - Cl/Cd/Cm polars with deflection angles
+- `ram_air_kite_body.obj` - 3D CAD model; VortexStepMethod slices it into
+  sections and generates their polars, caching both under `obj_geometry/`
 
 ## License
 
