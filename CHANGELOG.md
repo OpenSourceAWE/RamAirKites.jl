@@ -11,6 +11,11 @@
   updated to match.
 - BREAKING: `plot`, `replay` and `record` on a `SystemStructure` need
   `MakieControlPlots` loaded, not just a Makie backend.
+- `data/ram_air_kite/vsm_settings.yaml` declares `mesh: {n_sections: 4}`, so the
+  ram model's four stations each drive their own aerodynamic strut again.
+  SymbolicAWEModels 0.17 slices an `.obj` at panel resolution unless the wing
+  settings say otherwise, which gave the wing 41 struts against its 4 stations
+  and a parked kite that no longer settled.
 - `data/ram_air_kite/ram_air_kite_export.yaml` replaces its `materials` block
   with a `variables` mapping over the material columns, and a wing no longer
   lists its `point_idxs`.

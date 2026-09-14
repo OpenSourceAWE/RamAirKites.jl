@@ -18,6 +18,8 @@ wings:
       spanwise_panel_distribution: LINEAR
       spanwise_direction: [0.0, 1.0, 0.0]
       remove_nan: true
+      mesh:
+        n_sections: 4   # airfoil sections sliced from the .obj; one per station
 solver_settings:
     n_panels: 40
     aerodynamic_model_type: VSM
