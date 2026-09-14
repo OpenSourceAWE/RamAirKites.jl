@@ -3,19 +3,19 @@
 ## [Unreleased]
 
 ### Changed
-- BREAKING: `SymbolicAWEModels` compat is `0.16`, which renames `groups` to
-  `twist_surfaces` and drops the `WING` and `QUASI_STATIC` dynamics types. A
-  wing node is a `BODY_STATIC` point riding the wing body, wing membership is
-  carried by its twist surface, and `set.quasi_static` no longer selects
-  anything. `WING` is no longer re-exported. Examples, tests and factory
-  functions updated to match.
+- BREAKING: `SymbolicAWEModels` compat is `0.17`, which renames `groups` to
+  `stations` and drops the `WING` and `QUASI_STATIC` dynamics types. A wing
+  node is a `BODY_STATIC` point riding the wing body, wing membership is
+  carried by its station, and `set.quasi_static` no longer selects anything.
+  `WING` is no longer re-exported. Examples, tests and factory functions
+  updated to match.
 - BREAKING: `plot`, `replay` and `record` on a `SystemStructure` need
   `MakieControlPlots` loaded, not just a Makie backend.
 - `data/ram_air_kite/ram_air_kite_export.yaml` replaces its `materials` block
   with a `variables` mapping over the material columns, and a wing no longer
   lists its `point_idxs`.
 - Reworked the "ram" model bridle: removed the wing-fixed "loose point" so each
-  of the 4 twist surfaces now uses 4 deforming aerodynamic attachment points
+  of the 4 stations now uses 4 deforming aerodynamic attachment points
   (previously 3 deforming points plus 1 fixed point).
 - Retuned `examples/ram_air_kite.jl` (`AERO_Z_OFFSET`, `POSITION_P`, depower).
 - Moved bridle/spring property definitions from `SymbolicAWEModels` into
