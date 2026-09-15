@@ -22,7 +22,8 @@
   that `create_ram_sys_struct` builds.
 - The wing's airfoil polars are generated from `ram_air_kite_body.obj` and
   cached under `data/ram_air_kite/obj_geometry/`; `ram_air_kite_foil.dat` and
-  the bundled `*_polar.csv` are no longer read.
+  the bundled `*_polar.csv` are no longer read. The parked kite trims higher on
+  them: `test-parking.jl` holds 79.6° elevation at 30 s where it held 76.1°.
 - Reworked the "ram" model bridle: removed the wing-fixed "loose point" so each
   of the 4 stations now uses 4 deforming aerodynamic attachment points
   (previously 3 deforming points plus 1 fixed point).

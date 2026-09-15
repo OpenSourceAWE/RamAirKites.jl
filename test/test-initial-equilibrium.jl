@@ -93,17 +93,19 @@ set.l_tether = TETHER_LENGTH
     find_steady_state!(sam; dt=0.05, vsm_interval=0)
     toc("Steady state found after: ")
 
-    # Extra stabilization: free steps to dissipate DAE constraint forces
-    @info "Stabilizing for 2 seconds..."
-    for _ in 1:40
-        next_step!(sam; dt=0.05)
-    end
-    toc("Stabilization done after: ")
-
-    # Sync integrator state → sys_struct fields
+    # Extra stabilization: free steps to dissipate DAE constraint forces and the
+    # ~4 s swing that releasing the wing from its fixed sphere starts.
     @assert sam.prob !== nothing "Expected sam.prob to be initialized"
     @assert sam.integrator !== nothing "Expected sam.integrator to be initialized"
-    update_sys_struct!(sam.prob, sam.integrator, sam.sys_struct)
+    @info "Stabilizing for 5 seconds..."
+    peak_acc_norm = 0.0
+    for step in 1:100
+        next_step!(sam; dt=0.05)
+        step > 80 || continue
+        update_sys_struct!(sam.prob, sam.integrator, sam.sys_struct)
+        peak_acc_norm = max(peak_acc_norm, norm(sam.sys_struct.wings[1].acc_w))
+    end
+    toc("Stabilization done after: ")
 
     # Angle of attack — using the geometric formula from update_sys_state!
     # (atan of apparent wind in body frame), without the twist correction
@@ -115,8 +117,7 @@ set.l_tether = TETHER_LENGTH
     @test 2 < aoa_deg < 15
 
     # The kite should have settled: wing acceleration is very low at equilibrium.
-    acc_norm = norm(sam.sys_struct.wings[1].acc_w)
-    @info "Wing acceleration magnitude: $(round(acc_norm; digits=4)) m/s²"
-    @test acc_norm < 5.0
+    @info "Peak wing acceleration: $(round(peak_acc_norm; digits=4)) m/s²"
+    @test peak_acc_norm < 5.0
 end
 nothing
