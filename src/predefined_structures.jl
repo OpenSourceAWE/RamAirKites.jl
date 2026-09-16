@@ -9,7 +9,7 @@ when the ram-air kite models were extracted to this package.
 """
 
 # Internal helpers from SymbolicAWEModels that are not exported
-using SymbolicAWEModels: create_vsm_wing, calc_pos
+using SymbolicAWEModels: create_vsm_wing
 
 # ==================== TETHER CREATION HELPERS ==================== #
 
@@ -69,6 +69,26 @@ end
 # ==================== MODEL FACTORY FUNCTIONS ==================== #
 
 """
+    wing_surface_pos(vsm_wing, span_frac, chord_frac)
+
+Position in the CAD frame at `span_frac` along the span and `chord_frac` along the chord
+of `vsm_wing`, interpolated linearly between its unrefined sections. `span_frac` runs
+from -1 at the +y tip to 1 at the -y tip and measures leading-edge distance in the y-z
+plane, so the sweep does not shift it.
+"""
+function wing_surface_pos(vsm_wing, span_frac, chord_frac)
+    sections = sort(vsm_wing.unrefined_sections; by=section -> -section.LE_point[2])
+    span_dist = cumsum([0.0; [norm(sections[i+1].LE_point[2:3] - sections[i].LE_point[2:3])
+                              for i in 1:length(sections)-1]])
+    section_fracs = 2 .* span_dist ./ span_dist[end] .- 1
+    i = clamp(searchsortedlast(section_fracs, span_frac), 1, length(sections) - 1)
+    weight = (span_frac - section_fracs[i]) / (section_fracs[i+1] - section_fracs[i])
+    le_pos = (1 - weight) * sections[i].LE_point + weight * sections[i+1].LE_point
+    te_pos = (1 - weight) * sections[i].TE_point + weight * sections[i+1].TE_point
+    return le_pos + chord_frac * (te_pos - le_pos)
+end
+
+"""
     create_ram_sys_struct(set::Settings; d_winch_pos, prn)
 
 Create a `SystemStructure` for the primary "ram" model with a stability-enhancing bridle.
@@ -100,28 +120,28 @@ function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)], 
 
     z = vsm_wing.R_cad_body[:, 3]
 
-    function create_bridle(bridle_top, gammas, points, stations, segments, pulleys, attach_points)
+    function create_bridle(bridle_top, span_fracs, points, stations, segments, pulleys, attach_points)
         i_pnt = length(points)
         i_seg = length(segments)
         i_pul = length(pulleys)
         i_station = length(stations)
 
         points_new = [
-            Point(1+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[1]),
+            Point(1+i_pnt, wing_surface_pos(vsm_wing, span_fracs[1], set.bridle_fracs[1]),
                   BODY_STATIC; wing=1)
-            Point(2+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[2]),
+            Point(2+i_pnt, wing_surface_pos(vsm_wing, span_fracs[1], set.bridle_fracs[2]),
                   BODY_STATIC; wing=1)
-            Point(3+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[3]),
+            Point(3+i_pnt, wing_surface_pos(vsm_wing, span_fracs[1], set.bridle_fracs[3]),
                   BODY_STATIC; wing=1)
-            Point(4+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[4]),
+            Point(4+i_pnt, wing_surface_pos(vsm_wing, span_fracs[1], set.bridle_fracs[4]),
                   BODY_STATIC; wing=1)
-            Point(5+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[1]),
+            Point(5+i_pnt, wing_surface_pos(vsm_wing, span_fracs[2], set.bridle_fracs[1]),
                   BODY_STATIC; wing=1)
-            Point(6+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[2]),
+            Point(6+i_pnt, wing_surface_pos(vsm_wing, span_fracs[2], set.bridle_fracs[2]),
                   BODY_STATIC; wing=1)
-            Point(7+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[3]),
+            Point(7+i_pnt, wing_surface_pos(vsm_wing, span_fracs[2], set.bridle_fracs[3]),
                   BODY_STATIC; wing=1)
-            Point(8+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[4]),
+            Point(8+i_pnt, wing_surface_pos(vsm_wing, span_fracs[2], set.bridle_fracs[4]),
                   BODY_STATIC; wing=1)
         ]
         stations_new = [
@@ -177,9 +197,9 @@ function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)], 
         return nothing
     end
 
-    gammas = [-3/4, -1/4, 1/4, 3/4] * vsm_wing.gamma_tip
-    create_bridle(bridle_top_left, gammas[[1, 2]], points, stations, segments, pulleys, attach_points)
-    create_bridle(bridle_top_right, gammas[[3, 4]], points, stations, segments, pulleys, attach_points)
+    span_fracs = [-3/4, -1/4, 1/4, 3/4]
+    create_bridle(bridle_top_left, span_fracs[[1, 2]], points, stations, segments, pulleys, attach_points)
+    create_bridle(bridle_top_right, span_fracs[[3, 4]], points, stations, segments, pulleys, attach_points)
 
     points, tethers, power_left_anchor =
         add_tether!(points, tethers, :power_left, set, attach_points[1];
@@ -240,28 +260,28 @@ function create_4_attach_ram_sys_struct(set::Settings; prn=true)
 
     z = vsm_wing.R_cad_body[:, 3]
 
-    function create_bridle(bridle_top, gammas, points, stations, segments, pulleys, attach_points)
+    function create_bridle(bridle_top, span_fracs, points, stations, segments, pulleys, attach_points)
         i_pnt = length(points)
         i_seg = length(segments)
         i_pul = length(pulleys)
         i_station = length(stations)
 
         points_new = [
-            Point(1+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[1]),
+            Point(1+i_pnt, wing_surface_pos(vsm_wing, span_fracs[1], set.bridle_fracs[1]),
                   BODY_STATIC; wing=1)
-            Point(2+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[2]),
+            Point(2+i_pnt, wing_surface_pos(vsm_wing, span_fracs[1], set.bridle_fracs[2]),
                   BODY_STATIC; wing=1)
-            Point(3+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[3]),
+            Point(3+i_pnt, wing_surface_pos(vsm_wing, span_fracs[1], set.bridle_fracs[3]),
                   BODY_STATIC; wing=1)
-            Point(4+i_pnt, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[4]),
+            Point(4+i_pnt, wing_surface_pos(vsm_wing, span_fracs[1], set.bridle_fracs[4]),
                   BODY_STATIC; wing=1)
-            Point(5+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[1]),
+            Point(5+i_pnt, wing_surface_pos(vsm_wing, span_fracs[2], set.bridle_fracs[1]),
                   BODY_STATIC; wing=1)
-            Point(6+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[2]),
+            Point(6+i_pnt, wing_surface_pos(vsm_wing, span_fracs[2], set.bridle_fracs[2]),
                   BODY_STATIC; wing=1)
-            Point(7+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[3]),
+            Point(7+i_pnt, wing_surface_pos(vsm_wing, span_fracs[2], set.bridle_fracs[3]),
                   BODY_STATIC; wing=1)
-            Point(8+i_pnt, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[4]),
+            Point(8+i_pnt, wing_surface_pos(vsm_wing, span_fracs[2], set.bridle_fracs[4]),
                   BODY_STATIC; wing=1)
         ]
         stations_new = [
@@ -315,9 +335,9 @@ function create_4_attach_ram_sys_struct(set::Settings; prn=true)
         return nothing
     end
 
-    gammas = [-3/4, -1/4, 1/4, 3/4] * vsm_wing.gamma_tip
-    create_bridle(bridle_top_left, gammas[[1, 2]], points, stations, segments, pulleys, attach_points)
-    create_bridle(bridle_top_right, gammas[[3, 4]], points, stations, segments, pulleys, attach_points)
+    span_fracs = [-3/4, -1/4, 1/4, 3/4]
+    create_bridle(bridle_top_left, span_fracs[[1, 2]], points, stations, segments, pulleys, attach_points)
+    create_bridle(bridle_top_right, span_fracs[[3, 4]], points, stations, segments, pulleys, attach_points)
 
     points, tethers, power_left_anchor =
         add_tether!(points, tethers, :power_left, set, attach_points[1];
@@ -370,7 +390,7 @@ function create_simple_ram_sys_struct(set::Settings;
     vsm_set_path = joinpath(get_data_path(), "vsm_settings.yaml")
     vsm_set = VortexStepMethod.VSMSettings(vsm_set_path; data_prefix=false)
     vsm_wing = create_vsm_wing(set, vsm_set; prn=false)
-    gammas = [-1/2, 1/2] * vsm_wing.gamma_tip
+    span_fracs = [-1/2, 1/2]
 
     bridle_top_left = set.top_bridle_points
     bridle_top_right = [point .* [1, -1, 1] for point in bridle_top_left]
@@ -378,14 +398,14 @@ function create_simple_ram_sys_struct(set::Settings;
     points = [
         Point(1, bridle_top_left[2], BODY_STATIC; wing=1)
         Point(2, bridle_top_right[2], BODY_STATIC; wing=1)
-        Point(3, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[4]), BODY_STATIC; wing=1)
-        Point(4, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[4]), BODY_STATIC; wing=1)
+        Point(3, wing_surface_pos(vsm_wing, span_fracs[1], set.bridle_fracs[4]), BODY_STATIC; wing=1)
+        Point(4, wing_surface_pos(vsm_wing, span_fracs[2], set.bridle_fracs[4]), BODY_STATIC; wing=1)
         Point(5, [0, 0, -float(set.l_tether)], STATIC; transform=1)
         Point(6, [0, 0, -float(set.l_tether)], STATIC; transform=1)
         Point(7, [0, 0, -float(set.l_tether)], STATIC; transform=1)
         Point(8, [0, 0, -float(set.l_tether)], STATIC; transform=1)
-        Point(9, calc_pos(vsm_wing, gammas[1], set.bridle_fracs[1]), BODY_STATIC; wing=1)
-        Point(10, calc_pos(vsm_wing, gammas[2], set.bridle_fracs[1]), BODY_STATIC; wing=1)
+        Point(9, wing_surface_pos(vsm_wing, span_fracs[1], set.bridle_fracs[1]), BODY_STATIC; wing=1)
+        Point(10, wing_surface_pos(vsm_wing, span_fracs[2], set.bridle_fracs[1]), BODY_STATIC; wing=1)
     ]
     stations = [
         Station(1, [9, 3], DYNAMIC, 0.25)
