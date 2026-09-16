@@ -16,6 +16,7 @@ using SymbolicAWEModels
 using VortexStepMethod
 using LinearAlgebra
 using DiscretePIDs
+include("wing_sections.jl")
 toc()
 
 PHYSICAL_MODEL = "ram"       # Options: "ram", "simple_ram", "4_attach_ram"
@@ -53,6 +54,7 @@ set.l_tether = TETHER_LENGTH
     @test length(sys_struct.wings) == 1
     @test sys_struct.total_mass ≈ set.mass
     vsm_wing = sys_struct.wings[1].vsm_wing
+    @test section_area(vsm_wing.unrefined_sections) ≈ 4.75 atol=0.01
     @test vsm_wing.span ≈ 3.29 atol=0.01
     tf = sys_struct.transforms[1]
     @test rad2deg(tf.elevation) ≈ set.elevation
