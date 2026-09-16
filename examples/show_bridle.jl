@@ -84,8 +84,9 @@ insertcols!(df_segments, 1, :orig_idx => 1:nrow(df_segments))
 
 # --- Remove tether segments (defined in YAML tethers section) ---
 if REMOVE_GS && haskey(yaml_dict, "tethers")
-    df_tethers = yaml_section_to_df(yaml_dict["tethers"])
-    tether_prefixes = [lowercase(string(row.name)) for row in eachrow(df_tethers)]
+    # A tether row names its material through `variables`, so its columns do not line
+    # up with the headers; only the leading name is needed here.
+    tether_prefixes = [lowercase(string(row[1])) for row in yaml_dict["tethers"]["data"]]
     tether_mask = falses(nrow(df_segments))
     for (i, seg_name) in enumerate(df_segments.name)
         lname = lowercase(seg_name)
