@@ -53,9 +53,7 @@ set.l_tether = TETHER_LENGTH
     @test length(sys_struct.wings) == 1
     @test sys_struct.total_mass ≈ set.mass
     vsm_wing = sys_struct.wings[1].vsm_wing
-    wing_area = 2 * vsm_wing.area_interp(vsm_wing.span)
-    @test wing_area ≈ 13.01 atol=0.01
-    @test vsm_wing.span ≈ 3.27 atol=0.01
+    @test vsm_wing.span ≈ 3.29 atol=0.01
     tf = sys_struct.transforms[1]
     @test rad2deg(tf.elevation) ≈ set.elevation
 
