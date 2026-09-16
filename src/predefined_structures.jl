@@ -68,12 +68,16 @@ end
 
 # ==================== MODEL FACTORY FUNCTIONS ==================== #
 
-# The wing frame of the 46-point bridle, the same references ram_air_kite_export.yaml gives:
-# y from the -y outer leading-edge point to the +y one, z from the mid point of the outer
-# leading edges up to a point on the inner stations, and the origin between the inner leading edges.
+"""
+Body-frame references of the wing in the 4-station bridle factories, the ones
+`ram_air_kite_export.yaml` gives: y from the -y outer leading-edge point to the +y one,
+z from the middle of the outer leading edges up to the inner stations, and the origin
+between the inner leading edges.
+"""
 const WING_FRAME_REFS = (;
     y_ref_points=(22, 1),
-    z_ref_points=([(1, 0.5), (22, 0.5)], [(5, 0.2052), (18, 0.2052), (6, 0.2948), (19, 0.2948)]),
+    z_ref_points=([(1, 0.5), (22, 0.5)],
+                  [(5, 0.2052), (18, 0.2052), (6, 0.2948), (19, 0.2948)]),
     origin=[(5, 0.5), (18, 0.5)])
 
 """
@@ -402,14 +406,18 @@ function create_simple_ram_sys_struct(set::Settings;
     points = [
         Point(1, bridle_top_left[2], BODY_STATIC; wing=1)
         Point(2, bridle_top_right[2], BODY_STATIC; wing=1)
-        Point(3, wing_surface_pos(vsm_wing, span_fracs[1], set.bridle_fracs[4]), BODY_STATIC; wing=1)
-        Point(4, wing_surface_pos(vsm_wing, span_fracs[2], set.bridle_fracs[4]), BODY_STATIC; wing=1)
+        Point(3, wing_surface_pos(vsm_wing, span_fracs[1], set.bridle_fracs[4]),
+              BODY_STATIC; wing=1)
+        Point(4, wing_surface_pos(vsm_wing, span_fracs[2], set.bridle_fracs[4]),
+              BODY_STATIC; wing=1)
         Point(5, [0, 0, -float(set.l_tether)], STATIC; transform=1)
         Point(6, [0, 0, -float(set.l_tether)], STATIC; transform=1)
         Point(7, [0, 0, -float(set.l_tether)], STATIC; transform=1)
         Point(8, [0, 0, -float(set.l_tether)], STATIC; transform=1)
-        Point(9, wing_surface_pos(vsm_wing, span_fracs[1], set.bridle_fracs[1]), BODY_STATIC; wing=1)
-        Point(10, wing_surface_pos(vsm_wing, span_fracs[2], set.bridle_fracs[1]), BODY_STATIC; wing=1)
+        Point(9, wing_surface_pos(vsm_wing, span_fracs[1], set.bridle_fracs[1]),
+              BODY_STATIC; wing=1)
+        Point(10, wing_surface_pos(vsm_wing, span_fracs[2], set.bridle_fracs[1]),
+              BODY_STATIC; wing=1)
     ]
     stations = [
         Station(1, [9, 3], DYNAMIC, 0.25)

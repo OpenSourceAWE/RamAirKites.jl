@@ -16,7 +16,7 @@ using SymbolicAWEModels
 using SymbolicAWEModels: update_sys_struct!
 using VortexStepMethod
 using LinearAlgebra
-include("wing_sections.jl")
+include("wing_helpers.jl")
 toc()
 
 PHYSICAL_MODEL = "ram"      # Options: "ram", "simple_ram", "4_attach_ram"

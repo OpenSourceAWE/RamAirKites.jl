@@ -14,15 +14,15 @@ using SymbolicAWEModels
 using SymbolicAWEModels: Settings
 import VortexStepMethod: VSMSettings
 
-include("wing_sections.jl")
+include("wing_helpers.jl")
 
 let
     set_data_path(ram_air_data_path())
     set = Settings("system.yaml")
     set.physical_model = "ram"
+    vsm_set = VSMSettings(joinpath(get_data_path(), "vsm_settings.yaml"); data_prefix=false)
 
     @testset "Wing geometry" begin
-        vsm_set = VSMSettings(joinpath(get_data_path(), "vsm_settings.yaml"); data_prefix=false)
         sys_struct = load_sys_struct_from_yaml(
             joinpath(get_data_path(), "ram_air_kite_export.yaml");
             system_name="ram", set=set, vsm_set=vsm_set)
@@ -35,12 +35,10 @@ let
     end
 
     @testset "YAML and factory wing mass" begin
-        vsm_set = VSMSettings(joinpath(get_data_path(), "vsm_settings.yaml"); data_prefix=false)
         yaml_wing = load_sys_struct_from_yaml(
             joinpath(get_data_path(), "ram_air_kite_export.yaml");
             system_name="ram", set=set, vsm_set=vsm_set).wings[1]
         factory_wing = create_sys_struct(set).wings[1]
-        inertia_tensor(wing) = wing.R_p_to_c * Diagonal(wing.inertia_principal) * wing.R_p_to_c'
 
         @test yaml_wing.mass ≈ set.mass
         @test factory_wing.mass ≈ yaml_wing.mass

@@ -16,7 +16,7 @@ using SymbolicAWEModels
 using VortexStepMethod
 using LinearAlgebra
 using DiscretePIDs
-include("wing_sections.jl")
+include("wing_helpers.jl")
 toc()
 
 PHYSICAL_MODEL = "ram"       # Options: "ram", "simple_ram", "4_attach_ram"
