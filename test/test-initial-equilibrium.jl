@@ -16,6 +16,7 @@ using SymbolicAWEModels
 using SymbolicAWEModels: update_sys_struct!
 using VortexStepMethod
 using LinearAlgebra
+include("wing_helpers.jl")
 toc()
 
 PHYSICAL_MODEL = "ram"      # Options: "ram", "simple_ram", "4_attach_ram"
@@ -53,9 +54,8 @@ set.l_tether = TETHER_LENGTH
     @test length(sys_struct.wings) == 1
     @test sys_struct.total_mass ≈ set.mass
     vsm_wing = sys_struct.wings[1].vsm_wing
-    wing_area = 2 * vsm_wing.area_interp(vsm_wing.span)
-    @test wing_area ≈ 13.01 atol=0.01
-    @test vsm_wing.span ≈ 3.27 atol=0.01
+    @test section_area(vsm_wing.unrefined_sections) ≈ 4.75 atol=0.01
+    @test vsm_wing.span ≈ 3.29 atol=0.01
     tf = sys_struct.transforms[1]
     @test rad2deg(tf.elevation) ≈ set.elevation
 
@@ -81,8 +81,8 @@ set.l_tether = TETHER_LENGTH
     # This effectively zeros out the twist moments from tether forces 
     # (since the moment arm about the LE is zero), which simplifies the initial 
     # equilibrium search by removing twist dynamics as a degree of freedom.
-    for twist_surface in sam.sys_struct.twist_surfaces
-        twist_surface.moment_frac = 0.0
+    for station in sam.sys_struct.stations
+        station.moment_frac = 0.0
     end
     toc("Model created after: ")
     # 3. init

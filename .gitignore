@@ -42,3 +42,4 @@ examples/*.bak2
 ram-air-kite.code-workspace
 bin/del_package
 *.arrow
+data/ram_air_kite/obj_geometry/
