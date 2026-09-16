@@ -4,16 +4,14 @@
 """
 RamAirKite Makie Extension
 
-Provides visualization functions for ram air kite simulation results when GLMakie is available.
+Provides visualization functions for ram air kite simulation results when
+MakieControlPlots is loaded.
 Re-exports the plotting functions from SymbolicAWEModels.
 """
 module RamAirKiteMakieExt
 
 using RamAirKite
-using GLMakie
+using MakieControlPlots
 import RamAirKite: SymbolicAWEModels
-
-# Re-export SymbolicAWEModels plotting functions when GLMakie is loaded
-# The actual plotting is handled by SymbolicAWEModelsMakieExt
 
 end # module

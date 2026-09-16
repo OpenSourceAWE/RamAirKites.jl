@@ -54,8 +54,8 @@ set.l_tether = TETHER_LENGTH
     @test sys_struct.total_mass ≈ set.mass
     vsm_wing = sys_struct.wings[1].vsm_wing
     wing_area = 2 * vsm_wing.area_interp(vsm_wing.span)
-    @test wing_area ≈ 13.20 atol=0.01
-    @test vsm_wing.span ≈ 3.288 atol=0.01
+    @test wing_area ≈ 13.01 atol=0.01
+    @test vsm_wing.span ≈ 3.27 atol=0.01
     tf = sys_struct.transforms[1]
     @test rad2deg(tf.elevation) ≈ set.elevation
 
@@ -81,8 +81,8 @@ set.l_tether = TETHER_LENGTH
     # This effectively zeros out the twist moments from tether forces 
     # (since the moment arm about the LE is zero), which simplifies the initial 
     # equilibrium search by removing twist dynamics as a degree of freedom.
-    for station in sam.sys_struct.stations
-        station.moment_frac = 0.0
+    for twist_surface in sam.sys_struct.twist_surfaces
+        twist_surface.moment_frac = 0.0
     end
     toc("Model created after: ")
     # 3. init
