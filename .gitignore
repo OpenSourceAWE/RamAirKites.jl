@@ -28,6 +28,7 @@ refs
 data/ram_air_kite/*.bin
 Manifest-v*.toml
 install_version_*.txt
+LocalPreferences.toml
 data/ram_air_kite/tmp_run.arrow
 *.log
 AGENTS.md
