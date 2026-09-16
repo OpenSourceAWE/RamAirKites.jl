@@ -81,8 +81,8 @@ set.l_tether = TETHER_LENGTH
     # This effectively zeros out the twist moments from tether forces 
     # (since the moment arm about the LE is zero), which simplifies the initial 
     # equilibrium search by removing twist dynamics as a degree of freedom.
-    for twist_surface in sam.sys_struct.twist_surfaces
-        twist_surface.moment_frac = 0.0
+    for station in sam.sys_struct.stations
+        station.moment_frac = 0.0
     end
     toc("Model created after: ")
     # 3. init

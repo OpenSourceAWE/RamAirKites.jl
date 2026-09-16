@@ -46,7 +46,7 @@ let
         @test length(sys_struct.segments) > 0
         @test length(sys_struct.tethers) > 0
         @test length(sys_struct.wings) > 0
-        @test length(sys_struct.twist_surfaces) > 0
+        @test length(sys_struct.stations) > 0
 
         # Expected quantities from the exported model
         @test length(sys_struct.points) == 46
@@ -54,7 +54,7 @@ let
         @test length(sys_struct.tethers) == 4
         @test length(sys_struct.winches) == 3
         @test length(sys_struct.wings) == 1
-        @test length(sys_struct.twist_surfaces) == 4
+        @test length(sys_struct.stations) == 4
         @test length(sys_struct.pulleys) == 4
         @test length(sys_struct.transforms) == 1
 
@@ -89,8 +89,8 @@ let
         @test sys_struct.segments[46] !== nothing
         @test sys_struct.pulleys[1] !== nothing
         @test sys_struct.pulleys[4] !== nothing
-        @test sys_struct.twist_surfaces[1] !== nothing
-        @test sys_struct.twist_surfaces[4] !== nothing
+        @test sys_struct.stations[1] !== nothing
+        @test sys_struct.stations[4] !== nothing
         @test sys_struct.wings[1] !== nothing
         @test sys_struct.transforms[1] !== nothing
 
@@ -100,9 +100,9 @@ let
 
         # Verify that Symbol keys from wings.point_idxs resolve correctly
         for wing in sys_struct.wings
-            for ref in wing.twist_surface_refs
+            for ref in wing.station_refs
                 @test ref !== nothing
-                @test sys_struct.twist_surfaces[ref] !== nothing
+                @test sys_struct.stations[ref] !== nothing
             end
             for ref in wing.transform_ref
                 @test ref !== nothing
