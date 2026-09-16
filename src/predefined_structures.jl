@@ -132,15 +132,15 @@ function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)], 
         body_frame_damping = 1.0
         points_new = [
             points_new
-            Point(9+i_pnt, bridle_top[1], DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1)
-            Point(10+i_pnt, bridle_top[2], DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1)
-            Point(11+i_pnt, bridle_top[3], DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1)
-            Point(12+i_pnt, bridle_top[4], DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1)
-            Point(13+i_pnt, bridle_top[2] - 1z, DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1)
-            Point(14+i_pnt, bridle_top[1] - 2z, DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1)
-            Point(15+i_pnt, bridle_top[3] - 2z, DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1)
-            Point(16+i_pnt, bridle_top[1] - 4z, DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1)
-            Point(17+i_pnt, bridle_top[3] - 4z, DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(9+i_pnt, bridle_top[1], DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1, wing=1)
+            Point(10+i_pnt, bridle_top[2], DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1, wing=1)
+            Point(11+i_pnt, bridle_top[3], DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1, wing=1)
+            Point(12+i_pnt, bridle_top[4], DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1, wing=1)
+            Point(13+i_pnt, bridle_top[2] - 1z, DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1, wing=1)
+            Point(14+i_pnt, bridle_top[1] - 2z, DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1, wing=1)
+            Point(15+i_pnt, bridle_top[3] - 2z, DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1, wing=1)
+            Point(16+i_pnt, bridle_top[1] - 4z, DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1, wing=1)
+            Point(17+i_pnt, bridle_top[3] - 4z, DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1, wing=1)
         ]
         bk = bridle_kwargs(set)
         segments_new = [
@@ -272,15 +272,15 @@ function create_4_attach_ram_sys_struct(set::Settings; prn=true)
         body_frame_damping = 1.0
         points_new = [
             points_new
-            Point(9+i_pnt, bridle_top[1], DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1)
-            Point(10+i_pnt, bridle_top[2], DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1)
-            Point(11+i_pnt, bridle_top[3], DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1)
-            Point(12+i_pnt, bridle_top[4], DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1)
-            Point(13+i_pnt, bridle_top[2] - 1z, DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1)
-            Point(14+i_pnt, bridle_top[1] - 2z, DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1)
-            Point(15+i_pnt, bridle_top[3] - 2z, DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1)
-            Point(16+i_pnt, bridle_top[1] - 4z, DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1)
-            Point(17+i_pnt, bridle_top[3] - 4z, DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1)
+            Point(9+i_pnt, bridle_top[1], DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1, wing=1)
+            Point(10+i_pnt, bridle_top[2], DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1, wing=1)
+            Point(11+i_pnt, bridle_top[3], DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1, wing=1)
+            Point(12+i_pnt, bridle_top[4], DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1, wing=1)
+            Point(13+i_pnt, bridle_top[2] - 1z, DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1, wing=1)
+            Point(14+i_pnt, bridle_top[1] - 2z, DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1, wing=1)
+            Point(15+i_pnt, bridle_top[3] - 2z, DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1, wing=1)
+            Point(16+i_pnt, bridle_top[1] - 4z, DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1, wing=1)
+            Point(17+i_pnt, bridle_top[3] - 4z, DYNAMIC; body_frame_damping, world_frame_damping=0.0, transform=1, wing=1)
         ]
         bk = bridle_kwargs(set)
         segments_new = [
