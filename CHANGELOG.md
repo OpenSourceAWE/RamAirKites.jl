@@ -3,8 +3,8 @@
 ## [Unreleased]
 
 ### Changed
-- CI tests Julia 1.12 and 1.13, and `bin/install` accepts those two; the tracked
-  `Manifest-v1.11.toml.default` is replaced by `Manifest-v1.13.toml.default`.
+- Julia 1.11 is no longer supported: the package installs on Julia 1.12 and 1.13,
+  the two versions CI tests.
 - Bumped `SymbolicAWEModels` compat to `0.12`, which renames `groups` to
   `twist_surfaces`; all examples, tests, and factory functions updated to match.
 - Reworked the "ram" model bridle: removed the `WING`-fixed "loose point" so each
