@@ -68,6 +68,14 @@ end
 
 # ==================== MODEL FACTORY FUNCTIONS ==================== #
 
+# The wing frame of the 46-point bridle, the same references ram_air_kite_export.yaml gives:
+# y from the -y outer leading-edge point to the +y one, z from the mid point of the outer
+# leading edges up to a point on the inner stations, and the origin between the inner leading edges.
+const WING_FRAME_REFS = (;
+    y_ref_points=(22, 1),
+    z_ref_points=([(1, 0.5), (22, 0.5)], [(5, 0.2052), (18, 0.2052), (6, 0.2948), (19, 0.2948)]),
+    origin=[(5, 0.5), (18, 0.5)])
+
 """
     wing_surface_pos(vsm_wing, span_frac, chord_frac)
 
@@ -220,9 +228,7 @@ function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)], 
         Winch(:steering_right_winch, set, [:steering_right]; winch_point=steering_right_anchor)
     ]
 
-    vsm_aero = BodyAerodynamics([vsm_wing])
-    vsm_solver = Solver(vsm_aero; solver_type=NONLIN, atol=2e-8, rtol=2e-8)
-    wings = [VSMWing(1, vsm_aero, vsm_wing, vsm_solver, [1, 2, 3, 4], I(3), zeros(3))]
+    wings = [VSMWing(1, set, [1, 2, 3, 4], vsm_set; mass=set.mass, WING_FRAME_REFS...)]
     transforms = [Transform(1, deg2rad(float(set.elevation)), deg2rad(float(set.azimuth)), deg2rad(float(set.heading));
                              base_pos=zeros(3), base_point=steering_right_anchor, wing=1)]
 
@@ -358,9 +364,7 @@ function create_4_attach_ram_sys_struct(set::Settings; prn=true)
         Winch(:steering_right_winch, set, [:steering_right]; winch_point=steering_right_anchor)
     ]
 
-    vsm_aero = BodyAerodynamics([vsm_wing])
-    vsm_solver = Solver(vsm_aero; solver_type=NONLIN, atol=2e-8, rtol=2e-8)
-    wings = [VSMWing(1, vsm_aero, vsm_wing, vsm_solver, [1, 2, 3, 4], I(3), zeros(3))]
+    wings = [VSMWing(1, set, [1, 2, 3, 4], vsm_set; mass=set.mass, WING_FRAME_REFS...)]
     transforms = [Transform(1, deg2rad(float(set.elevation)), deg2rad(float(set.azimuth)), deg2rad(float(set.heading));
                              base_pos=zeros(3), base_point=steering_right_anchor, wing=1)]
 
@@ -428,9 +432,7 @@ function create_simple_ram_sys_struct(set::Settings;
         Winch(2, set, [3]; winch_point=7)
         Winch(3, set, [4]; winch_point=8)
     ]
-    vsm_aero = BodyAerodynamics([vsm_wing])
-    vsm_solver = Solver(vsm_aero; solver_type=NONLIN, atol=2e-8, rtol=2e-8)
-    wings = [VSMWing(1, vsm_aero, vsm_wing, vsm_solver, [1, 2], I(3), zeros(3))]
+    wings = [VSMWing(1, set, [1, 2], vsm_set; mass=set.mass)]
     transforms = [
         Transform(1, deg2rad(float(set.elevation)), deg2rad(float(set.azimuth)), deg2rad(float(set.heading));
                   base_pos=zeros(3), base_point=5, wing=1)

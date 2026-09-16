@@ -45,5 +45,22 @@ let
         @test section_area(vsm_wing.unrefined_sections) ≈ 4.75 atol=0.01
         @test vsm_wing.span ≈ 3.29 atol=0.01
     end
+
+    @testset "YAML and factory wing mass" begin
+        vsm_set = VSMSettings(joinpath(get_data_path(), "vsm_settings.yaml"); data_prefix=false)
+        yaml_wing = load_sys_struct_from_yaml(
+            joinpath(get_data_path(), "ram_air_kite_export.yaml");
+            system_name="ram", set=set, vsm_set=vsm_set).wings[1]
+        factory_wing = create_sys_struct(set).wings[1]
+        inertia_tensor(wing) = wing.R_p_to_c * Diagonal(wing.inertia_principal) * wing.R_p_to_c'
+
+        @test yaml_wing.mass ≈ set.mass
+        @test factory_wing.mass ≈ yaml_wing.mass
+        @test norm(yaml_wing.com_offset_b) > 0
+        # the factory places the frame's reference points on the VSM sections, up to 0.11 m
+        # from the exported ones, which moves the origin and axes by millimetres
+        @test factory_wing.com_offset_b ≈ yaml_wing.com_offset_b atol=0.01
+        @test inertia_tensor(factory_wing) ≈ inertia_tensor(yaml_wing) atol=1e-6
+    end
 end
 nothing
