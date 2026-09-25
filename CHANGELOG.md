@@ -38,7 +38,7 @@
   of the 4 stations now uses 4 deforming aerodynamic attachment points
   (previously 3 deforming points plus 1 fixed point).
 - Retuned `examples/ram_air_kite.jl` (`AERO_Z_OFFSET`, `POSITION_P`, depower).
-- `examples/ram_air_kite.jl` steers with `HEADING_P = 2.5`: the VortexStepMethod 5 wing
+- `examples/ram_air_kite.jl` steers with `HEADING_P = 2.5`: the OBJ wing
   tracks the heading setpoint as the old wing did at 0.8.
 - Moved bridle/spring property definitions from `SymbolicAWEModels` into
   `src/simulation_utils.jl`.
