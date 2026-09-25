@@ -232,7 +232,8 @@ function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)], 
         Winch(:steering_right_winch, set, [:steering_right]; winch_point=steering_right_anchor)
     ]
 
-    wings = [VSMWing(1, set, [1, 2, 3, 4], vsm_set; mass=set.mass, WING_FRAME_REFS...)]
+    wings = [VSMWing(1, set, [1, 2, 3, 4], vsm_set;
+                     extra_mass=set.mass, WING_FRAME_REFS...)]
     transforms = [Transform(1, deg2rad(float(set.elevation)), deg2rad(float(set.azimuth)), deg2rad(float(set.heading));
                              base_pos=zeros(3), base_point=steering_right_anchor, wing=1)]
 
@@ -368,7 +369,8 @@ function create_4_attach_ram_sys_struct(set::Settings; prn=true)
         Winch(:steering_right_winch, set, [:steering_right]; winch_point=steering_right_anchor)
     ]
 
-    wings = [VSMWing(1, set, [1, 2, 3, 4], vsm_set; mass=set.mass, WING_FRAME_REFS...)]
+    wings = [VSMWing(1, set, [1, 2, 3, 4], vsm_set;
+                     extra_mass=set.mass, WING_FRAME_REFS...)]
     transforms = [Transform(1, deg2rad(float(set.elevation)), deg2rad(float(set.azimuth)), deg2rad(float(set.heading));
                              base_pos=zeros(3), base_point=steering_right_anchor, wing=1)]
 
@@ -440,7 +442,7 @@ function create_simple_ram_sys_struct(set::Settings;
         Winch(2, set, [3]; winch_point=7)
         Winch(3, set, [4]; winch_point=8)
     ]
-    wings = [VSMWing(1, set, [1, 2], vsm_set; mass=set.mass)]
+    wings = [VSMWing(1, set, [1, 2], vsm_set; extra_mass=set.mass)]
     transforms = [
         Transform(1, deg2rad(float(set.elevation)), deg2rad(float(set.azimuth)), deg2rad(float(set.heading));
                   base_pos=zeros(3), base_point=5, wing=1)

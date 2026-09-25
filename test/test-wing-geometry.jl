@@ -40,8 +40,8 @@ let
             system_name="ram", set=set, vsm_set=vsm_set).wings[1]
         factory_wing = create_sys_struct(set).wings[1]
 
-        @test yaml_wing.mass ≈ set.mass
-        @test factory_wing.mass ≈ yaml_wing.mass
+        @test yaml_wing.extra_mass ≈ set.mass
+        @test factory_wing.extra_mass ≈ yaml_wing.extra_mass
         @test norm(yaml_wing.com_offset_b) > 0
         # the factory places the frame's reference points on the VSM sections, up to 0.11 m
         # from the exported ones, which moves the origin and axes by millimetres

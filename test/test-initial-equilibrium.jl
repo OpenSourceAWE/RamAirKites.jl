@@ -52,7 +52,7 @@ set.l_tether = TETHER_LENGTH
     @test all(t -> t.len ≈ TETHER_LENGTH, sys_struct.tethers)
     @test length(sys_struct.winches) == 3
     @test length(sys_struct.wings) == 1
-    @test sys_struct.total_mass ≈ set.mass
+    @test placed_mass(sys_struct) ≈ set.mass
     vsm_wing = sys_struct.wings[1].vsm_wing
     @test section_area(vsm_wing.unrefined_sections) ≈ 4.75 atol=0.01
     @test vsm_wing.span ≈ 3.29 atol=0.01

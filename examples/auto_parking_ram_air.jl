@@ -196,7 +196,7 @@ save_log(logger, "tmp_run")
 syslog = load_log("tmp_run")
 sl = syslog.syslog
 
-aero_force_norm = norm.(eachrow(sl.aero_force_b))
+aero_force_norm = norm.(eachrow(sl.aero_force_KA))
 l_diff = [sl.l_tether[i][3] - sl.l_tether[i][4] for i in 1:length(sl.time)]
 
 if PLOT

@@ -224,7 +224,7 @@ p1 = mcp.plotx(
     time_vec,
     [getindex.(sl.v_reelout, 1), getindex.(sl.v_reelout, 2), getindex.(sl.v_reelout, 3)],
     rad2deg.(sl.elevation),
-    getindex.(sl.aero_force_b, 1),
+    getindex.(sl.aero_force_KA, 1),
     rad2deg.(sl.AoA),
     [rad2deg.(sl.heading), rad2deg.(sl.course), rad2deg.(heading_setpoint)],
     [getindex.(sl.winch_force, 1), getindex.(sl.winch_force, 2), getindex.(sl.winch_force, 3)];

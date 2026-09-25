@@ -1,7 +1,7 @@
 # Copyright (c) 2025 Bart van de Lint, Uwe Fechner
 # SPDX-License-Identifier: MPL-2.0
 
-using LinearAlgebra: Diagonal, norm
+using LinearAlgebra: norm
 
 """
     section_area(sections)
@@ -20,6 +20,16 @@ end
 """
     inertia_tensor(wing)
 
-The wing's inertia tensor [kg m²] in the CAD frame, from its principal moments and axes.
+The wing's own inertia tensor [kg m²] about its own COM in the CAD frame, without the
+points it carries.
 """
-inertia_tensor(wing) = wing.R_p_to_c * Diagonal(wing.inertia_principal) * wing.R_p_to_c'
+inertia_tensor(wing) = wing.R_b_to_c * wing.extra_inertia_b * wing.R_b_to_c'
+
+"""
+    placed_mass(sys_struct)
+
+The mass [kg] placed on the structure: its wings' and points' `extra_mass`, without the
+tether segments.
+"""
+placed_mass(sys_struct) = sum(wing -> wing.extra_mass, sys_struct.wings) +
+                          sum(point -> point.extra_mass, sys_struct.points)

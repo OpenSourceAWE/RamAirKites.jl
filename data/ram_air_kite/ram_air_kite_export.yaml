@@ -146,7 +146,7 @@ wings:
       aero_mode: AeroLinearized
       stations: [1, 2, 3, 4]
       transform_idx: 1
-      mass: 0.9
+      extra_mass: 0.9
       y_ref_points: [22, 1]
       z_ref_points: [[[1, 0.5], [22, 0.5]], [[5, 0.2052], [18, 0.2052], [6, 0.2948], [19, 0.2948]]]
       origin_idx: [[5, 0.5], [18, 0.5]]
