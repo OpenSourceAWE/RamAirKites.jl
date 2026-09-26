@@ -40,6 +40,9 @@
 - Retuned `examples/ram_air_kite.jl` (`AERO_Z_OFFSET`, `POSITION_P`, depower).
 - `examples/ram_air_kite.jl` steers with `HEADING_P = 2.5`: the OBJ wing
   tracks the heading setpoint as the old wing did at 0.8.
+- `examples/steering_test_ram_air.jl` scales `STEERING_SEQ` by 0.4 instead of
+  0.3, so the OBJ wing keeps swinging about the zenith and the turn-rate-law
+  fit has samples above `STEERING_LIMIT`.
 - Moved bridle/spring property definitions from `SymbolicAWEModels` into
   `src/simulation_utils.jl`.
 
