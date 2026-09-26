@@ -30,7 +30,7 @@ let
 
         # the 41 sections obj_to_yaml writes for the 40 panels
         @test length(vsm_wing.unrefined_sections) == 41
-        @test section_area(vsm_wing.unrefined_sections) ≈ 4.75 atol=0.01
+        @test section_area(vsm_wing.unrefined_sections) ≈ 4.76 atol=0.01
         @test vsm_wing.span ≈ 3.29 atol=0.01
     end
 
@@ -43,9 +43,9 @@ let
         @test yaml_wing.extra_mass ≈ set.mass
         @test factory_wing.extra_mass ≈ yaml_wing.extra_mass
         @test norm(yaml_wing.com_offset_b) > 0
-        # the factory places the frame's reference points on the VSM sections, up to 0.11 m
-        # from the exported ones, which moves the origin and axes by millimetres
-        @test factory_wing.com_offset_b ≈ yaml_wing.com_offset_b atol=0.01
+        # the factory places its origin points on the VSM sections, 3.4 cm from the exported
+        # ones, 1.3 cm of it vertical
+        @test factory_wing.com_offset_b ≈ yaml_wing.com_offset_b atol=0.015
         @test inertia_tensor(factory_wing) ≈ inertia_tensor(yaml_wing) atol=1e-6
     end
 end

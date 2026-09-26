@@ -69,16 +69,24 @@ end
 # ==================== MODEL FACTORY FUNCTIONS ==================== #
 
 """
-Body-frame references of the wing in the 4-station bridle factories, the ones
-`ram_air_kite_export.yaml` gives: y from the -y outer leading-edge point to the +y one,
-z from the middle of the outer leading edges up to the inner stations, and the origin
+    wing_frame_refs(points)
+
+Body-frame references of the wing in the 4-station bridle factories: y from the -y outer
+leading-edge point to the +y one, z from the middle of the outer leading edges to the
+point on the inner chords at their x, so the frame keeps the CAD axes, and the origin
 between the inner leading edges.
 """
-const WING_FRAME_REFS = (;
-    y_ref_points=(22, 1),
-    z_ref_points=([(1, 0.5), (22, 0.5)],
-                  [(5, 0.2052), (18, 0.2052), (6, 0.2948), (19, 0.2948)]),
-    origin=[(5, 0.5), (18, 0.5)])
+function wing_frame_refs(points)
+    tip_x = points[1].pos_cad[1]
+    inner_x = (points[5].pos_cad[1], points[6].pos_cad[1])
+    weight = (tip_x - inner_x[1]) / (inner_x[2] - inner_x[1])
+    return (;
+        y_ref_points=(22, 1),
+        z_ref_points=([(1, 0.5), (22, 0.5)],
+                      [(5, (1 - weight) / 2), (18, (1 - weight) / 2),
+                       (6, weight / 2), (19, weight / 2)]),
+        origin=[(5, 0.5), (18, 0.5)])
+end
 
 """
     wing_surface_pos(vsm_wing, span_frac, chord_frac)
@@ -233,7 +241,7 @@ function create_ram_sys_struct(set::Settings; d_winch_pos=[zeros(3), zeros(3)], 
     ]
 
     wings = [VSMWing(1, set, [1, 2, 3, 4], vsm_set;
-                     extra_mass=set.mass, WING_FRAME_REFS...)]
+                     extra_mass=set.mass, wing_frame_refs(points)...)]
     transforms = [Transform(1, deg2rad(float(set.elevation)), deg2rad(float(set.azimuth)), deg2rad(float(set.heading));
                              base_pos=zeros(3), base_point=steering_right_anchor, wing=1)]
 
@@ -370,7 +378,7 @@ function create_4_attach_ram_sys_struct(set::Settings; prn=true)
     ]
 
     wings = [VSMWing(1, set, [1, 2, 3, 4], vsm_set;
-                     extra_mass=set.mass, WING_FRAME_REFS...)]
+                     extra_mass=set.mass, wing_frame_refs(points)...)]
     transforms = [Transform(1, deg2rad(float(set.elevation)), deg2rad(float(set.azimuth)), deg2rad(float(set.heading));
                              base_pos=zeros(3), base_point=steering_right_anchor, wing=1)]
 
