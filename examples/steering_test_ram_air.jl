@@ -39,7 +39,7 @@ TETHER_LENGTH = 50.0         # Tether length [m]
 ELEVATION = 76.5             # Initial elevation angle [deg]
 VSM_INTERVAL = 7             # VSM update interval (steps)
 OFFSET_DEG = 5.0             # Heading offset for direction reversal [deg]
-STEERING_SEQ = [0.1, -0.15, 0.25, -0.4, 0.5, -0.6, 0.7, -0.8, 0.9, -0.9, 1.1, -1.1] .* 0.3  # Steering setpoint sequence [m]
+STEERING_SEQ = [0.1, -0.15, 0.25, -0.4, 0.5, -0.6, 0.7, -0.8, 0.9, -0.9, 1.1, -1.1] .* 0.4  # Steering setpoint sequence [m]
 STEERING_LIMIT = 0.075       # Minimum steering setpoint for analysis [m] 
 
 # Cascaded position → speed → torque PID parameters
@@ -98,8 +98,8 @@ end
 for segment in sam.sys_struct.segments
     segment.compression_frac = 0.01
 end
-for twist_surface in sam.sys_struct.twist_surfaces
-    twist_surface.moment_frac = 0.0
+for station in sam.sys_struct.stations
+    station.moment_frac = 0.0
 end
 
 depower = 0.01
@@ -119,8 +119,8 @@ sys_state.time = 0.0
 steady_torque = calc_steady_torque(sam)
 torque_damp = 0.9
 
-for twist_surface in sam.sys_struct.twist_surfaces
-    twist_surface.damping = 200.0
+for station in sam.sys_struct.stations
+    station.damping = 200.0
 end
 
 # Setup cascaded position→speed→torque PIDs
@@ -376,10 +376,10 @@ end
 
 @info "Done!"
 
-# 50 m tether, 12.51 m/s wind, 76.5° elevation, 0.3 m max steering, 0.02 s timestep
-# Delay of turnrate: 0.46 s
-# Mean turnrate-law factor: 4.321 °/m ± 30.39 %
-# Mean turnrate-law factor: 0.0754 rad/m ± 30.39 %
+# 50 m tether, 12.51 m/s wind, 76.5° elevation, 0.3 m max steering, 0.01 s timestep
+# Delay of turnrate: 2.16 s
+# Mean turnrate-law factor: 1.416 °/m ± 39.71 %
+# Mean turnrate-law factor: 0.0247 rad/m ± 39.71 %
 # Turn-rate law coefficients:
-#   c1 (steering gain): 0.078267
-#   c2 (pendulum stability): 8.381176
+#   c1 (steering gain): 0.06991
+#   c2 (pendulum stability): 10.21447

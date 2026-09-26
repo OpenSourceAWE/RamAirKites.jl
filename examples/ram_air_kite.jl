@@ -7,7 +7,7 @@ Ram Air Kite Simulation Example
 Demonstrates how to use RamAirKite.jl to run a simulation with cascaded
 steering-line position→speed→torque control, tracking a sinusoidal heading
 setpoint. The simulation uses the "ram" physical model by default, which
-includes a bridle system and four wing section twist surfaces.
+includes a bridle system and four wing section stations.
 """
 
 using Pkg
@@ -48,7 +48,7 @@ VSM_INTERVAL = 7            # VSM update interval
 MAX_HEADING = 20.0          # Heading setpoint amplitude [deg]
 HEADING_PERIOD = 5.0        # Heading setpoint period [s]
 MAX_STEERING = 1.5          # Steering limit [m] (position setpoint)
-HEADING_P = 0.8             # Heading PID proportional gain
+HEADING_P = 2.5             # Heading PID proportional gain
 HEADING_I = 2.85            # Heading PID integral time (false = off)
 HEADING_D = 0.365           # Heading PID derivative time
 
@@ -105,8 +105,8 @@ end
 for segment in sam.sys_struct.segments
     segment.compression_frac = 0.01
 end
-for twist_surface in sam.sys_struct.twist_surfaces
-    twist_surface.moment_frac = 0.0
+for station in sam.sys_struct.stations
+    station.moment_frac = 0.0
 end
 
 depower = 0.01
@@ -124,7 +124,7 @@ depower_len = sys_struct.tethers[:steering_left].len - sys_struct.tethers[:power
 @info "Depowered by $(round(depower_len; digits=2)) m"
 
 # Plot initial configuration
-fig = Makie.plot(sam.sys_struct)
+fig = mcp.plot(sam.sys_struct)
 
 # Run heading-tracking simulation
 @info "Running simulation..."
@@ -138,8 +138,8 @@ sys_state.time = 0.0
 
 steady_torque = calc_steady_torque(sam)
 
-for twist_surface in sam.sys_struct.twist_surfaces
-    twist_surface.damping = 200.0
+for station in sam.sys_struct.stations
+    station.damping = 200.0
 end
 
 heading_pid = DiscretePID(; K=HEADING_P, Ti=HEADING_I, Td=HEADING_D, Ts=dt,
@@ -224,7 +224,7 @@ p1 = mcp.plotx(
     time_vec,
     [getindex.(sl.v_reelout, 1), getindex.(sl.v_reelout, 2), getindex.(sl.v_reelout, 3)],
     rad2deg.(sl.elevation),
-    getindex.(sl.aero_force_b, 1),
+    getindex.(sl.aero_force_KA, 1),
     rad2deg.(sl.AoA),
     [rad2deg.(sl.heading), rad2deg.(sl.course), rad2deg.(heading_setpoint)],
     [getindex.(sl.winch_force, 1), getindex.(sl.winch_force, 2), getindex.(sl.winch_force, 3)];
