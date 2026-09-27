@@ -6,6 +6,7 @@ using Test
 @testset "RamAirKite.jl" begin
     include("test-data-path.jl")
     include("test-yaml-load.jl")
+    include("test-wing-geometry.jl")
     include("test-initial-equilibrium.jl")
     include("test-parking.jl")
     include("test-simulation-disabled.jl")

@@ -32,7 +32,8 @@ include("examples/ram_air_kite.jl")
 ```julia
 using RamAirKite
 using SymbolicAWEModels
-using GLMakie  # For visualization
+using GLMakie            # For visualization
+using MakieControlPlots  # Enables plot/replay/record on a SystemStructure
 
 # Configure settings
 set_data_path(ram_air_data_path())
@@ -125,7 +126,7 @@ julia --project=examples examples/ram_air_kite.jl
 - **SymbolicAWEModels.jl**: Core symbolic modeling
 - **VortexStepMethod.jl**: Aerodynamic calculations
 - **KiteUtils.jl**: Common types and utilities
-- **GLMakie.jl** (optional): Visualization
+- **GLMakie.jl** and **MakieControlPlots.jl** (optional): Visualization
 
 ## Data Files
 
@@ -133,9 +134,8 @@ The package includes bundled data files in `data/ram_air_kite/`:
 - `system.yaml` - System configuration
 - `settings.yaml` - Simulation settings
 - `vsm_settings.yaml` - Aerodynamic settings
-- `ram_air_kite_body.obj` - 3D CAD model
-- `ram_air_kite_foil.dat` - Airfoil shape
-- `*_polar.csv` - Cl/Cd/Cm polars with deflection angles
+- `ram_air_kite_body.obj` - 3D CAD model; VortexStepMethod slices it into
+  sections and generates their polars, caching both under `obj_geometry/`
 
 ## License
 
